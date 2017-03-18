@@ -102,7 +102,7 @@ if not Menu.IsKeyDown(Tusk.optionKey) then return end
 		if not NPC.HasState(hero, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and Menu.IsEnabled(Tusk.optionEnableMedallion) and Medallion and Ability.IsCastable(Medallion, myMana) then Ability.CastTarget(Medallion, hero) return end
 		if not NPC.HasState(hero, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and Menu.IsEnabled(Tusk.optionEnableSolarCrest) and SolarCrest and Ability.IsCastable(SolarCrest, myMana) then Ability.CastTarget(SolarCrest, hero) return end
 		
-		if Menu.IsEnabled(Tusk.optionEnableWalrusPUNCH) and not NPC.IsStunned(hero) and WalrusPUNCH and Ability.IsCastable(WalrusPUNCH, myMana) then Ability.CastTarget(WalrusPUNCH, hero) return end
+		if Menu.IsEnabled(Tusk.optionEnableWalrusPUNCH) and WalrusPUNCH and Ability.IsCastable(WalrusPUNCH, myMana) then Ability.CastTarget(WalrusPUNCH, hero) return end
 		if Mjollnir and Ability.IsCastable(Mjollnir, myMana) and Menu.IsEnabled(Tusk.optionEnableMjollnir) then Ability.CastTarget(Mjollnir, myHero) return end
 		if AbyssalBlade and Ability.IsCastable(AbyssalBlade, myMana) and Menu.IsEnabled(Tusk.optionEnableAbyssalBlade) and not NPC.IsStunned(hero) and not NPC.HasModifier(hero, "modifier_tusk_walrus_punch_air_time") and not NPC.IsLinkensProtected(hero) then Ability.CastTarget(AbyssalBlade, hero) return end
 		if Orchid and Ability.IsCastable(Orchid, myMana) and Menu.IsEnabled(Tusk.optionEnableOrchid) and not NPC.IsStunned(hero) and not NPC.HasModifier(hero, "modifier_tusk_walrus_punch_air_time") and not NPC.IsLinkensProtected(hero)  then Ability.CastTarget(Orchid, hero) return end
