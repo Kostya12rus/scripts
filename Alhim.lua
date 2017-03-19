@@ -1,21 +1,44 @@
 -- Author: Kostya12rus
--- Version: 0.03
--- Updated: 15.02.2017
+-- Version: 0.05
+-- Updated: 19.03.2017
 local alchemist = {}
 
-alchemist.optionEnable = Menu.AddOption({ "Hero Specific","Alchemist" }, "Enabled", "")
-alchemist.soul = Menu.AddOption({ "Hero Specific","Alchemist" }, "Use Item Soul Ring", "")
+alchemist.optionEnable = Menu.AddOption({ "Hero Specific","Alchemist" }, "1. Enabled", "")
+alchemist.autopick = Menu.AddOption({ "Hero Specific","Alchemist" }, "2. AutoPick", "Автоматический пик Алхимика")
+alchemist.soul = Menu.AddOption({ "Hero Specific","Alchemist" }, "3. Use Item Soul Ring", "Использовать Soul Ring в боте")
 alchemist.font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 
 local myHero = Heroes.GetLocal()
 Bot = false 
-			--local game = GameRules.GetGameTime()  --Игровое время
-			--Renderer.DrawText(alchemist.font, 10, 235, "Секунд прошло " .. math.floor(game), 1)
+			
 
 function alchemist.OnDraw()
 	if not Menu.IsEnabled(alchemist.optionEnable) then 
 		return
 	else
+				--GameRules.GetGameState() == -1 в меню
+				--GameRules.GetGameState() == 1 загрузка в игру
+				--GameRules.GetGameState() == 2 пик героев
+				--GameRules.GetGameState() == 3 Стратегическая подготовка
+				--GameRules.GetGameState() == 8 китайские мувы
+				--GameRules.GetGameState() == 10 загрузка карты
+				--GameRules.GetGameState() == 4 Размика (передигровая до 00:00)
+				--GameRules.GetGameState() == 5 Игра (после 00:00)
+		
+		if GameRules.GetGameState() == -1 then return end
+	    local GameTime = GameRules.GetGameTime()  --Игровое время
+		local PreGameTime = GameRules.GetGameStartTime()
+		local RealTime = GameTime-PreGameTime
+		local Minute = math.floor(RealTime/60)
+		local Secund = math.floor(RealTime-(Minute*60))
+		Renderer.DrawText(alchemist.font, 10, 235, "Игровое время " .. Minute .. ":" .. Secund, 1)
+		
+		if Menu.IsEnabled(alchemist.autopick) then
+			if GameRules.GetGameState() == 2 and Heroes.GetLocal() == nil then
+				Engine.ExecuteCommand("dota_select_hero npc_dota_hero_alchemist")
+			end
+		end
+		
 		if NPC.GetUnitName(myHero) ~= "npc_dota_hero_alchemist" then return end
 		soul = NPC.GetItem(myHero, "item_soul_ring", true)
 		Bot = true 

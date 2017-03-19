@@ -73,7 +73,7 @@ function Disjointer.OnProjectile(projectile)
                                 if Menu.IsEnabled(Disjointer.optionPipe) and Pipe_of_Insight and NPC.IsEntityInRange(myHero, projectile.target, 900) and Ability.IsCastable(Pipe_of_Insight, myMana) then Ability.CastNoTarget(Pipe_of_Insight); return end
                                 if Menu.IsEnabled(Disjointer.optionLink) and link_sphere and Ability.IsCastable(link_sphere, myMana) then Ability.CastTarget(link_sphere, projectile.target); return end
                                 if Menu.IsEnabled(Disjointer.optionLotus) and lotus_orb and Ability.IsCastable(lotus_orb, myMana) then Ability.CastTarget(lotus_orb, projectile.target); return end 
-				if Menu.IsEnabled(Disjointer.optionGlimmer) and glimmer_cape and Ability.IsCastable(glimmer_cape, myMana) then Ability.CastTarget(glimmer_cape, projectile.target); return end 
+				if Menu.IsEnabled(Disjointer.optionGlimmer) and glimmer_cape and  NPC.IsEntityInRange(myHero, projectile.target, 1050) and Ability.IsCastable(glimmer_cape, myMana) then Ability.CastTarget(glimmer_cape, projectile.target); return end 
 			end
 		end
 	else

@@ -14,7 +14,7 @@ function Roshan.OnChatEvent(chatEvent)
 	if chatEvent.value ~= 200 then return end
 
 	if Menu.IsEnabled(Roshan.Chat) then
-		Engine.ExecuteCommand("chatwheel_say 58")
+		Engine.ExecuteCommand("chatwheel_say 57")
 	end
 	
 	local time = ( GameRules.GetGameTime() - GameRules.GetGameStartTime() )
