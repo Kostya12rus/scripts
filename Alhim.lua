@@ -2,9 +2,11 @@
 -- Version: 0.07
 -- Updated: 20.03.2017
 local alchemist = {}
-alchemist.optionEnable = Menu.AddOption		({ "Hero Specific","Alchemist" }, "1. Enabled", 			"")
-alchemist.autopick = Menu.AddOption			({ "Hero Specific","Alchemist" }, "2. AutoPick", 			"Автоматический пик Алхимика")
-alchemist.soul = Menu.AddOption				({ "Hero Specific","Alchemist" }, "3. Use Item Soul Ring", 	"Использовать Soul Ring в боте")
+alchemist.optionEnable = Menu.AddOption		({"Hero Specific","Alchemist"},		"1. Enabled", 			"")
+alchemist.soul = Menu.AddOption				({"Hero Specific","Alchemist"},		"2. Use Item Soul Ring","Использовать Soul Ring в боте")
+alchemist.autopick = Menu.AddOption			({"Hero Specific","Alchemist"}, 	"3. AutoPick", 			"Автоматический пик Алхимика")
+alchemist.autobuy = Menu.AddOption			({"Hero Specific","Alchemist"}, 	"4. AutoBuy", 			"Автоматически закупаться")
+alchemist.optionKey = Menu.AddKeyOption		({"Hero Specific","Alchemist"},		"5. Combo Key",Enum.ButtonCode.KEY_D)
 alchemist.font = Renderer.LoadFont			("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 
 local myHero = Heroes.GetLocal()
@@ -24,9 +26,9 @@ function alchemist.OnDraw()
 			--GameRules.GetGameState() == 4 Размика (передигровая до 00:00)
 			--GameRules.GetGameState() == 5 Игра (после 00:00)
 			
-			-- Renderer.DrawText(alchemist.font, 10, 240,NPC.GetAbsOrigin(myHero):GetX().." X", 1)		x
-			-- Renderer.DrawText(alchemist.font, 10, 260,NPC.GetAbsOrigin(myHero):GetY().." Y", 1)		y
-			-- Renderer.DrawText(alchemist.font, 10, 280,NPC.GetAbsOrigin(myHero):GetZ().." Z", 1)		z
+			-- Renderer.DrawText(alchemist.font, 10, 240,NPC.GetAbsOrigin(myHero):GetX().." X", 1)
+			-- Renderer.DrawText(alchemist.font, 10, 260,NPC.GetAbsOrigin(myHero):GetY().." Y", 1)	
+			-- Renderer.DrawText(alchemist.font, 10, 280,NPC.GetAbsOrigin(myHero):GetZ().." Z", 1)
 			-- Renderer.DrawText(alchemist.font, 10, 300,Entity.GetTeamNum(myHero).."teamNum", 1)		Номер команды
 			
 		if GameRules.GetGameState() == -1 then return end
@@ -42,9 +44,36 @@ function alchemist.OnDraw()
 			end
 		end
 		if NPC.GetUnitName(myHero) ~= "npc_dota_hero_alchemist" then return end
-		local soul = NPC.GetItem(myHero, "item_soul_ring", true)
+		soul = NPC.GetItem(myHero, "item_soul_ring", true)
 		Bot = true 
 		Renderer.DrawText(alchemist.font, 10, 190, "Bot On", 1)
+		
+			-- 	if Menu.IsEnabled(alchemist.optionEnable) then
+			-- 		local mousePos = Input.GetWorldCursorPos()	
+			-- 		Renderer.DrawText(alchemist.font, 10, 250,math.floor(mousePos:GetX()).." x", 1)
+			-- 		Renderer.DrawText(alchemist.font, 10, 270,math.floor(mousePos:GetY()).." y", 1)
+			-- 		Renderer.DrawText(alchemist.font, 10, 290,math.floor(mousePos:GetZ()).." z", 1)
+			-- 		if Menu.IsKeyDown(alchemist.optionKey) then
+			-- 			Engine.ExecuteCommand("say " .. math.floor(mousePos:GetX()) .. "-X," .. math.floor(mousePos:GetY()) .. "-Y," .. math.floor(mousePos:GetZ()) .. "-Z")
+			-- 		end
+			-- 	end
+		
+		local spot1 = Vector(-1851, -4443, 128)
+		local spot2 = Vector(-472, -3311, 256)
+		local spot1 = Vector(468, -4659, 384)
+		
+		if Menu.IsKeyDown(alchemist.optionKey) then
+			for i = 1, NPCs.Count() do
+				local hero = NPCs.Get(i)
+				local myTeam = Entity.GetTeamNum(myHero)
+				local sameTeam = Entity.GetTeamNum(hero) == myTeam
+				if not sameTeam then
+				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, hero, spot1, hero, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, hero)
+				end
+			end
+		end
+		
+		
 		if soul and Menu.IsEnabled(alchemist.soul) then
 			Renderer.DrawText(alchemist.font, 10, 205, "Soul Ring", 1)
 			local myMana = NPC.GetMana(myHero)

@@ -11,12 +11,21 @@ AutoDodger.particleLogic =
 
 AutoDodger.activeProjectiles = {}
 AutoDodger.knownRanges = {}
+AutoDodger.ignoredProjectileNames = {}
+AutoDodger.ignoredProjectileHashes = {}
 AutoDodger.impactRadius = 400
 AutoDodger.canReset = true
 
 AutoDodger.nextDodgeTime = 0.0
 AutoDodger.movePos = Vector()
 AutoDodger.active = false
+
+function AutoDodger.InsertIgnoredProjectile(name)
+    AutoDodger.ignoredProjectileNames[name] = true
+end
+
+AutoDodger.InsertIgnoredProjectile("tinker_machine")
+AutoDodger.InsertIgnoredProjectile("weaver_swarm_projectile")
 
 function AutoDodger.Reset()
     if not AutoDodger.canReset then return end
@@ -39,6 +48,19 @@ function AutoDodger.OnLinearProjectileCreate(projectile)
     if not projectile.source then return end
 
     if Entity.IsSameTeam(Heroes.GetLocal(), projectile.source) then return end
+
+    local shouldIgnore = AutoDodger.ignoredProjectileHashes[projectile.particleIndex]
+
+    if shouldIgnore == true then 
+        return
+    elseif shouldIgnore == nil then
+        if AutoDodger.ignoredProjectileNames[projectile.name] then
+            AutoDodger.ignoredProjectileHashes[projectile.particleIndex] = true
+            return
+        else
+            AutoDodger.ignoredProjectileHashes[projectile.particleIndex] = false
+        end
+    end
 
     AutoDodger.canReset = true
 
