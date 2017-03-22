@@ -26,10 +26,10 @@ function alchemist.OnDraw()
 			--GameRules.GetGameState() == 4 Размика (передигровая до 00:00)
 			--GameRules.GetGameState() == 5 Игра (после 00:00)
 			
-			-- Renderer.DrawText(alchemist.font, 10, 240,NPC.GetAbsOrigin(myHero):GetX().." X", 1)
-			-- Renderer.DrawText(alchemist.font, 10, 260,NPC.GetAbsOrigin(myHero):GetY().." Y", 1)	
-			-- Renderer.DrawText(alchemist.font, 10, 280,NPC.GetAbsOrigin(myHero):GetZ().." Z", 1)
-			-- Renderer.DrawText(alchemist.font, 10, 300,Entity.GetTeamNum(myHero).."teamNum", 1)		Номер команды
+			-- Renderer.DrawText(alchemist.font, 10, 240,NPC.GetAbsOrigin(myHero):GetX().." X", 1)    	--Коодината X
+			-- Renderer.DrawText(alchemist.font, 10, 260,NPC.GetAbsOrigin(myHero):GetY().." Y", 1)		--Коодината Y
+			-- Renderer.DrawText(alchemist.font, 10, 280,NPC.GetAbsOrigin(myHero):GetZ().." Z", 1)		--Коодината Z
+			-- Renderer.DrawText(alchemist.font, 10, 300,Entity.GetTeamNum(myHero).."teamNum", 1)		--Номер команды
 			
 		if GameRules.GetGameState() == -1 then return end
 	    local GameTime = GameRules.GetGameTime()  --Игровое время
@@ -68,7 +68,8 @@ function alchemist.OnDraw()
 				local myTeam = Entity.GetTeamNum(myHero)
 				local sameTeam = Entity.GetTeamNum(hero) == myTeam
 				if not sameTeam then
-				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, hero, spot1, hero, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, hero)
+					Player.PrepareUnitOrders(Players.GetLocal(), 4, Enemy, Vector(0,0,0), Enemy, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
+					Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, hero, spot1, hero, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, hero)
 				end
 			end
 		end
