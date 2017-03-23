@@ -5,20 +5,20 @@ SkyWrathHake.combokey = Menu.AddKeyOption( {"Hero Specific", "SkyWrathHake"}, "C
 SkyWrathHake.harraskey = Menu.AddKeyOption( {"Hero Specific", "SkyWrathHake"}, "Harras Key", Enum.ButtonCode.KEY_D)
 SkyWrathHake.enemyInRange = Menu.AddOption( {"Hero Specific", "SkyWrathHake"}, "Closest to mouse range", "Range that makes assembly checking for enemy in selected range.", 100, 600, 100)
 
-SkyWrathHake.menuItems =  {atos = "Rod of Atos", hex = "Scythe of Vyse", eblade = "Ethereal blade", veil = "Veil of Discrod", dagon = "Dagon", orchid = "Orchid", blood = "Bloodthorn", shiva = "Shiva's guard"}
+SkyWrathHake.menuItems =  {atos = "Rod of Atos", hex = "Scythe of Vyse", eblade = "Ethereal Blade", veil = "Veil of Discrod", dagon = "Dagon", orchid = "Orchid", blood = "Bloodthorn", shiva = "Shiva's guard"}
 SkyWrathHake.ItemsOptionID =  {atos, hex, eblade, veil, dagon, orchid, blood, shiva}
 for k, v in pairs(SkyWrathHake.menuItems) do
     SkyWrathHake.ItemsOptionID[k] = Menu.AddOption( {"Hero Specific", "SkyWrathHake", "Magic Damage Items"}, SkyWrathHake.menuItems[k], "")
 end
 
-SkyWrathHake.menuAbilities =  {bolt = "Arcane bolt", slow = "Concussive shot", silence = "Ancient seal", ulti = "Mystic flare"}
+SkyWrathHake.menuAbilities =  {bolt = "Arcane Bolt", slow = "Concussive Shot", silence = "Ancient Seal", ulti = "Mystic Flare"}
 SkyWrathHake.AbilitiesOptionID =  {bolt, slow, silence, ulti}
 for k, v in pairs(SkyWrathHake.menuAbilities) do
     SkyWrathHake.AbilitiesOptionID[k] = Menu.AddOption( {"Hero Specific", "SkyWrathHake", "Abilities"}, SkyWrathHake.menuAbilities[k], "")
 end
 
-SkyWrathHake.IsPopLinkenToggled = Menu.AddOption( {"Hero Specific", "SkyWrathHake", "Pop Linkens Items"}, "Enabled", "")
-SkyWrathHake.menuPopupLinkens = {cyclone = "Eul's Scepter of Divinity", atos = "Rod of Atos", hex = "Scythe of Vyse", forcestaff = "Force Staff", dagon = "Dagon", orchid = "Orchid", bloodthorn = "Bloodthorn", silence = "Ancient Seal", bolt = "Arcane Bolt"}
+SkyWrathHake.IsPopLinkenToggled = Menu.AddOption( {"Hero Specific", "SkyWrathHake", "Pop Linkens Items"}, "Enabled Pop Linken", "")
+SkyWrathHake.menuPopupLinkens = {cyclone = "Pop with Eul's Scepter of Divinity", atos = "Pop with Rod of Atos", hex = "Pop with Scythe of Vyse", forcestaff = "Pop with Force Staff", dagon = "Pop with Dagon", orchid = "Pop with Orchid", bloodthorn = "Pop with Bloodthorn", silence = "Pop with Ancient Seal", bolt = "Pop with Arcane Bolt"}
 SkyWrathHake.PopLinkensOptionID = {cyclone, atos, hex, forcestaff, dagon, orchid, blood, silence, bolt}
 for k, v in pairs(SkyWrathHake.menuPopupLinkens) do
     SkyWrathHake.PopLinkensOptionID[k] = Menu.AddOption( {"Hero Specific", "SkyWrathHake", "Pop Linkens Items"}, SkyWrathHake.menuPopupLinkens[k], "")

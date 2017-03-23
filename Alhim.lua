@@ -59,19 +59,11 @@ function alchemist.OnDraw()
 			-- 	end
 		
 		local spot1 = Vector(-1851, -4443, 128)
-		local spot2 = Vector(-472, -3311, 256)
-		local spot1 = Vector(468, -4659, 384)
+		local spot2 = Vector(-472, 	-3311, 256)
+		local spot1 = Vector(468, 	-4659, 384)
 		
 		if Menu.IsKeyDown(alchemist.optionKey) then
-			for i = 1, NPCs.Count() do
-				local hero = NPCs.Get(i)
-				local myTeam = Entity.GetTeamNum(myHero)
-				local sameTeam = Entity.GetTeamNum(hero) == myTeam
-				if not sameTeam then
-					Player.PrepareUnitOrders(Players.GetLocal(), 4, Enemy, Vector(0,0,0), Enemy, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
-					Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, hero, spot1, hero, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, hero)
-				end
-			end
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, hero, spot1, hero, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, hero)
 		end
 		
 		
