@@ -36,8 +36,8 @@ function alchemist.OnDraw()
 		local PreGameTime = GameRules.GetGameStartTime()
 		local RealTime = GameTime-PreGameTime
 		local Minute = math.floor(RealTime/60)
-		local Secund = math.floor(RealTime-(Minute*60))
-		Renderer.DrawText(alchemist.font, 10, 235, "Игровое время "..Minute..":"..Secund, 1)
+		local Second = math.floor(RealTime-(Minute*60))
+		Renderer.DrawText(alchemist.font, 10, 235, "Игровое время "..Minute..":"..Second, 1)
 		if Menu.IsEnabled(alchemist.autopick) and Menu.IsEnabled(alchemist.optionEnable) then
 			if GameRules.GetGameState() == 2 and Heroes.GetLocal() == nil then
 				Engine.ExecuteCommand("dota_select_hero npc_dota_hero_alchemist")
@@ -61,9 +61,13 @@ function alchemist.OnDraw()
 		local spot1 = Vector(-1851, -4443, 128)
 		local spot2 = Vector(-472, 	-3311, 256)
 		local spot1 = Vector(468, 	-4659, 384)
-		
-		if Menu.IsKeyDown(alchemist.optionKey) then
-			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, hero, spot1, hero, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, hero)
+		local gomove = true
+		if Menu.IsKeyDown(alchemist.optionKey) and gomove == true then
+			--Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, myHero, spot1, myHero, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, myHero, spot1, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, true, false)
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, myHero, spot2, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, true, false)
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, myHero, spot2, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, true, false)
+			local gomove = false
 		end
 		
 		
