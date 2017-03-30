@@ -1,16 +1,17 @@
+-- Author: Kostya12rus
+-- Version: 0.07
+-- Updated: 20.03.2017
 local alchemist = {}
 alchemist.optionEnable = Menu.AddOption		({"Hero Specific","Alchemist"},		"1. Enabled", 			"")
 alchemist.soul = Menu.AddOption				({"Hero Specific","Alchemist"},		"2. Use Item Soul Ring","Использовать Soul Ring в боте")
 alchemist.autopick = Menu.AddOption			({"Hero Specific","Alchemist"}, 	"3. AutoPick", 			"Автоматический пик Алхимика")
 alchemist.autobuy = Menu.AddOption			({"Hero Specific","Alchemist"}, 	"4. AutoBuy", 			"Автоматически закупаться")
 alchemist.optionKey = Menu.AddKeyOption		({"Hero Specific","Alchemist"},		"5. Combo Key",Enum.ButtonCode.KEY_D)
-alchemist.optionKeyCord = Menu.AddKeyOption		({"Hero Specific","Alchemist"},		"6. Cords",Enum.ButtonCode.KEY_1)
 alchemist.font = Renderer.LoadFont			("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 
 local myHero = Heroes.GetLocal()
 Bot = false 
-gomove = true
-MoveAttack1 = true
+
 function alchemist.OnDraw()
 	if not Menu.IsEnabled(alchemist.optionEnable) then 
 		return
@@ -46,6 +47,30 @@ function alchemist.OnDraw()
 		soul = NPC.GetItem(myHero, "item_soul_ring", true)
 		Bot = true 
 		Renderer.DrawText(alchemist.font, 10, 190, "Bot On", 1)
+		
+			-- 	if Menu.IsEnabled(alchemist.optionEnable) then
+			-- 		local mousePos = Input.GetWorldCursorPos()	
+			-- 		Renderer.DrawText(alchemist.font, 10, 250,math.floor(mousePos:GetX()).." x", 1)
+			-- 		Renderer.DrawText(alchemist.font, 10, 270,math.floor(mousePos:GetY()).." y", 1)
+			-- 		Renderer.DrawText(alchemist.font, 10, 290,math.floor(mousePos:GetZ()).." z", 1)
+			-- 		if Menu.IsKeyDown(alchemist.optionKey) then
+			-- 			Engine.ExecuteCommand("say " .. math.floor(mousePos:GetX()) .. "-X," .. math.floor(mousePos:GetY()) .. "-Y," .. math.floor(mousePos:GetZ()) .. "-Z")
+			-- 		end
+			-- 	end
+		
+		local spot1 = Vector(-1851, -4443, 128)
+		local spot2 = Vector(-472, 	-3311, 256)
+		local spot1 = Vector(468, 	-4659, 384)
+		local gomove = true
+		if Menu.IsKeyDown(alchemist.optionKey) and gomove == true then
+			--Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, myHero, spot1, myHero, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, myHero, spot1, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, true, false)
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, myHero, spot2, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, true, false)
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, myHero, spot2, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, true, false)
+			local gomove = false
+		end
+		
+		
 		if soul and Menu.IsEnabled(alchemist.soul) then
 			Renderer.DrawText(alchemist.font, 10, 205, "Soul Ring", 1)
 			local myMana = NPC.GetMana(myHero)
@@ -55,32 +80,7 @@ function alchemist.OnDraw()
 		end
 		local skill1 = Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0))
 		if skill1 > 0 then
-		end
-		local mousePos = Input.GetWorldCursorPos() Renderer.DrawText(alchemist.font, 1, 250,math.floor(mousePos:GetX()).." X", 1) Renderer.DrawText(alchemist.font, 70, 250,math.floor(mousePos:GetY()).." Y", 1)	Renderer.DrawText(alchemist.font, 140, 250,math.floor(mousePos:GetZ()).." Z", 1)		--Коодината Z
-		
-		local spot1 = Vector(-1806, -4454, 0)
-		local spot2 = Vector(0, 0, 0)
-		local x1L = (-1928) 
-		local x1H = (-1681) 
-		local y1H = (-4339)
-		local y1L = (-4544) 
-		local PHX = (NPC.GetAbsOrigin(myHero):GetX())
-		local PHY = (NPC.GetAbsOrigin(myHero):GetY())
-		if not Menu.IsKeyDown(alchemist.optionKey) then
-			return
-		else
-			if MoveAttack1 == true then
-				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, myHero, spot1, myHero, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, true)
-				if (x1H > PHX and PHX > x1L) and (y1H > PHY and PHY > y1L) then
-					local MoveAttack1 = false
-					local MoveAttack2 = true
-					Engine.ExecuteCommand("say Прибыл на спот1")
-				end
-			end
-			if MoveAttack2 == true then
-				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, myHero, spot2, myHero, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, true)
-				Engine.ExecuteCommand("say Прибыл на спот2")
-			end
+			Renderer.DrawText(alchemist.font, 10, 220, "First skill " .. (skill1) .. " lvl", 1)
 		end
 	end
 end
