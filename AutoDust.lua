@@ -106,7 +106,7 @@ function AutoDust.OnUpdate()
 	if not dust or not Ability.IsReady(dust) or not Ability.IsCastable(dust, 0) then return end
 	local target = AutoDust.FindTarget(hero, dust)
 	-- not target then return end
-	if (NPC.IsEntityInRange(hero, target, 1000) and not NPC.HasModifier(target, "modifier_truesight")) or (NPC.HasModifier(hero, AutoDust.Modifiers[12]))  then
+	if (NPC.IsEntityInRange(hero, target, 1000) and not NPC.HasModifier(target, "modifier_truesight") and not NPC.HasState(hero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE)) or (NPC.HasModifier(hero, AutoDust.Modifiers[12]))  then
 	--Log.Write(NPC.GetUnitName(target))
 	Ability.CastNoTarget(dust)	
 	AutoDust.Sleep(0.1, "updaterate");
@@ -115,7 +115,7 @@ function AutoDust.OnUpdate()
 			local timeLeft = alert.endTime - os.clock()
             if timeLeft < 0 then
             table.remove(AutoDust.Unique, i)
-			 elseif alert.enemy and NPC.IsPositionInRange(hero, alert.position, 1000) then
+			 elseif alert.enemy and NPC.IsPositionInRange(hero, alert.position, 1000) and not NPC.HasState(hero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then
 			 Ability.CastNoTarget(dust)	
 			 AutoDust.Sleep(0.1, "updaterate");
 			end
@@ -123,7 +123,7 @@ function AutoDust.OnUpdate()
 			for i = 1, Heroes.Count() do
                 local TAhero = Heroes.Get(i)
 			    local TA = NPC.GetUnitName(TAhero)=="npc_dota_hero_templar_assassin"
-			    if TA and NPC.IsEntityInRange(hero, TAhero, 1000) and (Entity.GetHealth(TAhero)/Entity.GetMaxHealth(TAhero)<0.3) and not NPC.HasModifier(TAhero, "modifier_truesight") and not Entity.IsSameTeam(hero, TAhero) then
+			    if TA and NPC.IsEntityInRange(hero, TAhero, 1000) and (Entity.GetHealth(TAhero)/Entity.GetMaxHealth(TAhero)<0.3) and not NPC.HasModifier(TAhero, "modifier_truesight") and not NPC.IsIllusion(TAhero) and not Entity.IsSameTeam(hero, TAhero) and not NPC.HasState(hero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then
 			    Ability.CastNoTarget(dust)	
 			    AutoDust.Sleep(0.1, "updaterate");
 			    end
@@ -131,12 +131,10 @@ function AutoDust.OnUpdate()
 end
 
 function AutoDust.FindTarget(me, item)
-	--local dagondmg = Ability.GetLevelSpecialValueFor(item, "damage") + Ability.GetLevelSpecialValueFor(item, "damage") * (Hero.GetIntellectTotal(me) / 16 / 100)
 	local entities = Heroes.GetAll()
 	for index, ent in pairs(entities) do
 		local enemyhero = Heroes.Get(index)
 		if not Entity.IsSameTeam(me, enemyhero)  and not NPC.IsIllusion(enemyhero) and NPC.IsEntityInRange(me, enemyhero, 1050) then
-			--local totaldmg = (1 - NPC.GetMagicalArmorValue(enemyhero)) * dagondmg
 			local isNotValid = AutoDust.CheckForModifiers(enemyhero)
 			local isPosValid = AutoDust.CheckForPositiveModifiers(enemyhero)
 			if not isNotValid and isPosValid then return enemyhero end
