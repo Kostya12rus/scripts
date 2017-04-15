@@ -1,11 +1,11 @@
 local Axe ={}
 
-Axe.optionEnable = Menu.AddOption({"Hero Specific", "Axe"}, "Enabled", "")
-Axe.optionKey = Menu.AddKeyOption({"Hero Specific", "Axe"}, "ComboKey", Enum.ButtonCode.KEY_F)
-Axe.bkbEnable = Menu.AddOption({"Hero Specific", "Axe"}, "Use BKB", "")
-Axe.pipeEnable = Menu.AddOption({"Hero Specific", "Axe"}, "Use Pipe", "")
-Axe.staffEnable = Menu.AddOption({"Hero Specific", "Axe"}, "Use Force Staff[BETA]", "")
-Axe.battlehungerEnable = Menu.AddOption({"Hero Specific", "Axe"}, "Use Battlehunger", "")
+Axe.optionEnable = Menu.AddOption({"Hero Specific", "Axe2"}, "Enabled", "")
+Axe.optionKey = Menu.AddKeyOption({"Hero Specific", "Axe2"}, "ComboKey", Enum.ButtonCode.KEY_F)
+Axe.bkbEnable = Menu.AddOption({"Hero Specific", "Axe2"}, "Use BKB", "")
+Axe.pipeEnable = Menu.AddOption({"Hero Specific", "Axe2"}, "Use Pipe", "")
+Axe.staffEnable = Menu.AddOption({"Hero Specific", "Axe2"}, "Use Force Staff[BETA]", "")
+Axe.battlehungerEnable = Menu.AddOption({"Hero Specific", "Axe2"}, "Use Battlehunger", "")
 Axe.Hero = nil
 
 function Axe.OnUpdate()
