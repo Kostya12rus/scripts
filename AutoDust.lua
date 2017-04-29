@@ -18,6 +18,7 @@ AutoDust.Modifiers = {
 [10] = "modifier_item_shadow_amulet_fade",
 [11] = "modifier_rune_invis",
 [12] = "modifier_invoker_ghost_walk_enemy",
+--[13] = "modifier_riki_permanent_invisibility"
 --Allies modifier
 [13] = "modifier_bounty_hunter_track",
 [14] = "modifier_bloodseeker_thirst_vision",
@@ -106,7 +107,7 @@ function AutoDust.OnUpdate()
 	if not dust or not Ability.IsReady(dust) or not Ability.IsCastable(dust, 0) then return end
 	local target = AutoDust.FindTarget(hero, dust)
 	-- not target then return end
-	if (NPC.IsEntityInRange(hero, target, 1000) and not NPC.IsChannellingAbility(hero) and not NPC.HasModifier(target, "modifier_truesight") and not NPC.HasState(hero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE)) or (NPC.HasModifier(hero, AutoDust.Modifiers[12]))  then
+	if (NPC.IsEntityInRange(hero, target, 1000) and not NPC.IsChannellingAbility(hero) and not NPC.HasModifier(target, "modifier_truesight") and not NPC.HasState(hero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE)) and not NPC.HasModifier(target,"modifier_riki_tricks_of_the_trade_phase") or (NPC.HasModifier(hero, AutoDust.Modifiers[12])) then
 	--Log.Write(NPC.GetUnitName(target))
 	Ability.CastNoTarget(dust)	
 	AutoDust.Sleep(0.1, "updaterate");
