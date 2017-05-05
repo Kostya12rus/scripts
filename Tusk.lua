@@ -83,7 +83,17 @@ if not Menu.IsKeyDown(Tusk.optionKey) then return end
 		return end
 	    if not NPC.HasState(hero, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and Menu.IsEnabled(Tusk.optionEnableSnowball) and Snowball and Ability.IsCastable(Snowball, myMana) then Ability.CastTarget(Snowball, hero)return end
 		
+	for k, v in pairs(NPC.GetHeroesInRadius(myHero, 350 , Enum.TeamType.TEAM_FRIEND)) do
+--	    local SelectionRadius = (NPC.GetHeroesInRadius(myHero, 350 , Enum.TeamType.TEAM_FRIEND))
+		if not NPC.IsIllusion(v) then
 		
+
+			if LaunchSnowball and Menu.IsEnabled(Tusk.optionTeamEnable) and not Ability.IsHidden(LaunchSnowball) and not NPC.HasState(v, Enum.ModifierState.MODIFIER_STATE_NOT_ON_MINIMAP)  then
+			Player.AttackTarget( Players.GetLocal(), myHero , v , true )
+			end
+	 	end
+		
+	end
 		
 		if LaunchSnowball and not Ability.IsHidden(LaunchSnowball) then Ability.CastNoTarget(LaunchSnowball) return end
 	 	 	 	
@@ -101,12 +111,11 @@ if not Menu.IsKeyDown(Tusk.optionKey) then return end
 		if BlackKingBar and Ability.IsCastable(BlackKingBar, 0) and Menu.IsEnabled(Tusk.optionEnableBlackKingBar) then Ability.CastNoTarget(BlackKingBar) return end
 		if not NPC.HasState(hero, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and Menu.IsEnabled(Tusk.optionEnableMedallion) and Medallion and Ability.IsCastable(Medallion, myMana) then Ability.CastTarget(Medallion, hero) return end
 		if not NPC.HasState(hero, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and Menu.IsEnabled(Tusk.optionEnableSolarCrest) and SolarCrest and Ability.IsCastable(SolarCrest, myMana) then Ability.CastTarget(SolarCrest, hero) return end
-		
+		if Orchid and Ability.IsCastable(Orchid, myMana) and Menu.IsEnabled(Tusk.optionEnableOrchid) and not NPC.IsLinkensProtected(hero)  then Ability.CastTarget(Orchid, hero) return end
+	 	if Bloodthorn and Ability.IsCastable(Bloodthorn, myMana) and Menu.IsEnabled(Tusk.optionEnableBloodthorn) and not NPC.IsLinkensProtected(hero)  then Ability.CastTarget(Bloodthorn, hero) return end
 		if Menu.IsEnabled(Tusk.optionEnableWalrusPUNCH) and WalrusPUNCH and Ability.IsCastable(WalrusPUNCH, myMana) then Ability.CastTarget(WalrusPUNCH, hero) return end
 		if Mjollnir and Ability.IsCastable(Mjollnir, myMana) and Menu.IsEnabled(Tusk.optionEnableMjollnir) then Ability.CastTarget(Mjollnir, myHero) return end
 		if AbyssalBlade and Ability.IsCastable(AbyssalBlade, myMana) and Menu.IsEnabled(Tusk.optionEnableAbyssalBlade) and not NPC.IsStunned(hero) and not NPC.HasModifier(hero, "modifier_tusk_walrus_punch_air_time") and not NPC.IsLinkensProtected(hero) then Ability.CastTarget(AbyssalBlade, hero) return end
-		if Orchid and Ability.IsCastable(Orchid, myMana) and Menu.IsEnabled(Tusk.optionEnableOrchid) and not NPC.IsStunned(hero) and not NPC.HasModifier(hero, "modifier_tusk_walrus_punch_air_time") and not NPC.IsLinkensProtected(hero)  then Ability.CastTarget(Orchid, hero) return end
-	 	if Bloodthorn and Ability.IsCastable(Bloodthorn, myMana) and Menu.IsEnabled(Tusk.optionEnableBloodthorn) and not NPC.IsStunned(hero) and not NPC.HasModifier(hero, "modifier_tusk_walrus_punch_air_time") and not NPC.IsLinkensProtected(hero)  then Ability.CastTarget(Bloodthorn, hero) return end
 		if Halberd and Ability.IsCastable(Halberd, myMana) and Menu.IsEnabled(Tusk.optionEnableHalberd) and not NPC.IsStunned(hero) and not NPC.HasModifier(hero, "modifier_tusk_walrus_punch_air_time") and not NPC.IsLinkensProtected(hero) then Ability.CastTarget(Halberd, hero) return end
 		if BladeMail and Ability.IsCastable(BladeMail, myMana) and Menu.IsEnabled(Tusk.optionEnableBladeMail) then Ability.CastNoTarget(BladeMail) return end
 		 end

@@ -12,7 +12,9 @@ function Nyx.OnUpdate()
 	if Menu.IsKeyDown(Nyx.optionKey)then
     Nyx.Combo()
 	end
+	if not Menu.IsKeyDown(Nyx.optionKey)then
 	Nyx.AutoSteal()
+	end
 end	
 
 
