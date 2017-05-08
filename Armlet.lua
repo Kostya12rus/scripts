@@ -1,3 +1,9 @@
+-- Armlet.lua (Version 3.0)
+-- Author: Eroica
+-- Release Date: 2017/5/8
+
+local Utility = require("Utility")
+
 local Armlet = {}
 
 local option = Menu.AddOption({"Item Specific"}, "Armlet", "Auto toggle armlet")
@@ -13,6 +19,7 @@ function Armlet.OnPrepareUnitOrders(orders)
 
     local myHero = Heroes.GetLocal()
     if not myHero then return true end
+    if not Utility.IsSuitableToUseItem(myHero) then return true end
 
     local item = NPC.GetItem(myHero, "item_armlet", true)
     if not item then return true end
@@ -39,6 +46,7 @@ function Armlet.OnUpdate()
 
     local myHero = Heroes.GetLocal()
     if not myHero then return end
+    if not Utility.IsSuitableToUseItem(myHero) then return end
 
     local item = NPC.GetItem(myHero, "item_armlet", true)
     if not item then return end
