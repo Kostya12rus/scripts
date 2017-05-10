@@ -956,7 +956,11 @@ function DrawImageBox(inpos, click, x, y, value)
 		local tempName = k:gsub(value["replace"], "")
 		local imageHandle = value["cache"][tempName]
 		if imageHandle == nil then
-			imageHandle = Renderer.LoadImage(value["iconpath"] .. tempName .. ".png")
+			if value["iconpath"] ~= "" then
+				imageHandle = Renderer.LoadImage(value["iconpath"] .. tempName .. ".png")
+			else
+				imageHandle = Renderer.LoadImage(value["heroes"][k] .. tempName .. ".png")
+			end
 			value["cache"][tempName] = imageHandle
 		end
 		
@@ -1049,7 +1053,11 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 		local tempName = k:gsub(value["replace"], "")
 		local imageHandle = value["cache"][tempName]
 		if imageHandle == nil then
-			imageHandle = Renderer.LoadImage(value["iconpath"] .. tempName .. ".png")
+			if value["iconpath"] ~= "" then
+				imageHandle = Renderer.LoadImage(value["iconpath"] .. tempName .. ".png")
+			else
+				imageHandle = Renderer.LoadImage(value["heroes"][k] .. tempName .. ".png")
+			end
 			value["cache"][tempName] = imageHandle
 		end
 		
