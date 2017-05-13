@@ -16,6 +16,10 @@ GT.Locale = {
 	["combo"] = {
 		["english"] = "Combo Key",
 		["russian"] = "Комбо клавиша"
+	},
+	["slider"] = {
+		["english"] = "Closest to mouse range",
+		["russian"] = "Радиус поиска ближнего"
 	}
 }
 
@@ -53,6 +57,8 @@ function GT.OnUpdate()
 		GUI.AddMenuItem(GT.Identity, GT.Identity .. "ordercast", GT.Locale["order"], 
 			GUI.MenuType.OrderBox, GT.Items, "", "item_", 36, 36)
 		GUI.AddMenuItem(GT.Identity, GT.Identity .. "combokey", GT.Locale["combo"], GUI.MenuType.Key, "F", GT.Skycombo)
+		GUI.AddMenuItem(GT.Identity, GT.Identity .. "closest", GT.Locale["slider"], GUI.MenuType.Slider, 100, 800, 50)
+
 	end
 end
     
@@ -61,7 +67,7 @@ function GT.Skycombo()
     local self = Heroes.GetLocal()
     if NPC.GetUnitName(self) ~= "npc_dota_hero_tiny" then return end
     local hero = Input.GetNearestHeroToCursor(Entity.GetTeamNum(self), Enum.TeamType.TEAM_ENEMY)
-    if not hero then return end
+    if not hero or not NPC.IsPositionInRange(hero, Input.GetWorldCursorPos(), GUI.Get(GT.Identity .. "closest"), 0) then return end
 	local ordercast = GUI.Get(GT.Identity .. "ordercast", 1)
 	if ordercast == nil then return end
     local position = Entity.GetAbsOrigin(hero)   
