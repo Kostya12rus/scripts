@@ -50,7 +50,7 @@ GT.CastTypes  = {
 }
 
 
-function GT.OnUpdate()
+function GT.OnDraw()
 	if GUI == nil then return end
 	if not GUI.Exist(GT.Identity) then
 		GUI.Initialize(GT.Identity, GUI.Category.Heroes, GT.Locale["name"], GT.Locale["desc"], "paroxysm, Beastmode, Jerfelly", "npc_dota_hero_tiny")
@@ -58,7 +58,6 @@ function GT.OnUpdate()
 			GUI.MenuType.OrderBox, GT.Items, "", "item_", 36, 36)
 		GUI.AddMenuItem(GT.Identity, GT.Identity .. "combokey", GT.Locale["combo"], GUI.MenuType.Key, "F", GT.Skycombo)
 		GUI.AddMenuItem(GT.Identity, GT.Identity .. "closest", GT.Locale["slider"], GUI.MenuType.Slider, 100, 800, 50)
-
 	end
 end
     

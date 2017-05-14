@@ -1,68 +1,140 @@
-local Axe ={}
+local Utility = require("Utility")
 
-Axe.optionEnable = Menu.AddOption({"Hero Specific", "Axe"}, "Enabled", "")
-Axe.optionKey = Menu.AddKeyOption({"Hero Specific", "Axe"}, "ComboKey", Enum.ButtonCode.KEY_F)
-Axe.bkbEnable = Menu.AddOption({"Hero Specific", "Axe"}, "Use BKB", "")
-Axe.pipeEnable = Menu.AddOption({"Hero Specific", "Axe"}, "Use Pipe", "")
-Axe.staffEnable = Menu.AddOption({"Hero Specific", "Axe"}, "Use Force Staff[BETA]", "")
+local Axe = {}
 
+Axe.optionAutoItem = Menu.AddOption({"Hero Specific", "Axe"}, "Auto Use Items", "Auto use items like blademail, lotus when calling")
+Axe.optionAutoBattleHunger = Menu.AddOption({"Hero Specific", "Axe"}, "Auto Battle Hunger", "Auto cast battle hunger to the enemy that you are attacking")
+Axe.optionBlinkHelper = Menu.AddOption({"Hero Specific", "Axe"}, "Blink Helper", "Auto blink to best position when calling")
+Axe.optionAutoInitiate = Menu.AddOption({"Hero Specific", "Axe"}, "Auto Initiate", "Auto initiate once see enemy heroes (can be turn on/off by key)")
+Axe.key = Menu.AddKeyOption({"Hero Specific", "Axe"}, "Auto Initiate Key", Enum.ButtonCode.KEY_E)
+Axe.font = Renderer.LoadFont("Tahoma", 24, Enum.FontWeight.EXTRABOLD)
+
+local shouldAutoInitiate = false
+
+-- blink to best position before call
+function Axe.OnPrepareUnitOrders(orders)
+    if not orders then return true end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero then return true end
+    if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return true end
+
+    if Menu.IsEnabled(Axe.optionAutoBattleHunger) then
+        Axe.AutoBattleHunger(myHero, orders)
+    end
+
+	if Menu.IsEnabled(Axe.optionBlinkHelper) then
+        Axe.BlinkHelper(myHero, orders)
+    end
+
+    return true
+end
+
+function Axe.AutoBattleHunger(myHero, orders)
+    if not myHero or not orders then return end
+    if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE and orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then return end
+
+    if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return end
+    if NPC.IsChannellingAbility(myHero) then return end
+
+    local battle_hunger = NPC.GetAbility(myHero, "axe_battle_hunger")
+    if not battle_hunger or not Ability.IsCastable(battle_hunger, NPC.GetMana(myHero)) then return end
+    
+    if not orders.target or not NPC.IsHero(orders.target) or Entity.IsSameTeam(myHero, orders.target) then return end
+    if NPC.HasModifier(orders.target, "modifier_axe_battle_hunger") then return end
+    if NPC.HasState(orders.target, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return end
+    if NPC.HasState(orders.target, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return end
+
+    local range = 750
+    if not NPC.IsEntityInRange(myHero, orders.target, range) then return end
+
+    Ability.CastTarget(battle_hunger, orders.target)
+end
+
+function Axe.BlinkHelper(myHero, orders)
+    if not myHero or not orders then return end
+    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return end
+
+    if not orders.ability or not Entity.IsAbility(orders.ability) then return end
+    if Ability.GetName(orders.ability) ~= "axe_berserkers_call" then return end
+
+    if not NPC.HasItem(myHero, "item_blink", true) then return end
+    local blink = NPC.GetItem(myHero, "item_blink", true)
+    if not blink or not Ability.IsCastable(blink, 0) then return end
+
+    local call_radius = 300
+    local blink_radius = 1200
+
+    local enemyHeroes = NPC.GetHeroesInRadius(myHero, blink_radius, Enum.TeamType.TEAM_ENEMY)
+    if not enemyHeroes or #enemyHeroes <= 0 then return end
+
+    local pos = Utility.BestPosition(enemyHeroes, call_radius)
+    if pos then
+    	Ability.CastPosition(blink, pos)
+    end
+end
+
+-- auto use items when calling enemy heroes (blademail, lotus, etc)
 function Axe.OnUpdate()
-if not Menu.IsEnabled(Axe.optionEnable) then return true end
-if not Menu.IsKeyDown(Axe.optionKey) then return end
-local myHero = Heroes.GetLocal()
+	if not Menu.IsEnabled(Axe.optionAutoItem) then return end
 
-if NPC.GetUnitName(myHero) ~= "npc_dota_hero_axe" then return end
-Axe.ITABcombo()
+    local myHero = Heroes.GetLocal()
+    if not myHero or not NPC.HasModifier(myHero, "modifier_axe_berserkers_call_armor") then return end
+    if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return end
+
+    -- local mod = NPC.GetModifier(myHero, "modifier_axe_berserkers_call_armor")
+    -- if mod and GameRules.GetGameTime() - Modifier.GetCreationTime(mod) > 0.1 then return end
+
+    local call_radius = 300
+    local enemyHeroes = NPC.GetHeroesInRadius(myHero, call_radius, Enum.TeamType.TEAM_ENEMY)
+    if #enemyHeroes > 0 then
+	    Utility.PopDefensiveItems(myHero)
+	end
+
 end
 
-function Axe.ITABcombo()
+-- auto initiate when enemy heroes are near 
+-- (this mode can be turn on/off by pressing key)
+function Axe.OnDraw()
+	if not Menu.IsEnabled(Axe.optionAutoInitiate) then return end
 
+    local myHero = Heroes.GetLocal()
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_axe" then return end
+    if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
 
+	if Menu.IsKeyDownOnce(Axe.key) then
+		shouldAutoInitiate = not shouldAutoInitiate
+	end
 
-local hero = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY) --!
-if not hero then return end
+	if not shouldAutoInitiate then return end
 
-local heroPos = NPC.GetAbsOrigin(hero)
-local stan = NPC.GetAbilityByIndex(myHero,0)
-local ult = NPC.GetAbilityByIndex(myHero,1)
+	-- draw text when auto initiate key is up
+	local pos = Entity.GetAbsOrigin(myHero)
+	local x, y, visible = Renderer.WorldToScreen(pos)
+	Renderer.SetDrawColor(0, 255, 0, 255)
+	Renderer.DrawTextCentered(Axe.font, x, y, "Auto", 1)
 
-local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
-local lotus = NPC.GetItem(myHero,"item_lotus_orb", true)
-local bm = NPC.GetItem(myHero,"item_blade_mail", true)
-local medallion = NPC.GetItem(myHero, "item_medallion_of_courage", true)
-local crest = NPC.GetItem(myHero, "item_solar_crest", true)
-local bkb = NPC.GetItem(myHero, "item_black_king_bar", true)
-local crimson = NPC.GetItem(myHero, "item_crimson_guard", true)
-local staff = NPC.GetItem(myHero, "item_force_staff")
-local pipe = NPC.GetItem(myHero, "item_pipe")
- local myMana = NPC.GetMana(myHero)
- local blink = NPC.GetItem(myHero, "item_blink", true) 
- local mousePos = Input.GetWorldCursorPos()
-  --lotus
- if lotus and Ability.IsCastable(lotus,myMana) and hero ~= nil and NPC.IsPositionInRange(myHero, NPC.GetAbsOrigin(hero),300,0) then Ability.CastTarget(lotus,myHero) return end
- 
- if bkb and Ability.IsCastable(bkb,myMana) and Menu.IsEnabled(Axe.bkbEnable) and hero ~= nil and NPC.IsPositionInRange(myHero, NPC.GetAbsOrigin(hero),300,0) and Menu.IsEnabled(Axe.bkbEnable) then Ability.CastNoTarget(bkb) return end
- if crimson and Ability.IsCastable(crimson, myMana)  then Ability.CastNoTarget(crimson) return end
- if pipe and Ability.IsCastable(pipe, myMana) and hero ~=nil and NPC.IsPositionInRange(myHero,NPC.GetAbsOrigin(hero), 0 , 300) and Menu.IsEnabled(Axe.pipeEnable) then Ability.CastNoTarget(pipe) return end
- --blink 
- if blink and Ability.IsCastable(blink, myMana) and hero ~= nil and not NPC.IsPositionInRange(myHero, NPC.GetAbsOrigin(hero),1200,0) then Ability.CastPosition(blink,heroPos) 
- else
-if blink and Ability.IsCastable(blink, myMana) and hero ~= nil and NPC.IsPositionInRange(myHero, NPC.GetAbsOrigin(hero),1800, 0) then Ability.CastPosition(blink,heroPos) return end
-if staff and Ability.IsCastable(staff, myMana) and hero ~= nil and not NPC.IsPositionInRange(myHero, NPC.GetAbsOrigin(hero),0,300) and Menu.IsEnabled(Axe.staffEnable) then Ability.CastTarget(staff,myHero) return end
+	if not NPC.HasItem(myHero, "item_blink", true) then return end
+    local blink = NPC.GetItem(myHero, "item_blink", true)
+    if not blink or not Ability.IsCastable(blink, 0) then return end
+
+    local call = NPC.GetAbilityByIndex(myHero, 0)
+    if not call or not Ability.IsCastable(call, NPC.GetMana(myHero)) then return end
+
+    local call_radius = 300
+    local blink_radius = 1200
+
+    local enemyHeroes = NPC.GetHeroesInRadius(myHero, blink_radius, Enum.TeamType.TEAM_ENEMY)
+    if not enemyHeroes or #enemyHeroes <= 0 then return end
+
+    local pos = Utility.BestPosition(enemyHeroes, call_radius)
+    if pos then
+    	Ability.CastPosition(blink, pos)
+    end
+    Ability.CastNoTarget(call)
+
 end
- 
-  
-  
- if Ability.IsCastable(stan, myMana) and hero ~=nil and NPC.IsPositionInRange(myHero,NPC.GetAbsOrigin(hero), 0 , 300)  then Ability.CastNoTarget(stan) return end
- if bm and hero ~=nil and NPC.IsPositionInRange(myHero,NPC.GetAbsOrigin(hero), 0 , 300) and Ability.IsCastable(bm, myMana) then Ability.CastNoTarget(bm) return end
- --ult
- if Ability.IsCastable(ult,myMana) then Ability.CastTarget(ult, hero) return end
- --shiva
- if shiva and Ability.IsCastable(shiva,myMana) and hero ~= nil and NPC.IsPositionInRange(myHero, NPC.GetAbsOrigin(hero),800,0) then Ability.CastNoTarget(shiva) return end
- --medallion
- if medallion and Ability.IsCastable(medallion,myMana) then Ability.CastTarget(medallion,hero) return end
- if crest and Ability.IsCastable(crest,myMana) then Ability.CastTarget(crest,hero) return end
 
-
- end
- return Axe
+return Axe

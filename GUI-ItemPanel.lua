@@ -1,9 +1,20 @@
--- Author: paroxysm
--- Updated: 22.02.2017
 local ItemPanel = {}
+ItemPanel.Identity = "item_panel"
+ItemPanel.Locale = {
+	["name"] = {
+		["english"] = "Item Panel",
+		["russian"] = "Панель предметов"
+	},
+	["desc"] = {
+		["english"] = "Shows what items enemy hero had in last time he was seen.",
+		["russian"] = "Показывает какие предметы имел вражеский герой в последний раз когда был виден."
+	},
+	["size"] = {
+		["english"] = "Size",
+		["russian"] = "Размер"
+	}
+}
 
-ItemPanel.Enable = Menu.AddOption({ "Utility","Item Panel" }, "Enabled", "")
-ItemPanel.Key = Menu.AddKeyOption({ "Utility", "Item Panel" }, "Key", Enum.ButtonCode.KEY_F)
 ItemPanel.Size = Menu.AddOption({ "Utility","Item Panel" }, "Size", "", 16, 64, 8)
 
 ItemPanel.IsOpen = false
@@ -179,57 +190,88 @@ ItemPanel.items["item_dagon_3"] = "Dagon3"
 ItemPanel.items["item_dagon_4"] = "Dagon4"
 ItemPanel.items["item_dagon_5"] = "Dagon5" 
 
-function ItemPanel.OnUpdate()
-	if Menu.IsKeyDownOnce(ItemPanel.Key) and Menu.IsEnabled(ItemPanel.Enable) then 	
-		if ItemPanel.IsOpen then ItemPanel.IsOpen = false
-		else ItemPanel.IsOpen = true end
-	end
-end
+ItemPanel.OnAir = false
+local offsetPosX = 0
+local offsetPosY = 0
 
 function ItemPanel.OnDraw()
-	Renderer.SetDrawColor(255, 255, 255, 255)
-    if not Menu.IsEnabled(ItemPanel.Enable) then return true end
-    if not ItemPanel.IsOpen then return true end
+	if GUI == nil then return end
+	local locx = GUI.Get(ItemPanel.Identity .. "locx")
+	local locy = GUI.Get(ItemPanel.Identity .. "locy")
 	
+	if not GUI.Exist(ItemPanel.Identity) then
+		GUI.Initialize(ItemPanel.Identity, GUI.Category.General, ItemPanel.Locale["name"], ItemPanel.Locale["desc"], "paroxysm")
+		GUI.AddMenuItem(ItemPanel.Identity, ItemPanel.Identity .. "size", ItemPanel.Locale["size"], GUI.MenuType.Slider, 16, 64, 24)
+		
+		if (locx == "" or locx == nil) then GUI.Set(ItemPanel.Identity .. "locx", 10) locx = 10 end
+		if (locy == "" or locy == nil) then GUI.Set(ItemPanel.Identity .. "locy", 150) locy = 150 Log.Write("150") end
+	end
+
+	if ItemPanel.OnAir then 
+		local mx, my = Input.GetCursorPos()
+		GUI.Set(ItemPanel.Identity .. "locx", mx - offsetPosX)
+		GUI.Set(ItemPanel.Identity .. "locy", my - offsetPosY)
+		if tonumber(GUI.Get(ItemPanel.Identity .. "locx")) < 1 then GUI.Set(ItemPanel.Identity .. "locx", 1) end
+		if tonumber(GUI.Get(ItemPanel.Identity .. "locy")) < 1 then GUI.Set(ItemPanel.Identity .. "locy", 1) end
+	end
+	
+	Renderer.SetDrawColor(255, 255, 255, 255)
+    if not GUI.IsEnabled(ItemPanel.Identity) then return true end
 	local myHero = Heroes.GetLocal()
 	if myHero == nil then return end
-	local myTeam = Entity.GetTeamNum( myHero )
-	local ypos = 150
-	local defx, xpos = math.floor(Menu.GetValue(ItemPanel.Size) * 128 / 72)
+	
+	local ypos = locy
+	local size = GUI.Get(ItemPanel.Identity .. "size")
+	local defx, xpos = math.floor(size * 128 / 72)
+	local total_heroes = 0
+	local max_items = 0
 
-	for i = 1, Heroes.Count() do
-		local hero = Heroes.Get(i)
-		
-		if not NPC.IsIllusion(hero) then
-			local sameTeam = Entity.GetTeamNum(hero) == myTeam
-			if not sameTeam then
-				ypos = ypos + Menu.GetValue(ItemPanel.Size)
-				xpos = defx
-				for k, v in pairs(ItemPanel.items) do
-					if NPC.HasItem(hero, k, true) then
-						local tempName = k
-						tempName = tempName:gsub("item_", "")
-						local imageHandle = ItemPanel.ItemIcons[tempName]
-						if imageHandle == nil then
-							imageHandle = Renderer.LoadImage(ItemPanel.IconPath .. tempName .. ".png")
-							ItemPanel.ItemIcons[tempName] = imageHandle
-						end
-						xpos = xpos + Menu.GetValue(ItemPanel.Size) + 8
-						Renderer.DrawImage(imageHandle, xpos, ypos, Menu.GetValue(ItemPanel.Size) + 8, Menu.GetValue(ItemPanel.Size))
+	for k, hero in pairs(Heroes.GetAll()) do		
+		if not NPC.IsIllusion(hero) and Entity.IsHero(hero) and not Entity.IsSameTeam(myHero, hero) then
+			ypos = ypos + size + 5
+			xpos = defx + locx + 5
+			for k, v in pairs(ItemPanel.items) do
+				if NPC.HasItem(hero, k, true) then
+					local tempName = k
+					tempName = tempName:gsub("item_", "")
+					local imageHandle = ItemPanel.ItemIcons[tempName]
+					if imageHandle == nil then
+						imageHandle = Renderer.LoadImage(ItemPanel.IconPath .. tempName .. ".png")
+						ItemPanel.ItemIcons[tempName] = imageHandle
 					end
+					Renderer.DrawImage(imageHandle, xpos, ypos, size + 8, size)
+					xpos = xpos + size + 10
 				end
-				
-				local tempHeroName = NPC.GetUnitName(hero):gsub("npc_dota_hero_", "")
-				local imageHandle = ItemPanel.HeroIcons[tempHeroName]
-				if imageHandle == nil then
-					imageHandle = Renderer.LoadImage(ItemPanel.HeroPath .. tempHeroName .. ".png")
-					ItemPanel.HeroIcons[tempHeroName] = imageHandle
-				end
-				Renderer.DrawImage(imageHandle, 10, ypos, defx, Menu.GetValue(ItemPanel.Size) )
 			end
-			
+			if max_items < xpos then max_items = xpos end
+			total_heroes = total_heroes + 1
+			local tempHeroName = NPC.GetUnitName(hero):gsub("npc_dota_hero_", "")
+			local imageHandle = ItemPanel.HeroIcons[tempHeroName]
+			if imageHandle == nil then
+				imageHandle = Renderer.LoadImage(ItemPanel.HeroPath .. tempHeroName .. ".png")
+				ItemPanel.HeroIcons[tempHeroName] = imageHandle
+			end
+			Renderer.DrawImage(imageHandle, locx, ypos, defx, size )
 		end
 	end
+	
+	if total_heroes == 0 then return end
+	
+	if Input.IsCursorInRect(locx, (locy + size + 5) - 29, max_items - 12, 25) then
+		Renderer.SetDrawColor(217, 19, 61, 230)
+		if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then 
+			local mx, my = Input.GetCursorPos()
+			offsetPosX = mx - locx
+			offsetPosY = my - locy
+			if ItemPanel.OnAir then ItemPanel.OnAir = false else ItemPanel.OnAir = true end
+		end
+	else
+		Renderer.SetDrawColor(217, 19, 61, 150)
+	end
+	
+	Renderer.DrawFilledRect(locx, (locy + size + 5) - 29, max_items - locx - 2, 25)
+	Renderer.SetDrawColor(hex2rgb("#fff"))
+	Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, locx + math.ceil((max_items - locx - 2) / 2), ((locy + size + 5) - 29) + 12, "TAP HERE TO MOVE", true)
 end
 
 return ItemPanel

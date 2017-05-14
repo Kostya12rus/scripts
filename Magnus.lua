@@ -1,209 +1,191 @@
-local magnus = {}
+local Utility = require("Utility")
 
-magnus.optionEnable = Menu.AddOption({"Hero Specific", "Magnus"}, "Enable",  "Combo - Huembo:D")
-magnus.optionKey = Menu.AddKeyOption({"Hero Specific", "Magnus"}, "Key", Enum.ButtonCode.KEY_F)
-magnus.bkb = Menu.AddOption({"Hero Specific", "Magnus"}, "USE BKB",  "")
-magnus.pipeEnable = Menu.AddOption({"Hero Specific", "Magnus"}, "Use Pipe", "")
-magnus.cache= {}
+local Magnus = {}
 
-function magnus.OnUpdate()
-    if not Menu.IsEnabled(magnus.optionEnable) then return true end
-    if not Menu.IsKeyDown(magnus.optionKey) then return end
-	
-	local myHero = Heroes.GetLocal()
+Magnus.optionAwareness = Menu.AddOption({"Hero Specific", "Magnus"}, "Killable Awareness", "show how many hits left (with the damage of shockwave) to kill an enemy")
+Magnus.optionKillSteal = Menu.AddOption({"Hero Specific", "Magnus"}, "Kill Steal", "auto cast shockwave to KS")
+Magnus.optionEmpower = Menu.AddOption({"Hero Specific", "Magnus"}, "Auto Empower", "auto cast empower on allies or magnus himself")
+Magnus.optionRPHelper = Menu.AddOption({"Hero Specific", "Magnus"}, "RP Helper", "Auto blink to best position for RP, auto turn around before RP")
+Magnus.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
- if NPC.GetUnitName(myHero) ~= "npc_dota_hero_magnataur" then return end
-	
-	 
-	local ultimate = NPC.GetAbilityByIndex(myHero,3)
-	if ultimate == nill or not Ability.IsReady(ultimate) then return end
-	local enemies = NPC.GetHeroesInRadius(myHero, 1500, Enum.TeamType.TEAM_ENEMY)
-	
-	local count = 0;
-    local point = {}
-    for i, enemy in ipairs(enemies) do
-        count = count + 1;
-        point[i] = NPC.GetAbsOrigin(enemy)
-	end
-	
-	if count<2 then return end
-	
-	local maxCount = 0
-	local finalPos = nill
-	local j=0
-	for i = 1, count do
-	    for j=j+1, count do
-		    for k=j+1, count do
-		         magnus.processHeroes(myHero, point[i], point[j], point[k])
-				 local tempPos = magnus.cache["pos"]
-				 local tempCount = magnus.cache["count"]
-				 if tempCount> maxCount then
-				     maxCount = tempCount
-					 finalPos = tempPos
-					 end
-			    end
-		end
-  end
-  
-  if finalPos == nill or maxCount<2 then return end
-  
- magnus.castUlt(myHero, finalPos)
- end
- 
- function magnus.processHeroes(myHero, hero1Pos, hero2Pos, hero3Pos)
- 
-    local centroid = magnus.centroid(hero1Pos, hero2Pos, hero3Pos)
-    local ccs = magnus.circumCenter(hero1Pos, hero2Pos, hero3Pos)
-    local mid = magnus.furthestMidPoint(hero1Pos, hero2Pos, hero3Pos)
-	
-	local centroidHeroCount = magnus.validateCenter(centroid,myHero)
-    local ccsHeroCount = magnus.validateCenter(ccs,myHero)
-    local midCount = magnus.validateCenter(mid,myHero)
-	
-	if centroidHeroCount < 2 and ccsHeroCount < 2 and midCount < 2 then
-       
-        magnus.cache["pos"] = nill
-        magnus.cache["count"] = 0
-        return 
-    end
-	
-	   if centroidHeroCount >= ccsHeroCount and centroidHeroCount >= midCount then 
-        magnus.cache["pos"] = centroid
-        magnus.cache["count"] = centroidHeroCount
-        return
-    end
-    if ccsHeroCount >= centroidHeroCount and ccsHeroCount >= midCount then 
-        magnus.cache["pos"] = ccs
-        magnus.cache["count"] = ccsHeroCount
-        return
-    end
-	
-   magnus.cache["pos"] = mid
-    magnus.cache["count"] = midCount
-    return result
-    --magnus.castUlt(myHero, ccs) 
-end
+local RP_timer
+local ERROR = 0.05
 
-function magnus.furthestMidPoint(a, b, c)
-    local distanceAB = a:Distance(b)
-    local distanceAC = a:Distance(c)
-    local distanceBC = b:Distance(c)
+-- show how many hits left (with the damage of shockwave) to kill an enemy
+function Magnus.OnDraw()
+    if not Menu.IsEnabled(Magnus.optionAwareness) then return end
 
-    distanceAB = distanceAB:Length()
-    distanceAC = distanceAC:Length()
-    distanceBC = distanceBC:Length()
+    local myHero = Heroes.GetLocal()
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_magnataur" then return end
 
-    if distanceAB >= distanceAC and distanceAB>= distanceBC then 
-        local result = a + b
-        result:SetX(result:GetX()/2)
-        result:SetY(result:GetY()/2)  
-        result:SetZ(0)
-        return result
-    end 
-
-    if distanceAC >= distanceAB and distanceAC>= distanceBC then 
-        local result = a + c
-        result:SetX(result:GetX()/2)
-        result:SetY(result:GetY()/2)  
-        result:SetZ(0)
-        return result
-    end 
-
-    local result = b + c
-    result:SetX(result:GetX()/2)
-    result:SetY(result:GetY()/2)  
-    result:SetZ(0)
-    return result
-end
-
-function magnus.circumCenter(a, b, c)
-    a:SetZ(0)
-    b:SetZ(0)
-    c:SetZ(0)
-    
-    local xa = a:GetX()
-    local ya = a:GetY()
-    local xb = b:GetX()
-    local yb = b:GetY()
-    local xc = c:GetX()
-    local yc = c:GetY()
-
-    local delta = 2*(xa-xb)*(yc-yb) - 2*(ya-yb)*(xc-xb)
-    local deltaX = (yc-yb)*(xa*xa + ya*ya - xb*xb - yb*yb) - (ya-yb)*(xc*xc + yc*yc - xb*xb - yb*yb)
-    local deltaY = (xa-xb)*(xc*xc + yc*yc - xb*xb - yb*yb) - (xc-xb)*(xa*xa + ya*ya - xb*xb - yb*yb) 
-
-    local resultX = deltaX/delta
-    local resultY = deltaY/delta
-    return Vector(resultX, resultY, 0)
-end
-
-function magnus.castUlt(myHero, pos)
-local lastcasttime = 0
-local myMana = NPC.GetMana(myHero)
-local pipe = NPC.GetItem(myHero, "item_pipe", true)
-local ult = NPC.GetAbilityByIndex(myHero,3)
-local blik = NPC.GetItem(myHero, "item_blink", true)
-local bkb = NPC.GetItem(myHero, "item_black_king_bar", true)
-local sviva = NPC.GetItem(myHero, "item_shivas_guard", true)
-local lotus = NPC.GetItem(myHero, "item_lotus_orb", true)
-
-
-
-   if blik ~= nill and Ability.IsCastable(ult, myMana) and Ability.IsReady(blik) then
-        if NPC.IsPositionInRange(myHero, pos, 1200, 0) then
-		    if bkb and Menu.IsEnabled(magnus.bkb) and Ability.IsReady(bkb) then Ability.CastNoTarget(bkb) end
-			if pipe and Menu.IsEnabled(magnus.pipeEnable) and Ability.IsCastable(pipe, myMana) then Ability.CastNoTarget(pipe) end
-		    if lotus and Ability.IsCastable(lotus, myMana) then Ability.CastTarget(lotus, myHero) end
-            Ability.CastPosition(blik, pos)
-	  else
-	  local dir = pos - NPC.GetAbsOrigin(myHero)
-            dir:SetZ(0)
-            dir:Normalize()
-            dir:Scale(1199)
-            local destination = NPC.GetAbsOrigin(myHero) + dir
-				    if bkb and Menu.IsEnabled(magnus.bkb) and Menu.IsEnabled(magnus.pipeEnable) and Ability.IsReady(bkb) then Ability.CastNoTarget(bkb) end
-						if pipe and Menu.IsEnabled(magnus.pipeEnable) and Ability.IsCastable(pipe, myMana) then Ability.CastNoTarget(pipe) end
-            if lotus and Ability.IsCastable(lotus, myMana) then Ability.CastTarget(lotus, myHero) end
-            Ability.CastPosition(blik, destination)
-			
-	   end
-	end
-
-	
-	if ult and NPC.IsPositionInRange(myHero, pos, 410, 0)  and Ability.IsCastable(ult, myMana) then 
-	Ability.CastNoTarget(ult, true)
-    end
-	if sviva and  Ability.IsCastable(sviva, myMana) then Ability.CastNoTarget(sviva)   end
-
-	end
-
-
-	
-	function magnus.centroid(a, b, c )
-    local result = a + b + c
-    result:SetX(result:GetX()/3)
-    result:SetY(result:GetY()/3)
-    result:SetZ(0)
-    return result
-end
-
-function magnus.validateCenter(center, myHero)
-    local numOfEnemyInRadius = 0
-    local myTeam = Entity.GetTeamNum( myHero )
+    local wave = NPC.GetAbility(myHero, "magnataur_shockwave")
+    local level = Ability.GetLevel(wave)
+    local wave_damage = 75 * level
+    if not Ability.IsCastable(wave, NPC.GetMana(myHero)) then wave_damage = 0 end
 
     for i = 1, Heroes.Count() do
-        local hero = Heroes.Get(i)
-        if not NPC.IsIllusion(hero) then
-            local sameTeam = Entity.GetTeamNum(hero) == myTeam
-            if not sameTeam then
-                if NPC.IsPositionInRange(hero, center, 410, 0) then 
-                    numOfEnemyInRadius = numOfEnemyInRadius + 1
-                end
+        local enemy = Heroes.Get(i)
+        if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
+            local enemyHp = Entity.GetHealth(enemy)
+            local physicalDamage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
+            local magicalDamage = wave_damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            local hitsLeft = math.ceil((enemyHp - magicalDamage) / (physicalDamage + 1))
+        
+            -- draw
+            local pos = Entity.GetAbsOrigin(enemy)
+            local x, y, visible = Renderer.WorldToScreen(pos)
+
+            -- red : can kill; green : cant kill
+            if enemyHp - magicalDamage <= 0 then
+                Renderer.SetDrawColor(255, 0, 0, 255)
+                Renderer.DrawTextCentered(Magnus.font, x, y, "Kill", 1)
+            else
+                Renderer.SetDrawColor(0, 255, 0, 255)
+                Renderer.DrawTextCentered(Magnus.font, x, y, hitsLeft, 1)
             end
         end
     end
-    
-    return numOfEnemyInRadius
-end 
+end
 
-return magnus
+-- blink to best position and turn around before RP
+function Magnus.OnPrepareUnitOrders(orders)
+    if not Menu.IsEnabled(Magnus.optionRPHelper) then return true end
+    if not orders or not orders.ability then return true end
+    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
+
+    if not Entity.IsAbility(orders.ability) then return true end
+    if Ability.GetName(orders.ability) ~= "magnataur_reverse_polarity" then return true end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero then return true end
+    if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return true end
+
+    if not Ability.IsCastable(orders.ability, NPC.GetMana(myHero)) then return true end
+
+    local dir = Input.GetWorldCursorPos()
+
+    local blink = NPC.GetItem(myHero, "item_blink", true)
+    if blink and Ability.IsCastable(blink, 0) then
+        local RP_radius = 410
+        local blink_radius = 1200
+        local enemyHeroes = NPC.GetHeroesInRadius(myHero, blink_radius, Enum.TeamType.TEAM_ENEMY)
+        local pos = Utility.BestPosition(enemyHeroes, RP_radius)
+        if pos then 
+            Ability.CastPosition(blink, pos) 
+        end
+    end
+
+    -- turn around
+    Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION, nil, dir, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY , myHero)
+    RP_timer = GameRules.GetGameTime()
+    return false
+end
+
+function Magnus.OnUpdate()
+    local myHero = Heroes.GetLocal()
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_magnataur" then return end
+    
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
+    if NPC.IsChannellingAbility(myHero) then return end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return end
+    if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
+
+    if Menu.IsEnabled(Magnus.optionKillSteal) then
+        Magnus.KillSteal(myHero)
+    end
+
+    if Menu.IsEnabled(Magnus.optionEmpower) then
+        Magnus.AutoEmpower(myHero)
+    end
+
+    if Menu.IsEnabled(Magnus.optionRPHelper) then
+        Magnus.RPHelper(myHero)
+    end
+end
+
+-- auto cast shockwave to KS
+function Magnus.KillSteal(myHero)
+    local wave = NPC.GetAbility(myHero, "magnataur_shockwave")
+    if not wave or not Ability.IsCastable(wave, NPC.GetMana(myHero)) then return end
+
+    local level = Ability.GetLevel(wave)
+    local wave_damage = 75 * level
+
+    local range = 1150
+    local enemiesAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+
+    for i, enemy in ipairs(enemiesAround) do
+        local magicalDamage = wave_damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+        if Entity.GetHealth(enemy) <= magicalDamage and not NPC.IsIllusion(enemy) and Entity.IsAlive(enemy)
+            and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) 
+            and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
+
+            local dis = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length()
+            local speed = 1150
+            local travel_time = dis / (speed + 1)
+            local castpoint = 0.3
+            local delay = travel_time + castpoint
+
+            local pos = Utility.GetPredictedPosition(enemy, delay)
+            if (pos - Entity.GetAbsOrigin(myHero)):Length() <= range then
+                Ability.CastPosition(wave, pos)
+                return
+            end
+        end
+    end
+end
+
+-- auto cast empower on himself or needed ally heroes
+-- priority: magnus -> melee ally hero -> ranged ally hero
+function Magnus.AutoEmpower(myHero)
+    local empower = NPC.GetAbilityByIndex(myHero, 1)
+    if not empower or not Ability.IsCastable(empower, NPC.GetMana(myHero)) then return end
+
+    -- avoid cancel right click when farming
+    if NPC.IsAttacking(myHero) then return end
+
+    -- avoid casting empower right before ultimate
+    local enemiesAround = NPC.GetHeroesInRadius(myHero, 450, Enum.TeamType.TEAM_ENEMY)
+    if enemiesAround and #enemiesAround > 0 then return end
+
+    if not NPC.HasModifier(myHero, "modifier_magnataur_empower") then
+        Ability.CastTarget(empower, myHero)
+        return
+    end
+
+    local range = 800
+    local alliesAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
+    if not alliesAround or #alliesAround <= 0 then return end
+
+    -- for melee ally hero
+    for i, ally in ipairs(alliesAround) do
+        if not NPC.HasModifier(ally, "modifier_magnataur_empower") 
+            and not NPC.IsIllusion(ally) and not NPC.IsRanged(ally) then
+            Ability.CastTarget(empower, ally)
+            return
+        end
+    end
+
+    -- for range ally hero
+    -- for i, ally in ipairs(alliesAround) do
+    --     if not NPC.HasModifier(ally, "modifier_magnataur_empower") and not NPC.IsIllusion(ally) then
+    --         Ability.CastTarget(empower, ally)
+    --         return
+    --     end
+    -- end
+end
+
+function Magnus.RPHelper(myHero)
+    local RP = NPC.GetAbilityByIndex(myHero, 3)
+    if not RP or not Ability.IsCastable(RP, NPC.GetMana(myHero)) then return end
+
+    if not RP_timer then return end
+
+    -- magnus's turn rate is 0.8, 0.2s delay works well in practice.
+    local delay = 0.2
+    if math.abs(GameRules.GetGameTime()-(RP_timer+delay)) <= ERROR then
+        Ability.CastNoTarget(RP)
+    end
+end
+
+return Magnus
