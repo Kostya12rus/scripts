@@ -392,13 +392,6 @@ function GUI.AddMenuItem(menucode, itemcode, name, control, ...)
 			GUI.CallBackKey[menucode]["itemcode"] = itemcode
 			GUI.Items[menucode]["items"][order]["callback"] = select(2, ...)
 		end
-		if select(3, ...) == nil then
-			GUI.Set(itemcode, "F")
-		else
-			if GUI.Get(itemcode) == nil or temp_data == "" then
-				GUI.Set(itemcode, select(3, ...))			
-			end
-		end
 		if temp_data ~= nil and temp_data ~= "" then GUI.Set(itemcode, temp_data) end
 		
 	elseif GUI.MenuType.SelectBox == control then
