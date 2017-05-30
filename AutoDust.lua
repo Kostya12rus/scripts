@@ -17,13 +17,14 @@ AutoDust.Modifiers = {
 [9] = "modifier_item_glimmer_cape_fade",
 [10] = "modifier_item_shadow_amulet_fade",
 [11] = "modifier_rune_invis",
-[12] = "modifier_invoker_ghost_walk_enemy",
---[13] = "modifier_riki_permanent_invisibility"
+[12] = "modifier_windrunner_windrun_invis",
+[13] = "modifier_invoker_ghost_walk_enemy",
+
 --Allies modifier
-[13] = "modifier_bounty_hunter_track",
-[14] = "modifier_bloodseeker_thirst_vision",
-[15] = "modifier_slardar_amplify_damage",
-[16] = "modifier_item_dustofappearance",
+[14] = "modifier_bounty_hunter_track",
+[15] = "modifier_bloodseeker_thirst_vision",
+[16] = "modifier_slardar_amplify_damage",
+[17] = "modifier_item_dustofappearance"
 
 
  }
@@ -144,7 +145,7 @@ function AutoDust.FindTarget(me, item)
 end
 --NegativeModifiers
 function AutoDust.CheckForModifiers(target)
-	 for i=0,11 do
+	 for i=0,12 do
 		if NPC.HasModifier(target, AutoDust.Modifiers[i]) then
 			return false
 		end
@@ -154,7 +155,7 @@ function AutoDust.CheckForModifiers(target)
 end
 --PositiveModifiers
 function AutoDust.CheckForPositiveModifiers(target)
-	 for i=13,16 do
+	 for i=14,17 do
 		if NPC.HasModifier(target, AutoDust.Modifiers[i]) then
 			return false
 		end
