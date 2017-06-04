@@ -213,11 +213,21 @@ function GUI.OnMenuOptionChange(option, oldValue, newValue)
 	end
 end
 
-function KeyLog()
+function CheckKeys()
+	local current_key = ""
+	local down_type = 0
+	GUI.CurrentKey = ""
+	
 	for i = 5, 40 do
+		if Input.IsKeyDown(i) then
+			local alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+			current_key = string.sub(alphabet, i - 4, i - 4)
+		end
 		if Input.IsKeyDownOnce(i) then
 			local alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-			GUI.CurrentKey = string.sub(alphabet, i - 4, i - 4)
+			current_key = string.sub(alphabet, i - 4, i - 4)
+			down_type = 1
+			GUI.CurrentKey = current_key
 		end
 	end
 	
@@ -228,20 +238,10 @@ function KeyLog()
 	if Input.IsKeyDownOnce(71) then
 		GUI.CurrentKey = "backspace"
 	end
-end
-
-function CheckKeys()
-	local current_key = ""
-	for i = 5, 40 do
-		if Input.IsKeyDown(i) then
-			local alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-			current_key = string.sub(alphabet, i - 4, i - 4)
-		end
-	end
-
+	
 	if current_key ~= "" then
 		for k, v in pairs(GUI.CallBackKey) do
-			if current_key == GUI.Data[v["itemcode"]] then
+			if current_key == GUI.Data[v["itemcode"]] and v["type"] == down_type then
 				GUI.Items[k]["items"][v["order"]]["callback"]()
 			end
 		end
@@ -391,6 +391,11 @@ function GUI.AddMenuItem(menucode, itemcode, name, control, ...)
 			GUI.CallBackKey[menucode]["order"] = order
 			GUI.CallBackKey[menucode]["itemcode"] = itemcode
 			GUI.Items[menucode]["items"][order]["callback"] = select(2, ...)
+		end
+		if select(3, ...) == nil then
+			GUI.CallBackKey[menucode]["type"] = 0
+		else
+			GUI.CallBackKey[menucode]["type"] = select(3, ...)
 		end
 		if temp_data ~= nil and temp_data ~= "" then GUI.Set(itemcode, temp_data) end
 		
@@ -827,7 +832,6 @@ function DrawMenuItem(value, x, y, size_x, size_y, name, click, key)
 						if GUI.SelectedHero ~= "" and GUI.TextValues[GUI.SelectedLanguage]["back"] == name then
 							GUI.TempSelectedMenu = ":about"
 							GUI.SelectedHero = ""
-							-- GUI.SelectedCategory = 1
 						else
 							GUI.TempSelectedMenu = key
 						end
@@ -1122,7 +1126,6 @@ function DrawTextBox(inpos, click, x, y, size_x, size_y, value)
 	Renderer.SetDrawColor(255, 255, 255, 255)
 	if	inpos
 	then 
-		KeyLog()
 		if GUI.CurrentKey ~= "" then
 			if GUI.Get(key) == nil then GUI.Set(key, "") end
 		
@@ -1190,7 +1193,6 @@ function DrawKeyBox(click, x, y, size_x, size_y, value)
 	local inpos = Input.IsCursorInRect(x, y, offset_x + size_x, size_y)
 	if	inpos
 	then 
-		KeyLog()
 		if GUI.CurrentKey ~= "" then
 			if GUI.Get(key) == nil then GUI.Set(key, "") end
 		
@@ -1511,7 +1513,7 @@ GUI.HeroesList["npc_dota_hero_zuus"] = "Zeus"
 -----------------------------------------------------------------------------------------------------------
 function GUI.Set(key, value)
 	if type(value) ~= "table" then
-		Config.WriteString("GUI", key, value)
+		Config.WriteString("GUI", key, "~" .. value .. "~")
 	else
 		local s = tableToString(value)
 		Config.WriteString("GUI", key, s)
@@ -1522,7 +1524,14 @@ end
 function GUI.Get(key, type)
     type = type or 0
 	if type == 0 then
-		return Config.ReadString("GUI", key, nil)
+		local t = Config.ReadString("GUI", key, nil)
+		if	string.sub(t,1,1) == "~" 
+			and string.sub(t, -1) == "~"
+		then
+			return string.sub(t,2,string.len(t) - 1)
+		else
+			return t
+		end
 	else
 		return stringToTable(Config.ReadString("GUI", key, nil))
 	end
@@ -1570,6 +1579,8 @@ function val_to_str ( v )
       return "'" .. v .. "'"
     end
     return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
+  elseif type(v) == "number" then
+	return v
   else
     return "table" == type( v ) and tostr( v ) or
       tostr( v )

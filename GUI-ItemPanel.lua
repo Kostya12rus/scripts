@@ -12,6 +12,10 @@ ItemPanel.Locale = {
 	["size"] = {
 		["english"] = "Size",
 		["russian"] = "Размер"
+	},
+	["cd"] = {
+		["english"] = "Show item cooldown",
+		["russian"] = "Показывать время перезарядки предмета"
 	}
 }
 
@@ -202,9 +206,10 @@ function ItemPanel.OnDraw()
 	if not GUI.Exist(ItemPanel.Identity) then
 		GUI.Initialize(ItemPanel.Identity, GUI.Category.General, ItemPanel.Locale["name"], ItemPanel.Locale["desc"], "paroxysm")
 		GUI.AddMenuItem(ItemPanel.Identity, ItemPanel.Identity .. "size", ItemPanel.Locale["size"], GUI.MenuType.Slider, 16, 64, 24)
-		
+		GUI.AddMenuItem(ItemPanel.Identity, ItemPanel.Identity .. "cd", ItemPanel.Locale["cd"], GUI.MenuType.CheckBox, 0)
+
 		if (locx == "" or locx == nil) then GUI.Set(ItemPanel.Identity .. "locx", 10) locx = 10 end
-		if (locy == "" or locy == nil) then GUI.Set(ItemPanel.Identity .. "locy", 150) locy = 150 Log.Write("150") end
+		if (locy == "" or locy == nil) then GUI.Set(ItemPanel.Identity .. "locy", 150) locy = 150 end
 	end
 
 	if ItemPanel.OnAir then 
@@ -230,9 +235,11 @@ function ItemPanel.OnDraw()
 		if not NPC.IsIllusion(hero) and Entity.IsHero(hero) and not Entity.IsSameTeam(myHero, hero) then
 			ypos = ypos + size + 5
 			xpos = defx + locx + 5
+			local item_array = {}
 			for k, v in pairs(ItemPanel.items) do
 				if NPC.HasItem(hero, k, true) then
 					local tempName = k
+					local item = NPC.GetItem(hero, k, true)
 					tempName = tempName:gsub("item_", "")
 					local imageHandle = ItemPanel.ItemIcons[tempName]
 					if imageHandle == nil then
@@ -240,6 +247,16 @@ function ItemPanel.OnDraw()
 						ItemPanel.ItemIcons[tempName] = imageHandle
 					end
 					Renderer.DrawImage(imageHandle, xpos, ypos, size + 8, size)
+					local cd = math.ceil(Ability.GetCooldown(item))
+					local iscd = GUI.IsEnabled(ItemPanel.Identity .. "cd")
+					if Item.GetCurrentCharges(item) > 0 or (cd > 0 and iscd) then
+						Renderer.SetDrawColor(0, 0, 0, 200)
+						Renderer.DrawFilledRect(xpos, ypos, size + 8, size)
+						Renderer.SetDrawColor(255, 255, 255, 255)
+						local d = Item.GetCurrentCharges(item)
+						if cd > 0 and iscd then d = cd end
+						Renderer.DrawTextCentered(GUI.Font.ContentBold, xpos + math.ceil((size + 8) / 2), ypos + math.ceil(size / 2), d, true)
+					end
 					xpos = xpos + size + 10
 				end
 			end
