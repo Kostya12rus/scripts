@@ -4,10 +4,16 @@ TechiesHUD.optionTotal = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHU
 
 TechiesHUD.optionDetonate = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Auto mines", "Auto detonate remote mines")
 
-TechiesHUD.optionLegitDetonate = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Auto mines mode", "Standart or legit")
+TechiesHUD.optionLegitDetonate = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Auto mines mode", "Standart(needful) or legit(all)")
 
 Menu.SetValueName(TechiesHUD.optionLegitDetonate, 1, "legit")
 Menu.SetValueName(TechiesHUD.optionLegitDetonate, 0, "standart")
+
+TechiesHUD.optionFDFailSwitch = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Focused Detonate FailSwitch", "Focused Detonate Will not detonate mines if they do not cause damage. For forced detonate, use Alt + Focused Detonate")
+TechiesHUD.optionFDFailSwitchMode = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Focused Detonate mode", "Standart(needful) or legit(all)")
+
+Menu.SetValueName(TechiesHUD.optionFDFailSwitchMode, 1, "legit")
+Menu.SetValueName(TechiesHUD.optionFDFailSwitchMode, 0, "standart")
 
 TechiesHUD.optionDelay = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Delay detonate ms", "Waiting some time before detonate in ms", 0, 3000, 50)
 
@@ -369,35 +375,35 @@ function TechiesHUD.OnUpdate()
 					end
 				end -- calc sum damage
 
-				if Menu.IsEnabled(TechiesHUD.optionForce) then -- auto force stuff
-					if force ~= nil then
-						if hero_time[i] == 1 and forced_time ~= 0 and GameRules.GetGameTime() - forced_time > 1 then
-							hero_time[i] = 0
-							forced_time = 0
-						end
-						if NPC.IsPositionInRange(myHero, UnitPos, 1000, 0)
-						and force_remote_sum_damage * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit) and GameRules.GetGameTime() - forc_time > 0.5 then
-							if force_direction[i] == nil or force_direction[i] == 0 then
-								force_direction[i] = GameRules.GetGameTime()
-							elseif Ability.GetCooldownTimeLeft(force) == 0 and GameRules.GetGameTime() - force_direction[i] > Config.ReadInt("TechiesHUD", "Force Stuff delay", 500) / 1000 then
-								Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET, Unit, Vector(0, 0, 0), force, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero, 0, 0)
-								forc_time = GameRules.GetGameTime()
-								hero_time[i] =  1
-								forced_time = GameRules.GetGameTime()
+				if Menu.IsEnabled(TechiesHUD.optionDetonate) then -- auto detonate
+					if Menu.IsEnabled(TechiesHUD.optionForce) then -- auto force stuff
+						if force ~= nil then
+							if hero_time[i] == 1 and forced_time ~= 0 and GameRules.GetGameTime() - forced_time > 1 then
+								hero_time[i] = 0
+								forced_time = 0
+							end
+							if NPC.IsPositionInRange(myHero, UnitPos, 1000, 0)
+							and force_remote_sum_damage * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit) and GameRules.GetGameTime() - forc_time > 0.5 then
+								if force_direction[i] == nil or force_direction[i] == 0 then
+									force_direction[i] = GameRules.GetGameTime()
+								elseif Ability.GetCooldownTimeLeft(force) == 0 and GameRules.GetGameTime() - force_direction[i] > Config.ReadInt("TechiesHUD", "Force Stuff delay", 500) / 1000 then
+									Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET, Unit, Vector(0, 0, 0), force, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero, 0, 0)
+									forc_time = GameRules.GetGameTime()
+									hero_time[i] =  1
+									forced_time = GameRules.GetGameTime()
+									force_direction[i] = 0
+								end
+							else
 								force_direction[i] = 0
 							end
-						else
-							force_direction[i] = 0
 						end
-					end
-				end -- auto force stuff
+					end -- auto force stuff
 
-				if Menu.IsEnabled(TechiesHUD.optionDetonate) then -- auto detonate
 					if remote_sum_damage * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit) then
 						if hero_time[i] == 0 then
 							hero_time[i] = GameRules.GetGameTime()
 						end
-						local remote_need_damage = Entity.GetHealth(Unit) + NPC.GetHealthRegen(npc) * 0.3
+						local remote_need_damage = Entity.GetHealth(Unit) + NPC.GetHealthRegen(Unit) * 0.3
 						if GameRules.GetGameTime() - check_detonate > 0.5 and (hero_time[i] ~= 0) and (GameRules.GetGameTime() - hero_time[i] > Menu.GetValue(TechiesHUD.optionDelay) / 1000) then
 							for j = 0, NPCs.Count() do
 								local Unit2 = NPCs.Get(j)
@@ -427,13 +433,42 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
     if not Menu.IsEnabled(TechiesHUD.optionTotal) then return true end
 	if not Menu.IsEnabled(TechiesHUD.optionStack) then return true end
 
-	if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION then return true end
+	if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION and orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO then return true end
     if not orders.ability then return true end
-    if not orders.npc then return true end
 
 	if Ability.GetName(orders.ability) == "techies_suicide" then
 		cast_pos = orders.position
 		return true
+	end
+
+	if Menu.GetValue(TechiesHUD.optionFDFailSwitch) == 1 and Ability.GetName(orders.ability) == "techies_focused_detonate" then
+		if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) then
+			Player.PrepareUnitOrders(orders.player, Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION, orders.target, Input.GetWorldCursorPos(), orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
+			return false
+		end
+		local hp = {}
+		for i = 0, NPCs.Count() do
+			local Unit = NPCs.Get(i)
+			local UnitPos = Entity.GetAbsOrigin(Unit)
+			if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
+			and NPC.IsPositionInRange(Unit, orders.position, 700, 0)
+			then
+				local num_enemy = 0
+				for j, v in pairs(NPC.GetHeroesInRadius(Unit, 425, Enum.TeamType.TEAM_ENEMY)) do
+					if hp[Entity.GetIndex(v)] == nil then
+						hp[Entity.GetIndex(v)] = Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3
+					end
+					if hp[Entity.GetIndex(v)] > 0 or Menu.GetValue(TechiesHUD.optionFDFailSwitchMode) == 1 then
+						hp[Entity.GetIndex(v)] = hp[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(v)
+						num_enemy = num_enemy + 1
+					end
+				end
+				if num_enemy ~= 0 then
+					Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, 0, Vector(0, 0, 0), NPC.GetAbilityByIndex(Unit, 0), Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, Unit, 0, 0)
+				end
+			end
+		end
+		return false
 	end
 
 	if Ability.GetName(orders.ability) ~= "techies_remote_mines"
