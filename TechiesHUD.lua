@@ -6,6 +6,10 @@ TechiesHUD.optionDetonate = Menu.AddOption({ "Hero Specific", "Techies", "Techie
 
 TechiesHUD.optionLegitDetonate = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Auto mines mode", "Standart(needful) or legit(all)")
 
+TechiesHUD.optionAutoPlant = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action", "AutoPlant" }, "Auto plant mines", "Automatically plant mines in the places indicated by you. ") --Use the button Set position and a shift to create several positions. Use the simple key Set position that would clear all positions
+TechiesHUD.optionAutoPlantKey = Menu.AddKeyOption({ "Hero Specific", "Techies", "TechiesHUD", "Action", "AutoPlant" }, "Set position", Enum.ButtonCode.KEY_T)
+TechiesHUD.optionAutoPlantNumMines = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action", "AutoPlant" }, "Number of mines", "Number of mines for planting", 1, 100)
+
 Menu.SetValueName(TechiesHUD.optionLegitDetonate, 1, "legit")
 Menu.SetValueName(TechiesHUD.optionLegitDetonate, 0, "standart")
 
@@ -70,7 +74,6 @@ local mines_time = {}
 local mines_damage = {}
 local hero_time = {}
 local hero_rotate_time = {}
-local check_detonate = {}
 local forc_time = 0
 local forced_time = 0
 local force_direction = {}
@@ -78,14 +81,14 @@ local cast_pos = {}
 local remote_pos_draw = {}
 local mines_num = {}
 local check_detonate = 0
-
+local spot_for_plant = {}
+local plant_time = 0
 function TechiesHUD.OnGameStart()
 	size_x, size_y = Renderer.GetScreenSize()
 	mines_time = {}
 	mines_damage = {}
 	hero_time = {}
 	hero_rotate_time = {}
-	check_detonate = {}
 	forc_time = 0
 	forced_time = 0
 	force_direction = {}
@@ -93,6 +96,8 @@ function TechiesHUD.OnGameStart()
 	remote_pos_draw = {}
 	mines_num = {}
 	check_detonate = 0
+	spot_for_plant = {}
+	plant_time = 0
 end
 
 function TechiesHUD.OnEntityDestroy(ent)
@@ -164,7 +169,17 @@ function TechiesHUD.OnDraw()
 		Renderer.SetDrawColor(255, 255, 255, 255)
 		DrawCircle(cast_pos, 400)
 	end
-	
+
+	if Menu.GetValue(TechiesHUD.optionAutoPlant) == 1 then
+		for i, spot in pairs(spot_for_plant) do
+			local x, y, visible = Renderer.WorldToScreen(spot.position)
+			if visible then
+				Renderer.SetDrawColor(255, 255, 255, 255)
+				DrawCircle(spot.position, 200)
+			end
+		end
+	end
+
 	remote_pos_draw = {}
 	mines_num = {}
 	for i = 0, NPCs.Count() do
@@ -238,7 +253,7 @@ function TechiesHUD.OnDraw()
 							local num_mines = 0
 							for j = 0, NPCs.Count() do
 								local Unit2 = NPCs.Get(j)
-								if NPC.IsPositionInRange(Unit2, UnitPos, 425, Enum.TeamType.TEAM_FRIEND)
+								if NPC.IsPositionInRange(Unit2, UnitPos, 200, Enum.TeamType.TEAM_FRIEND)
 								and NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil
 								then
 									num_mines = num_mines + 1
@@ -337,6 +352,54 @@ function TechiesHUD.OnUpdate()
 	local remote_damage = Ability.GetLevelSpecialValueFor(remote, "damage")
 	local force = NPC.GetItem(myHero, "item_force_staff", 1)
 
+	if Menu.GetValue(TechiesHUD.optionAutoPlant) == 1 then
+		if not Input.IsInputCaptured() then
+			if Menu.IsKeyDownOnce(TechiesHUD.optionAutoPlantKey) then
+				if Input.IsKeyDown(Enum.ButtonCode.KEY_LSHIFT) then
+					Log.Write("cheShift")
+					local spot = {}
+					spot.position = Input.GetWorldCursorPos()
+					spot.num_mines = 0
+					table.insert(spot_for_plant, spot)
+				else
+					Log.Write("che")
+					spot_for_plant = {}
+				end
+			end
+		end
+
+		for i, spot in pairs(spot_for_plant) do
+			spot.num_mines = 0
+			for j = 0, NPCs.Count() do
+				local Unit2 = NPCs.Get(j)
+				if NPC.IsPositionInRange(Unit2, spot.position, 200, Enum.TeamType.TEAM_FRIEND)
+				and NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil
+				then
+					spot.num_mines = spot.num_mines + 1
+				end
+			end
+		end
+		--Log.Write(GameRules.GetGameTime() - plant_time)
+		if remote ~= nil and Ability.GetLevel(remote) ~= 0 and Ability.GetCooldownTimeLeft(remote) == 0 and not Ability.IsInAbilityPhase(remote) and GameRules.GetGameTime() - plant_time > 2 then
+			local step = 0
+			for i, spot in pairs(spot_for_plant) do
+				if spot.num_mines < Menu.GetValue(TechiesHUD.optionAutoPlantNumMines) and step == 0 then
+					if (Entity.GetAbsOrigin(myHero) - spot.position):Length() < Ability.GetCastRange(remote) then
+						Ability.CastPosition(remote, spot.position, 0)
+						plant_time = GameRules.GetGameTime()
+						step = 1
+					else
+						if not Input.IsKeyDown(Enum.ButtonCode.KEY_LSHIFT) then
+							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, nil, spot.position, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, nil, 0, 1)
+							plant_time = GameRules.GetGameTime() - 1.9
+							step = 1
+						end
+					end
+				end
+			end
+		end
+	end
+
 	for i = 0, NPCs.Count() do
 		local Unit = NPCs.Get(i)
 		local UnitPos = Entity.GetAbsOrigin(Unit)
@@ -431,7 +494,6 @@ end
 
 function TechiesHUD.OnPrepareUnitOrders(orders)
     if not Menu.IsEnabled(TechiesHUD.optionTotal) then return true end
-	if not Menu.IsEnabled(TechiesHUD.optionStack) then return true end
 
 	if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION and orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO then return true end
     if not orders.ability then return true end
@@ -471,25 +533,26 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 		return false
 	end
 
-	if Ability.GetName(orders.ability) ~= "techies_remote_mines"
-	and Ability.GetName(orders.ability) ~= "techies_land_mines"
-	and Ability.GetName(orders.ability) ~= "techies_stasis_trap"
-	then return true end
+	if Menu.IsEnabled(TechiesHUD.optionStack) then
+		if Ability.GetName(orders.ability) ~= "techies_remote_mines"
+		and Ability.GetName(orders.ability) ~= "techies_land_mines"
+		and Ability.GetName(orders.ability) ~= "techies_stasis_trap"
+		then return true end
 
-	for i = 0, NPCs.Count() do
-		local Unit = NPCs.Get(i)
-		local UnitPos = Entity.GetAbsOrigin(Unit)
-		if ((NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
-		or NPC.GetModifier(Unit, "modifier_techies_land_mine") ~= nil
-		or NPC.GetModifier(Unit, "modifier_techies_stasis_trap") ~= nil)
-		and Entity.IsAlive(Unit)
-		and NPC.IsPositionInRange(Unit, orders.position, Menu.GetValue(TechiesHUD.optionStackRange), 0))
-		then
-			Player.PrepareUnitOrders(orders.player, orders.order, orders.target, UnitPos, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
-			return false
+		for i = 0, NPCs.Count() do
+			local Unit = NPCs.Get(i)
+			local UnitPos = Entity.GetAbsOrigin(Unit)
+			if ((NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
+			or NPC.GetModifier(Unit, "modifier_techies_land_mine") ~= nil
+			or NPC.GetModifier(Unit, "modifier_techies_stasis_trap") ~= nil)
+			and Entity.IsAlive(Unit)
+			and NPC.IsPositionInRange(Unit, orders.position, Menu.GetValue(TechiesHUD.optionStackRange), 0))
+			then
+				Player.PrepareUnitOrders(orders.player, orders.order, orders.target, UnitPos, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
+				return false
+			end
 		end
 	end
-
     return true
 end
 

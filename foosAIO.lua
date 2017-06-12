@@ -1,5 +1,5 @@
 -- foosAIO.lua
--- Version: 0.37b
+-- Version: beta.0.43.c
 -- Author: foo0oo
 -- Release Date: 2017/5/03
 
@@ -8,7 +8,9 @@ local fooAllInOne = {}
 	-- general Menu
 fooAllInOne.optionEnable = Menu.AddOption({ "Utility","foos AllInOne" }, "Enabled", "Helpers helper")
 fooAllInOne.optionComboKey = Menu.AddKeyOption({ "Utility","foos AllInOne" }, "Combo Key", Enum.ButtonCode.KEY_SPACE)
-fooAllInOne.optionDebugEnable = Menu.AddOption({ "Utility","foos AllInOne" }, "Debug", "shoulb be off, just for developers")
+fooAllInOne.optionDebugEnable = Menu.AddOption({ "Utility","foos AllInOne" }, "Debug", "should be off, just for developers")
+fooAllInOne.optionWorldToMinimapOffsetX = Menu.AddOption({ "Utility","foos AllInOne", "WorldToMinimap" }, "X-Offset", "Adjustment variable for World-to-minimap renderer", -30, 30, 1)
+fooAllInOne.optionWorldToMinimapOffsetY = Menu.AddOption({ "Utility","foos AllInOne", "WorldToMinimap" }, "Y-Offset", "Adjustment variable for World-to-minimap renderer", -30, 30, 1)
 	-- killsteal Menu
 fooAllInOne.optionKillStealEnable = Menu.AddOption({ "Utility","foos AllInOne", "Auto Kill Steal" }, "Enabled", "uses skill nukes to kill enemy (only nukes, no disable abilities)")
 fooAllInOne.optionKillStealInvoker = Menu.AddOption({ "Utility","foos AllInOne", "Auto Kill Steal", "Invoker" }, "Auto Sunstrike KillSteal", "tries to kill steal MOVING enemys")
@@ -99,6 +101,19 @@ fooAllInOne.optionHeroPuckPanicDirection = Menu.AddOption({ "Utility","foos AllI
 fooAllInOne.optionHeroPuckComboAltKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "Hero Scripts", "Puck" }, "1.3 Puck Alt Key", Enum.ButtonCode.KEY_LCONTROL)
 fooAllInOne.optionHeroPuckDefend = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Puck" }, "2.2 Auto defend", "auto use waning rift when enemy jumps you")
 fooAllInOne.optionHeroPuckOrbInit = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Puck" }, "1.2 Orb Initiation", "will initiate with orb, if no blink dagger; will jaunt to orb, if target is hit")
+fooAllInOne.optionHeroProphet = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Natures Prophet" }, "Prophet Helper", "Lane Pusher with Treants")
+fooAllInOne.optionHeroProphetToggleKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "Hero Scripts", "Natures Prophet" }, "Toggle Key", Enum.ButtonCode.KEY_P)
+fooAllInOne.optionProphetDrawToggle = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Natures Prophet", "Drawings" }, "1. Draw Toggle Notification", "")
+fooAllInOne.optionProphetDrawKS = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Natures Prophet", "Drawings" }, "2. Draw KS Notification", "will show you, if an enemy is below 20% hp")
+fooAllInOne.optionProphetDrawKSminimap = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Natures Prophet", "Drawings" }, "3. Draw KS Target on Minimap", "draws a notification where an enemy below 20% HP is on minimap")
+fooAllInOne.optionHeroInvoker = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Invoker" }, "1. Invoker Combo", "basic Invoker combos")
+fooAllInOne.optionHeroInvokerAltKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "Hero Scripts", "Invoker" }, "1.2 Invoker Alt Key", Enum.ButtonCode.KEY_LCONTROL)
+fooAllInOne.optionHeroInvokerToggleKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "Hero Scripts", "Invoker", "2. Panel" }, "Panel toggle key", Enum.ButtonCode.KEY_P)
+fooAllInOne.optionHeroInvokerSkillshotStyle = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Invoker" }, "1.1 Skillshot Style", "use build-in prediction or use cursor position for tornado targeting", 0, 1, 1)
+fooAllInOne.optionHeroInvokerAutoInvoke = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Invoker", "2. Panel" }, "Auto Invoke", "hero will auto invoke required skills after selecting the combo")
+fooAllInOne.optionHeroInvokerPanelXPos = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Invoker", "2. Panel" }, "X-position", "", -200, 500, 10)
+fooAllInOne.optionHeroInvokerPanelYPos = Menu.AddOption({ "Utility","foos AllInOne", "Hero Scripts", "Invoker", "2. Panel" }, "Y-position", "", -500, 500, 10)
+
 	-- Menu set values
 Menu.SetValueName(fooAllInOne.optionItemVeil, 0, 'OFF')
 Menu.SetValueName(fooAllInOne.optionItemHex, 0, 'OFF')
@@ -163,6 +178,8 @@ Menu.SetValueName(fooAllInOne.optionHeroPuckJump, 0, 'blink target')
 Menu.SetValueName(fooAllInOne.optionHeroPuckJump, 1, 'blink best position')
 Menu.SetValueName(fooAllInOne.optionHeroPuckPanicDirection, 0, 'fountain')
 Menu.SetValueName(fooAllInOne.optionHeroPuckPanicDirection, 1, 'cursor')
+Menu.SetValueName(fooAllInOne.optionHeroInvokerSkillshotStyle, 0, 'prediction')
+Menu.SetValueName(fooAllInOne.optionHeroInvokerSkillshotStyle, 1, 'cursor')
 
 	-- global Variables
 fooAllInOne.lastCastTime = 0
@@ -184,8 +201,26 @@ fooAllInOne.GenericUpValue = false
 fooAllInOne.lastPosition = Vector(0, 0, 0)
 fooAllInOne.PuckOrbHitSim = {}
 fooAllInOne.PuckOrbCastTime = 0
+fooAllInOne.Toggler = false
+fooAllInOne.TogglerTime = 0
+fooAllInOne.PreInvoke = false
+fooAllInOne.PreInvokeSkills = {}
 fooAllInOne.IconPath = "resource/flash3/images/small_boost_icons/"
 fooAllInOne.font = Renderer.LoadFont("Tahoma", 25, Enum.FontWeight.EXTRABOLD)
+fooAllInOne.InvokerCachedIconsSnap = nil
+fooAllInOne.InvokerCachedIconsSunStrike = nil
+fooAllInOne.InvokerCachedIconsEmp = nil
+fooAllInOne.InvokerCachedIconsTornado = nil
+fooAllInOne.InvokerCachedIconsAlacrity = nil
+fooAllInOne.InvokerCachedIconsBlast = nil
+fooAllInOne.InvokerCachedIconsMeteor = nil
+fooAllInOne.InvokerCachedIconsIcewall = nil
+fooAllInOne.InvokerCachedIconsSpirit = nil
+fooAllInOne.InvokerCachedIconsAgha = nil
+fooAllInOne.InvokerCachedIconsRefresher = nil
+fooAllInOne.InvokerCachedIconsDagger = nil
+fooAllInOne.InvokerCachedIconsEul = nil
+fooAllInOne.InvokerComboSelector = 0
 	-- global Tables
 fooAllInOne.LinkensBreakerItemOrder = {}
 fooAllInOne.ItemCastOrder = {}
@@ -203,6 +238,7 @@ fooAllInOne.invokerInvokeOrder =
 		invoker_ice_wall = { 0, 0, 2 },
 		invoker_forge_spirit = { 0, 2, 2 }
 	}
+fooAllInOne.invokerTornadoLiftDuration = { 0.8, 1.1, 1.4, 1.7, 2.0, 2.3, 2.6, 2.9 }
 fooAllInOne.AbilityList = {
 { "npc_dota_hero_abaddon", "abaddon_death_coil", "nuke", "target" , "target_damage" },
 { "npc_dota_hero_abaddon", "abaddon_frostmourne", "utility", "0" , "0" },
@@ -794,16 +830,48 @@ function fooAllInOne.ResetGlobalVariables()
 	fooAllInOne.lastPosition = Vector(0, 0, 0)
 	fooAllInOne.PuckOrbHitSim = {}
 	fooAllInOne.PuckOrbCastTime = 0
+	fooAllInOne.Toggler = false
+	fooAllInOne.TogglerTime = 0
+	fooAllInOne.PreInvoke = false
+	fooAllInOne.PreInvokeSkills = {}
+	fooAllInOne.InvokerCachedIconsSnap = nil
+	fooAllInOne.InvokerCachedIconsSunStrike = nil
+	fooAllInOne.InvokerCachedIconsEmp = nil
+	fooAllInOne.InvokerCachedIconsTornado = nil
+	fooAllInOne.InvokerCachedIconsAlacrity = nil
+	fooAllInOne.InvokerCachedIconsBlast = nil
+	fooAllInOne.InvokerCachedIconsMeteor = nil
+	fooAllInOne.InvokerCachedIconsIcewall = nil
+	fooAllInOne.InvokerCachedIconsSpirit = nil
+	fooAllInOne.InvokerCachedIconsAgha = nil
+	fooAllInOne.InvokerCachedIconsRefresher = nil
+	fooAllInOne.InvokerCachedIconsDagger = nil
+	fooAllInOne.InvokerCachedIconsEul = nil
+	fooAllInOne.InvokerComboSelector = 0
 	fooAllInOne.LinkensBreakerItemOrder = {}
 	fooAllInOne.ItemCastOrder = {}
 	fooAllInOne.rotationTable = {}
 
 end
 
+function fooAllInOne.OnGameStart()
+	
+	fooAllInOne.ResetGlobalVariables()
+
+end
+
+function fooAllInOne.OnGameEnd()
+	
+	fooAllInOne.ResetGlobalVariables()
+
+end
+	
+
 -- main callback
 function fooAllInOne.OnUpdate()
 	if not Menu.IsEnabled(fooAllInOne.optionEnable) then return end
 	if not GameRules.GetGameState() == 5 then return end
+	if Input.IsInputCaptured() then return end
 	local myHero = Heroes.GetLocal()
 		if not myHero then return end
 		if not Entity.IsAlive(myHero) then return end
@@ -857,14 +925,23 @@ function fooAllInOne.OnUpdate()
 			elseif NPC.GetUnitName(myHero) == "npc_dota_hero_puck" then
 				fooAllInOne.PuckCombo(myHero, enemy)
 			end
+			
 		
 		else fooAllInOne.itemUsage(myHero, enemy)
 
 		end
 	end
 
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then
+		fooAllInOne.InvokerCombo(myHero, enemy)
+	end
+
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_arc_warden" then
 		fooAllInOne.ArcWardenCombo(myHero, enemy)
+	end
+
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_furion" then
+		fooAllInOne.ProphetHelper(myHero, enemy)
 	end
 	
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_clinkz" then
@@ -895,7 +972,11 @@ function fooAllInOne.OnUpdate()
 		else
 			fooAllInOne.AutoNukeKillSteal(myHero)
 		end
-	end	
+	end
+
+--	for n in pairs(fooAllInOne) do 
+--		Log.Write(tostring(n))
+--	end	
 
 --	local test = 0
 --	for i = 1, Heroes.Count() do
@@ -971,10 +1052,6 @@ end
 
 function fooAllInOne.OnDraw()
 
-	if not Engine.IsInGame() then
-		fooAllInOne.ResetGlobalVariables()
-	end
-
 	local myHero = Heroes.GetLocal()
         	if not myHero then return end
 		if not Entity.IsAlive(myHero) then return end
@@ -989,6 +1066,19 @@ function fooAllInOne.OnDraw()
 		if Menu.IsEnabled(fooAllInOne.optionHeroArcWardenDraw) then
 			fooAllInOne.drawArcWardenIndicators(fooAllInOne.ArcWardenEntity)
 		end
+	end
+
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_furion" then
+		if Menu.IsEnabled(fooAllInOne.optionProphetDrawToggle) then
+			fooAllInOne.DrawProphetHelperSwitch()
+		end
+		if Menu.IsEnabled(fooAllInOne.optionProphetDrawKS) or Menu.IsEnabled(fooAllInOne.optionProphetDrawKSminimap) then
+			fooAllInOne.DrawProphetAwareness(myHero)
+		end
+	end
+
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then
+		fooAllInOne.InvokerDraw(myHero)
 	end
 
 end
@@ -1576,31 +1666,45 @@ end
 
 function fooAllInOne.GenericAttackIssuer2(attackType, target, position, npc)
 	
-	if not npc then return end
+	if not npc or (npc and not Entity.IsAlive(npc)) then return end
 	if not target and not position then return end
-	if os.clock() - fooAllInOne.lastAttackTime2 < 0.1 then return end
 
-	if attackType == "Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET" then
-		if target ~= nil then
-			if target ~= fooAllInOne.LastTarget then
-				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET, target, Vector(0, 0, 0), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, npc)
-				fooAllInOne.LastTarget = target
-			--	return
-			end
+	if fooAllInOne[tostring(npc)] ~= nil then
+		if os.clock() - fooAllInOne[tostring(npc)] < 1.0 then
+			return
 		end
 	end
 
+	if attackType == "Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET" and Menu.IsKeyDown(fooAllInOne.optionComboKey) then
+		if target ~= nil then
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET, target, Vector(0, 0, 0), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, npc)
+			fooAllInOne.Debugger(GameRules.GetGameTime(), npc, "attack", "DOTA_UNIT_ORDER_ATTACK_TARGET")
+			fooAllInOne[tostring(npc)] = os.clock()
+			return
+		end
+	end
 
-	if target ~= nil then
-		if target == fooAllInOne.LastTarget then
-			if not NPC.IsAttacking(npc) then
-				fooAllInOne.LastTarget = nil
-				fooAllInOne.lastAttackTime2 = os.clock()
+	if attackType == "Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE" then
+		if position ~= nil then
+			if #NPC.GetUnitsInRadius(npc, NPC.GetAttackRange(npc)+50, 1) < 1 then
+				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE, target, position, ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, npc)
+				fooAllInOne.Debugger(GameRules.GetGameTime(), npc, "attackMove", "DOTA_UNIT_ORDER_ATTACK_MOVE")
+				fooAllInOne[tostring(npc)] = os.clock()
 				return
 			end
 		end
 	end
 
+	if attackType == "Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION" then
+		if position ~= nil then
+			if not NPC.IsRunning(npc) then
+				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, position, ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, npc)
+				fooAllInOne.Debugger(GameRules.GetGameTime(), npc, "move", "DOTA_UNIT_ORDER_MOVE_TO_POSITION")
+				fooAllInOne[tostring(npc)] = os.clock()
+				return
+			end
+		end
+	end
 end
 
 function fooAllInOne.GenericLanePusher(npc)
@@ -1710,12 +1814,64 @@ function fooAllInOne.ForceBlink(myHero, enemy, range)
 	end
 end
 
+function fooAllInOne:WorldToMiniMap(pos, screenWidth, screenHeight)
+	local screenH = screenHeight
+	local screenW = screenWidth 
+	local MapLeft = -8000
+	local MapTop = 7350
+	local MapRight = 7500
+	local MapBottom = -7200
+	local mapWidth = math.abs(MapLeft - MapRight)
+	local mapHeight = math.abs(MapBottom - MapTop)
+	
+
+	local x = pos:GetX() - MapLeft
+	local y = pos:GetY() - MapBottom
+
+	local dx, dy, px, py
+	if self.Round(screenW / screenH, 1) >= 1.7 then
+
+		dx = 272 / 1920 * screenW
+		dy = 261 / 1080 * screenH
+		px = 11 / 1920 * screenW
+		py = 11 / 1080 * screenH
+	elseif self.Round(screenW / screenH, 1) >= 1.5 then
+
+		dx = 267 / 1680 * screenW
+		dy = 252 / 1050 * screenH
+		px = 10 / 1680 * screenW
+		py = 11 / 1050 * screenH
+	else
+		dx = 255 / 1280 * screenW
+		dy = 229 / 1024 * screenH
+		px = 6 / 1280 * screenW
+		py = 9 / 1024 * screenH
+	end
+	local minimapMapScaleX = dx / mapWidth
+	local minimapMapScaleY = dy / mapHeight
+
+	local scaledX = math.min(math.max(x * minimapMapScaleX, 0), dx)
+	local scaledY = math.min(math.max(y * minimapMapScaleY, 0), dy)
+
+	local screenX = px + scaledX
+	local screenY = screenH - scaledY - py
+
+	return Vector(math.floor(screenX - 20 + Menu.GetValue(fooAllInOne.optionWorldToMinimapOffsetX)), math.floor(screenY - 12 + Menu.GetValue(fooAllInOne.optionWorldToMinimapOffsetY)), 0)
+end
+
+function fooAllInOne.Round(num, numDecimalPlaces)
+	local mult = 10^(numDecimalPlaces or 0)
+	return math.floor(num * mult + 0.5) / mult
+end
+
 -- item usage functions
 function fooAllInOne.itemUsage(myHero, enemy)
 
 	if not Menu.IsEnabled(fooAllInOne.optionItemEnable) then return end
 	if (os.clock() - fooAllInOne.lastItemTick) < fooAllInOne.itemDelay then return end
 	if fooAllInOne.ItemCastStop then return end
+	if NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return end
+	if NPC.IsStunned(myHero) then return end
 
 	if Menu.GetValue(fooAllInOne.optionItemStyle) == 0 then 
 		fooAllInOne.itemUsageNoOrder(myHero, enemy)
@@ -3287,10 +3443,7 @@ function fooAllInOne.VisageCombo(myHero, enemy)
 						if not (NPC.HasModifier(npc, "modifier_visage_summonfamiliars_timer") or NPC.HasModifier(npc, "modifier_rooted")) then
 							if Entity.IsAlive(npc) then
 								if npc ~= nil then
-									local stoneForm = NPC.GetAbilityByIndex(npc, 0)
-									if (os.clock() - fooAllInOne.ControlledUnitCastTime) >= (Ability.GetLevelSpecialValueForFloat(stoneForm, "stun_duration") - 0.1 - NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING)) then
-										fooAllInOne.VisageFamiliarControl(myHero, enemy, npc, false, soulAssumption, soulMaxStacks, soulStackCounter, stoneForm, myMana)
-									end
+									table.insert(familiarEntityTable, npc)
 								end
 							end
 						end
@@ -3299,6 +3452,27 @@ function fooAllInOne.VisageCombo(myHero, enemy)
 			end
 		end
 	end
+
+	if next(familiarEntityTable) ~= nil then
+
+		for _, familiarAttack in ipairs(familiarEntityTable) do
+			if Menu.IsKeyDown(fooAllInOne.optionComboKey) then
+				if not NPC.IsEntityInRange(familiarAttack, enemy, NPC.GetAttackRange(familiarAttack)+50) then
+					fooAllInOne.GenericAttackIssuer2("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, familiarAttack)
+				end
+			end
+		end
+
+		for _, familiarStun in ipairs(familiarEntityTable) do
+			if Menu.IsKeyDown(fooAllInOne.optionComboKey) then
+				if (os.clock() - fooAllInOne.ControlledUnitCastTime) >= (Ability.GetLevelSpecialValueForFloat(NPC.GetAbilityByIndex(familiarStun, 0), "stun_duration") - 0.1 - NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING)) then
+					fooAllInOne.VisageFamiliarControl(myHero, enemy, familiarStun, soulAssumption, soulMaxStacks, soulStackCounter, NPC.GetAbilityByIndex(familiarStun, 0), myMana)
+					break
+				end
+			end
+		end
+	end
+	
 
 	fooAllInOne.itemUsage(myHero, enemy)
 
@@ -3330,7 +3504,7 @@ function fooAllInOne.VisageCombo(myHero, enemy)
 	end
 end
 
-function fooAllInOne.VisageFamiliarControl(myHero, enemy, familiarEntity, attackIssued, soulAssumption, soulMaxStacks, soulStackCounter, stoneForm, myMana)
+function fooAllInOne.VisageFamiliarControl(myHero, enemy, familiarEntity, soulAssumption, soulMaxStacks, soulStackCounter, stoneForm, myMana)
 
 	if not familiarEntity then return end
 	if not Entity.IsAlive(familiarEntity) then return end
@@ -3342,11 +3516,7 @@ function fooAllInOne.VisageFamiliarControl(myHero, enemy, familiarEntity, attack
 		end
 
 	if Menu.IsKeyDown(fooAllInOne.optionComboKey) and Entity.GetHealth(enemy) > 0 and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
-		if not attackIssued then
-			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET, enemy, Vector(0,0,0), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, familiarEntity)
-			attackIssued = true
-		end
-		if attackIssued and NPC.IsEntityInRange(familiarEntity, enemy, 300) then
+		if NPC.IsEntityInRange(familiarEntity, enemy, 300) then
 			if stoneForm and Ability.IsReady(stoneForm) then
 				if familiarDMGcharges < Menu.GetValue(fooAllInOne.optionHeroVisageDMGStacks) then
 					if not NPC.HasModifier(enemy, "modifier_rooted") or not NPC.HasModifier(enemy, "modifier_sheepstick_debuff") then
@@ -4497,8 +4667,1273 @@ function fooAllInOne.PuckDefend(myHero, enemy, myMana, waningRift)
 	end
 end
 
+function fooAllInOne.ProphetHelper(myHero, enemy)
+
+	if not Menu.IsEnabled(fooAllInOne.optionHeroProphet) then return end
+	
+	if Menu.IsKeyDownOnce(fooAllInOne.optionHeroProphetToggleKey) then
+		fooAllInOne.Toggler = not fooAllInOne.Toggler
+		fooAllInOne.TogglerTime = os.clock()
+	end
+
+	local treantEntities = {}
+	if fooAllInOne.Toggler then
+		for i = 1, NPCs.Count() do 
+		local npc = NPCs.Get(i)
+			if Entity.IsSameTeam(myHero, npc) and Entity.IsAlive(npc) then
+				if npc ~= myHero then
+					if Entity.GetOwner(npc) == myHero then
+						if npc ~= nil then
+							if NPC.GetUnitName(npc) == "npc_dota_furion_treant" then
+								if npc ~= nil then
+									fooAllInOne.GenericAttackIssuer2("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE", nil, fooAllInOne.GenericLanePusher(npc), npc)
+								end
+							end	
+						end
+					end
+				end
+			end
+		end
+	end
+			
+end
+
+function fooAllInOne.DrawProphetHelperSwitch()
+
+	local w, h = Renderer.GetScreenSize()
+	Renderer.SetDrawColor(255, 0, 255)
+
+	if os.clock() - fooAllInOne.TogglerTime < 3 then
+		if fooAllInOne.Toggler then
+			Renderer.DrawTextCentered(fooAllInOne.font, w / 2, h / 2 + 300, "LANE PUSH ON", 1)
+		else 
+			Renderer.DrawTextCentered(fooAllInOne.font, w / 2, h / 2 + 300, "LANE PUSH OFF", 1)
+		end
+	end
+
+end
+
+function fooAllInOne.DrawProphetAwareness(myHero)
+
+	local w, h = Renderer.GetScreenSize()
+	Renderer.SetDrawColor(255, 255, 255)
+
+	for i = 1, Heroes.Count() do 
+	local hero = Heroes.Get(i)
+		if not Entity.IsSameTeam(myHero, hero) and Entity.IsAlive(hero) then
+			if not Entity.IsDormant(hero) and not NPC.IsIllusion(hero) then
+				if Entity.GetHealth(hero) / Entity.GetMaxHealth(hero) <= 0.20 then
+					Renderer.DrawTextCentered(fooAllInOne.font, w / 2, h / 2 + 300, "POSSIBLE PORT TARGET", 1)
+					fooAllInOne.DrawProphetAwarenessMinimap(hero)
+				end
+			end
+		end
+	end
+end
+
+function fooAllInOne.DrawProphetAwarenessMinimap(hero)
+
+	if not Menu.IsEnabled(fooAllInOne.optionProphetDrawKSminimap) then return end
+
+	local w, h = Renderer.GetScreenSize()
+	local targetPos = Entity.GetAbsOrigin(hero)
+	Renderer.SetDrawColor(255, 255, 255)
+
+	position = fooAllInOne:WorldToMiniMap(targetPos, w, h)
+	Renderer.DrawText(fooAllInOne.font, position:GetX(), position:GetY(), "X", 1)
+
+end
+
+function fooAllInOne.InvokerCombo(myHero, enemy)
+
+	if not Menu.IsEnabled(fooAllInOne.optionHeroInvoker) then return end
+	if NPC.IsStunned(myHero) then return end
+
+	local sunStrike = NPC.GetAbility(myHero, "invoker_sun_strike")
+	local emp = NPC.GetAbility(myHero, "invoker_emp")
+	local tornado = NPC.GetAbility(myHero, "invoker_tornado")
+	local ghostWalk = NPC.GetAbility(myHero, "invoker_ghost_walk")
+	local deafeningBlast = NPC.GetAbility(myHero, "invoker_deafening_blast")
+	local chaosMeteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
+	local iceWall = NPC.GetAbility(myHero, "invoker_ice_wall")
+	local coldSnap = NPC.GetAbility(myHero, "invoker_cold_snap")
+	local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
+	local forgeSpirit = NPC.GetAbility(myHero, "invoker_forge_spirit")
+
+	local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+	local myMana = NPC.GetMana(myHero)
+	local aghanims = NPC.GetItem(myHero, "item_ultimate_scepter", true)
+	local refresher = NPC.GetItem(myHero, "item_refresher", true)
+	local blink = NPC.GetItem(myHero, "item_blink", true)
+	local euls = NPC.GetItem(myHero, "item_cyclone", true)
+
+	if not Menu.IsKeyDown(fooAllInOne.optionHeroInvokerAltKey) then
+		fooAllInOne.itemUsage(myHero, enemy)
+	end
+
+	if Menu.IsKeyDown(fooAllInOne.optionHeroInvokerAltKey) and Menu.IsKeyDown(fooAllInOne.optionComboKey) then
+		if fooAllInOne.InvokerComboSelector == 1 then
+			fooAllInOne.PreInvokeSkills = {{coldSnap, forgeSpirit}}
+		elseif fooAllInOne.InvokerComboSelector == 2 then
+			fooAllInOne.PreInvokeSkills = {{emp, tornado}}
+		elseif fooAllInOne.InvokerComboSelector == 3 then
+			fooAllInOne.PreInvokeSkills = {{chaosMeteor, tornado}}
+		elseif fooAllInOne.InvokerComboSelector == 4 then
+			fooAllInOne.PreInvokeSkills = {{chaosMeteor, sunStrike}}
+		elseif fooAllInOne.InvokerComboSelector == 5 then
+			fooAllInOne.PreInvokeSkills = {{emp, tornado}}
+		elseif fooAllInOne.InvokerComboSelector == 6 then
+			fooAllInOne.PreInvokeSkills = {{sunStrike, tornado}}
+		elseif fooAllInOne.InvokerComboSelector == 7 then
+			fooAllInOne.PreInvokeSkills = {{sunStrike, tornado}}
+		elseif fooAllInOne.InvokerComboSelector == 8 then
+			fooAllInOne.PreInvokeSkills = {{emp, tornado}}
+		elseif fooAllInOne.InvokerComboSelector == 9 then
+			fooAllInOne.PreInvokeSkills = {{deafeningBlast, chaosMeteor}}
+		end
+	end
+	
+	if next(fooAllInOne.PreInvokeSkills) ~= nil then
+		fooAllInOne.InvokerPreInvoke(myHero, myMana, invoke)
+	end
+
+	if enemy then
+		if Menu.IsKeyDown(fooAllInOne.optionComboKey) and not Menu.IsKeyDown(fooAllInOne.optionHeroInvokerAltKey) and Entity.GetHealth(enemy) > 0 and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+			if fooAllInOne.InvokerComboSelector == 0 then
+				return
+			elseif fooAllInOne.InvokerComboSelector == 1 then
+				fooAllInOne.InvokerComboCSAlacritySpirit(myHero, myMana, enemy, coldSnap, alacrity, forgeSpirit, blink, invoke)
+			elseif fooAllInOne.InvokerComboSelector == 2 then
+				fooAllInOne.InvokerComboTornadoEmpIcewall(myHero, myMana, enemy, tornado, emp, iceWall, coldSnap, blink, invoke)
+			elseif fooAllInOne.InvokerComboSelector == 3 then
+				fooAllInOne.InvokerComboTornadoMeteorBlast(myHero, myMana, enemy, tornado, chaosMeteor, deafeningBlast, blink, invoke)
+			elseif fooAllInOne.InvokerComboSelector == 4 then
+				fooAllInOne.InvokerComboEulsSunstrikeMeteorBlast(myHero, myMana, enemy, sunStrike, chaosMeteor, deafeningBlast, blink, euls, invoke)
+			elseif fooAllInOne.InvokerComboSelector == 5 then
+				fooAllInOne.InvokerComboAghaTornadoEmpMeteorBlast(myHero, myMana, enemy, tornado, emp, chaosMeteor, deafeningBlast, aghanims, blink, invoke)
+			elseif fooAllInOne.InvokerComboSelector == 6 then
+				fooAllInOne.InvokerComboAghaTornadoSunstrikeMeteorBlast(myHero, myMana, enemy, tornado, sunStrike, chaosMeteor, deafeningBlast, aghanims, blink, invoke)
+			elseif fooAllInOne.InvokerComboSelector == 7 then
+				fooAllInOne.InvokerComboRefresherAghaTornadoSunstrikeMeteorBlast(myHero, myMana, enemy, tornado, sunStrike, chaosMeteor, deafeningBlast, aghanims, refresher, blink, invoke)
+			elseif fooAllInOne.InvokerComboSelector == 8 then
+				fooAllInOne.InvokerComboRefresherAghaTornadoEmpMeteorBlast(myHero, myMana, enemy, tornado, emp, chaosMeteor, deafeningBlast, aghanims, refresher, blink, invoke)
+			elseif fooAllInOne.InvokerComboSelector == 9 then
+				fooAllInOne.InvokerComboRefresherAghaBlastMeteorSunstrike(myHero, myMana, enemy, deafeningBlast, chaosMeteor, sunStrike, blink, aghanims, refresher, invoke)
+			end
+		end
+	end
+end
+
+function fooAllInOne.InvokerComboCSAlacritySpirit(myHero, myMana, enemy, coldSnap, alacrity, forgeSpirit, blink, invoke)
+
+	if fooAllInOne.InvokerInvokedChecker(myHero, "invoker_cold_snap", "invoker_forge_spirit") and invoke and Ability.IsReady(invoke) then
+		if not NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(myHero)) then
+			if blink and Ability.IsReady(blink) then
+				if NPC.IsEntityInRange(myHero, enemy, 1150 + 400) then
+					Ability.CastPosition(blink, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(400))
+					return
+				else
+					if fooAllInOne.SleepReady(0.1) then
+						Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, Entity.GetAbsOrigin(enemy), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, npc, queue, showEffects)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+			if not blink or (blink and not Ability.IsReady(blink)) then
+				fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+				return
+			end
+		else
+			if fooAllInOne.SleepReady(0.05) and coldSnap and Ability.IsCastable(coldSnap, myMana) then
+				Ability.CastTarget(coldSnap, enemy)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+			if fooAllInOne.SleepReady(0.05) and forgeSpirit and Ability.IsCastable(forgeSpirit, myMana) then
+				Ability.CastNoTarget(forgeSpirit)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+			if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+				fooAllInOne.invokerInvokeAbility(myHero, alacrity)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+	end
+	if not Ability.IsReady(coldSnap) and not Ability.IsReady(forgeSpirit) then
+		if fooAllInOne.SleepReady(0.05) and alacrity and Ability.IsCastable(alacrity, myMana) then
+			Ability.CastTarget(alacrity, myHero)
+			fooAllInOne.lastTick = os.clock()
+			return
+		end
+	end
+
+	fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+	return
+	
+end
+
+
+function fooAllInOne.InvokerComboTornadoEmpIcewall(myHero, myMana, enemy, tornado, emp, iceWall, coldSnap, blink, invoke)
+
+	if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(emp), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
+		if not NPC.IsEntityInRange(myHero, enemy, 1000) then
+			if blink and Ability.IsReady(blink) then
+				if NPC.IsEntityInRange(myHero, enemy, 1150 + NPC.GetAttackRange(myHero)) then
+					Ability.CastPosition(blink, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(600))
+					return
+				else
+					if fooAllInOne.SleepReady(0.1) then
+						Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, Entity.GetAbsOrigin(enemy), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, npc, queue, showEffects)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+			if not blink or (blink and not Ability.IsReady(blink)) then
+				fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+				return
+			end
+		else
+			local travelTime = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000
+			local tornadoTiming = fooAllInOne.invokerTornadoLiftDuration[Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0))] + travelTime
+			if tornadoTiming < 2.9 then
+				if fooAllInOne.SleepReady(0.05) and emp and Ability.IsCastable(emp, myMana) then
+					if NPC.IsEntityInRange(myHero, enemy, 925) then
+						Ability.CastPosition(emp, Entity.GetAbsOrigin(enemy))
+						fooAllInOne.lastTick = os.clock()
+						fooAllInOne.lastCastTime = os.clock()
+						return
+					else
+						Ability.CastPosition(emp, Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(925))
+						fooAllInOne.lastTick = os.clock()
+						fooAllInOne.lastCastTime = os.clock()
+						return
+					end
+				end
+				if not Ability.IsReady(emp) then
+					if fooAllInOne.SleepReady(0.05) and tornado and Ability.IsCastable(tornado, myMana) then
+						if os.clock() - fooAllInOne.lastCastTime <= 2.9 - tornadoTiming then
+							fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+							return
+						else	
+							if Menu.GetValue(fooAllInOne.optionHeroInvokerSkillshotStyle) == 0 then
+								local tornadoPrediction = Ability.GetCastPoint(tornado) + (Entity.GetAbsOrigin(enemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
+								Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, enemy, tornadoPrediction))
+								fooAllInOne.lastTick = os.clock()
+								return
+							else
+								Ability.CastPosition(tornado, Input.GetWorldCursorPos())
+								fooAllInOne.lastTick = os.clock()
+								return
+							end
+						end
+					end
+				end
+			else
+				if fooAllInOne.SleepReady(0.05) and tornado and Ability.IsCastable(tornado, myMana) then
+					if Menu.GetValue(fooAllInOne.optionHeroInvokerSkillshotStyle) == 0 then
+						local tornadoPrediction = Ability.GetCastPoint(tornado) + (Entity.GetAbsOrigin(enemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
+						Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, enemy, tornadoPrediction))
+						fooAllInOne.lastTick = os.clock()
+						fooAllInOne.lastCastTime = os.clock()
+						return
+					else
+						Ability.CastPosition(tornado, Input.GetWorldCursorPos())
+						fooAllInOne.lastTick = os.clock()
+						fooAllInOne.lastCastTime = os.clock()
+						return
+					end
+				end
+				if fooAllInOne.SleepReady(0.05) and emp and Ability.IsCastable(emp, myMana) then
+					local travelTime = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000
+					local tornadoTiming = fooAllInOne.invokerTornadoLiftDuration[Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0))] + travelTime
+					if os.clock() - fooAllInOne.lastCastTime > tornadoTiming - 2.9 + 0.05 then
+						if NPC.IsEntityInRange(myHero, enemy, 925) then
+							Ability.CastPosition(emp, Entity.GetAbsOrigin(enemy))
+							fooAllInOne.lastTick = os.clock()
+							return
+						else
+							Ability.CastPosition(emp, Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(925))
+							fooAllInOne.lastTick = os.clock()
+							return
+						end
+					end
+				end
+			end
+			if not Ability.IsReady(emp) and not Ability.IsReady(tornado) and NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+				local distance = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D()
+				local timeToTarget = distance / NPC.GetMoveSpeed(myHero)
+				if GameRules.GetGameTime() + timeToTarget <= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) then
+					if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+						fooAllInOne.invokerInvokeAbility(myHero, iceWall)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				else
+					if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+						fooAllInOne.invokerInvokeAbility(myHero, coldSnap)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+		end
+	end
+
+	if not Ability.IsReady(tornado) and not Ability.IsReady(emp) then
+		if fooAllInOne.InvokerIsAbilityInvoked(myHero, iceWall) then
+			if fooAllInOne.SleepReady(0.05) and iceWall and Ability.IsCastable(iceWall, myMana) then
+				if not NPC.IsEntityInRange(myHero, enemy, 250) then
+					fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(249), myHero)
+				else
+					Ability.CastNoTarget(iceWall)
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+			end
+		end
+		if fooAllInOne.InvokerIsAbilityInvoked(myHero, coldSnap) then
+			if fooAllInOne.SleepReady(0.05) and coldSnap and Ability.IsCastable(coldSnap, myMana) then
+				if NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+					if not NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(myHero)) then
+						fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(NPC.GetAttackRange(myHero) - 25), myHero)
+					end
+				else
+					Ability.CastTarget(coldSnap, enemy)
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+			end
+		end
+
+		if not NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+			fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+		end
+	end		
+end
+
+function fooAllInOne.InvokerComboTornadoMeteorBlast(myHero, myMana, enemy, tornado, chaosMeteor, deafeningBlast, blink, invoke)
+
+	if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(chaosMeteor), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
+		if not NPC.IsEntityInRange(myHero, enemy, 950) then
+			if blink and Ability.IsReady(blink) then
+				if NPC.IsEntityInRange(myHero, enemy, 1150 + NPC.GetAttackRange(myHero)) then
+					Ability.CastPosition(blink, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(600))
+					return
+				else
+					if fooAllInOne.SleepReady(0.1) then
+						Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, Entity.GetAbsOrigin(enemy), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, npc, queue, showEffects)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+			if not blink or (blink and not Ability.IsReady(blink)) then
+				fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+				return
+			end
+		else
+			local travelTime = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000
+			local tornadoTiming = fooAllInOne.invokerTornadoLiftDuration[Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0))] + travelTime
+			if tornadoTiming < 1.3 then
+				if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+					Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
+					fooAllInOne.lastTick = os.clock()
+					fooAllInOne.lastCastTime = os.clock()
+					return
+				end
+				if not Ability.IsReady(chaosMeteor) then
+					if fooAllInOne.SleepReady(0.05) and tornado and Ability.IsCastable(tornado, myMana) then
+						if os.clock() - fooAllInOne.lastCastTime <= 1.3 - tornadoTiming then
+							fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+							return
+						else	
+							if Menu.GetValue(fooAllInOne.optionHeroInvokerSkillshotStyle) == 0 then
+								local tornadoPrediction = Ability.GetCastPoint(tornado) + (Entity.GetAbsOrigin(enemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
+								Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, enemy, tornadoPrediction))
+								fooAllInOne.lastTick = os.clock()
+								return
+							else
+								Ability.CastPosition(tornado, Input.GetWorldCursorPos())
+								fooAllInOne.lastTick = os.clock()
+								return
+							end
+						end
+					end
+				end
+			else
+				if fooAllInOne.SleepReady(0.05) and tornado and Ability.IsCastable(tornado, myMana) then
+					if Menu.GetValue(fooAllInOne.optionHeroInvokerSkillshotStyle) == 0 then
+						local tornadoPrediction = Ability.GetCastPoint(tornado) + (Entity.GetAbsOrigin(enemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
+						Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, enemy, tornadoPrediction))
+						fooAllInOne.lastTick = os.clock()
+						return
+					else
+						Ability.CastPosition(tornado, Input.GetWorldCursorPos())
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+				if NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+					local distance = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() - NPC.GetAttackRange(myHero)
+						if distance < 0 then
+							distance = 0
+						end
+					local timeToPosition = distance / NPC.GetMoveSpeed(myHero)
+					if GameRules.GetGameTime() + timeToPosition < Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+						if not NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(myHero)) then
+							fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(NPC.GetAttackRange(myHero)), myHero)	
+						else
+							if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+								if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+									Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
+									fooAllInOne.lastTick = os.clock()
+									return
+								end
+							end
+						end
+					else
+						if not NPC.IsEntityInRange(myHero, enemy, 950) then
+							fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(950), myHero)	
+						else
+							if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+								if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+									Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
+									fooAllInOne.lastTick = os.clock()
+									return
+								end
+							end
+						end
+					end
+
+					if fooAllInOne.SleepReady(0.05) and not Ability.IsReady(chaosMeteor) and not Ability.IsReady(tornado) and invoke and Ability.IsCastable(invoke, myMana) then
+						fooAllInOne.invokerInvokeAbility(myHero, deafeningBlast)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+		end
+	end
+
+	if not Ability.IsReady(tornado) and not Ability.IsReady(chaosMeteor) then
+		if fooAllInOne.SleepReady(0.05) and deafeningBlast and Ability.IsCastable(deafeningBlast, myMana) and fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+			if NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+				local blastTime = ((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1100) - 0.25
+				if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - blastTime - NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) then
+					Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+			else
+				Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+			
+		end
+
+		if not NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+			fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+		end
+
+	end		
+end
+
+function fooAllInOne.InvokerComboEulsSunstrikeMeteorBlast(myHero, myMana, enemy, sunStrike, chaosMeteor, deafeningBlast, blink, euls, invoke)
+
+	if not euls then return end
+
+	if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(chaosMeteor), Ability.GetName(sunStrike)) and invoke and Ability.IsReady(invoke) then
+		if not NPC.IsEntityInRange(myHero, enemy, 550) then
+			if blink and Ability.IsReady(blink) then
+				if NPC.IsEntityInRange(myHero, enemy, 1150 + NPC.GetAttackRange(myHero)) then
+					Ability.CastPosition(blink, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(500))
+					return
+				else
+					if fooAllInOne.SleepReady(0.1) then
+						Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, Entity.GetAbsOrigin(enemy), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, npc, queue, showEffects)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+			if not blink or (blink and not Ability.IsReady(blink)) then
+				fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy), myHero)
+				return
+			end
+		else
+			if fooAllInOne.SleepReady(0.05) and euls and Ability.IsCastable(euls, myMana) then
+				Ability.CastTarget(euls, enemy)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+			if NPC.HasModifier(enemy, "modifier_eul_cyclone") then
+				if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_eul_cyclone")) - 1.7 then
+					if fooAllInOne.SleepReady(0.05) and sunStrike and Ability.IsCastable(sunStrike, myMana) then
+						Ability.CastPosition(sunStrike, Entity.GetAbsOrigin(enemy))
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+			if fooAllInOne.SleepReady(0.05) and not Ability.IsReady(sunStrike) and invoke and Ability.IsCastable(invoke, myMana) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+				fooAllInOne.invokerInvokeAbility(myHero, deafeningBlast)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+	end
+	if fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) and not Ability.IsReady(sunStrike) then
+		if NPC.HasModifier(enemy, "modifier_eul_cyclone") then
+			if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_eul_cyclone")) - 1.3 then
+				if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+					Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+			end
+			local blastTime = ((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1100) - 0.25
+			if not Ability.IsReady(chaosMeteor) then
+				if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_eul_cyclone")) - blastTime - NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) then
+					Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+			end
+		end
+
+		if not NPC.HasModifier(enemy, "modifier_eul_cyclone") then
+			fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+		end
+	end
+
+end
+
+
+function fooAllInOne.InvokerComboAghaTornadoEmpMeteorBlast(myHero, myMana, enemy, tornado, emp, chaosMeteor, deafeningBlast, aghanims, blink, invoke)
+
+	if not aghanims then return end
+
+	if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(emp), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
+		if not NPC.IsEntityInRange(myHero, enemy, 1000) then
+			if blink and Ability.IsReady(blink) then
+				if NPC.IsEntityInRange(myHero, enemy, 1150 + NPC.GetAttackRange(myHero)) then
+					Ability.CastPosition(blink, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(600))
+					return
+				else
+					if fooAllInOne.SleepReady(0.1) then
+						Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, Entity.GetAbsOrigin(enemy), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, npc, queue, showEffects)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+			if not blink or (blink and not Ability.IsReady(blink)) then
+				fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+				return
+			end
+		else
+			if fooAllInOne.SleepReady(0.05) and tornado and Ability.IsCastable(tornado, myMana) then
+				if Menu.GetValue(fooAllInOne.optionHeroInvokerSkillshotStyle) == 0 then
+					local tornadoPrediction = Ability.GetCastPoint(tornado) + (Entity.GetAbsOrigin(enemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
+					Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, enemy, tornadoPrediction))
+					fooAllInOne.lastTick = os.clock()
+					fooAllInOne.lastCastTime = os.clock()
+					return
+				else
+					Ability.CastPosition(tornado, Input.GetWorldCursorPos())
+					fooAllInOne.lastTick = os.clock()
+					fooAllInOne.lastCastTime = os.clock()
+					return
+				end
+			end
+			if fooAllInOne.SleepReady(0.05) and emp and Ability.IsCastable(emp, myMana) then
+				local travelTime = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000
+				local tornadoTiming = fooAllInOne.invokerTornadoLiftDuration[Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0))] + travelTime
+				if os.clock() - fooAllInOne.lastCastTime > tornadoTiming - 2.9 + 0.05 then
+					if NPC.IsEntityInRange(myHero, enemy, 925) then
+						Ability.CastPosition(emp, Entity.GetAbsOrigin(enemy))
+						fooAllInOne.lastTick = os.clock()
+						return
+					else
+						Ability.CastPosition(emp, Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(925))
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+			if not Ability.IsReady(tornado) and not Ability.IsReady(emp) then
+				if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+					fooAllInOne.invokerInvokeAbility(myHero, chaosMeteor)
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+			end
+		end
+	end
+		
+	if NPC.HasModifier(enemy, "modifier_invoker_tornado") and fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(chaosMeteor), Ability.GetName(emp)) then
+		if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+			local distance = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() - NPC.GetAttackRange(myHero)
+				if distance < 0 then
+					distance = 0
+				end
+			local timeToPosition = distance / NPC.GetMoveSpeed(myHero)
+			if GameRules.GetGameTime() + timeToPosition < Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+				if not NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(myHero)) then
+					fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(NPC.GetAttackRange(myHero)), myHero)	
+				else
+					if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+						if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+							Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
+							fooAllInOne.lastTick = os.clock()
+							return
+						end
+					end
+				end
+			else
+				if not NPC.IsEntityInRange(myHero, enemy, 950) then
+					fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(950), myHero)	
+				else
+					if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+						if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+							Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
+							fooAllInOne.lastTick = os.clock()
+							return
+						end
+					end
+				end
+			end
+		end			
+	end
+	
+	if not Ability.IsReady(chaosMeteor) then
+		if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+			fooAllInOne.invokerInvokeAbility(myHero, deafeningBlast)
+			fooAllInOne.lastTick = os.clock()
+			return
+		end
+		if fooAllInOne.SleepReady(0.05) and deafeningBlast and Ability.IsCastable(deafeningBlast, myMana) and fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+			if NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+				local blastTime = ((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1100) - 0.25
+				if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - blastTime - NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) then
+					Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+			end
+		end
+	end
+
+	if not NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+		fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+	end
+end
+
+function fooAllInOne.InvokerComboAghaTornadoSunstrikeMeteorBlast(myHero, myMana, enemy, tornado, sunStrike, chaosMeteor, deafeningBlast, aghanims, blink, invoke)
+
+	if not aghanims then return end
+
+	if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(sunStrike), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
+		if not NPC.IsEntityInRange(myHero, enemy, 1000) then
+			if blink and Ability.IsReady(blink) then
+				if NPC.IsEntityInRange(myHero, enemy, 1150 + NPC.GetAttackRange(myHero)) then
+					Ability.CastPosition(blink, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(600))
+					return
+				else
+					if fooAllInOne.SleepReady(0.1) then
+						Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, Entity.GetAbsOrigin(enemy), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, npc, queue, showEffects)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+			if not blink or (blink and not Ability.IsReady(blink)) then
+				fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+				return
+			end
+		else
+			if fooAllInOne.SleepReady(0.05) and tornado and Ability.IsCastable(tornado, myMana) then
+				if Menu.GetValue(fooAllInOne.optionHeroInvokerSkillshotStyle) == 0 then
+					local tornadoPrediction = Ability.GetCastPoint(tornado) + (Entity.GetAbsOrigin(enemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
+					Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, enemy, tornadoPrediction))
+					fooAllInOne.lastTick = os.clock()
+					return
+				else
+					Ability.CastPosition(tornado, Input.GetWorldCursorPos())
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+			end
+			if not Ability.IsReady(tornado) then
+				if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+					fooAllInOne.invokerInvokeAbility(myHero, chaosMeteor)
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+			end
+		end
+	end
+		
+	if NPC.HasModifier(enemy, "modifier_invoker_tornado") and fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(chaosMeteor), Ability.GetName(sunStrike)) then
+		if fooAllInOne.SleepReady(0.05) and sunStrike and Ability.IsCastable(sunStrike, myMana) then
+			local distance = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() - NPC.GetAttackRange(myHero)
+				if distance < 0 then
+					distance = 0
+				end
+			local timeToPosition = distance / NPC.GetMoveSpeed(myHero)
+			if GameRules.GetGameTime() + timeToPosition < Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.7 then
+				if not NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(myHero)) then
+					fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(NPC.GetAttackRange(myHero)), myHero)	
+				else
+					if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.7 then
+						if fooAllInOne.SleepReady(0.05) and sunStrike and Ability.IsCastable(sunStrike, myMana) then
+							Ability.CastPosition(sunStrike, Entity.GetAbsOrigin(enemy))
+							fooAllInOne.lastTick = os.clock()
+							return
+						end
+					end
+				end
+			else
+				if not NPC.IsEntityInRange(myHero, enemy, 950) then
+					fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(950), myHero)	
+				else
+					if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.7 then
+						if fooAllInOne.SleepReady(0.05) and sunStrike and Ability.IsCastable(sunStrike, myMana) then
+							Ability.CastPosition(sunStrike, Entity.GetAbsOrigin(enemy))
+							fooAllInOne.lastTick = os.clock()
+							return
+						end
+					end
+				end
+			end
+		end			
+		
+		if not Ability.IsReady(tornado) and not Ability.IsReady(sunStrike) then
+			if NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+				if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+					if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+						Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+		end
+	end
+
+	if not Ability.IsReady(chaosMeteor) then
+		if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+			fooAllInOne.invokerInvokeAbility(myHero, deafeningBlast)
+			fooAllInOne.lastTick = os.clock()
+			return
+		end
+		if fooAllInOne.SleepReady(0.05) and deafeningBlast and Ability.IsCastable(deafeningBlast, myMana) and fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+			if NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+				local blastTime = ((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1100) - 0.25
+				if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - blastTime - NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) then
+					Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+			end
+		end
+	end
+
+	if not NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+		fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+	end
+		
+end
+
+function fooAllInOne.InvokerComboRefresherAghaTornadoSunstrikeMeteorBlast(myHero, myMana, enemy, tornado, sunStrike, chaosMeteor, deafeningBlast, aghanims, refresher, blink, invoke)
+
+	if not aghanims then return end
+	if not refresher then return end
+
+	if Ability.IsReady(refresher) then
+		if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(sunStrike), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
+			if not NPC.IsEntityInRange(myHero, enemy, 1000) then
+				if blink and Ability.IsReady(blink) then
+					if NPC.IsEntityInRange(myHero, enemy, 1150 + NPC.GetAttackRange(myHero)) then
+						Ability.CastPosition(blink, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(600))
+						return
+					else
+						if fooAllInOne.SleepReady(0.1) then
+							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, Entity.GetAbsOrigin(enemy), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, npc, queue, showEffects)
+							fooAllInOne.lastTick = os.clock()
+							return
+						end
+					end
+				end
+				if not blink or (blink and not Ability.IsReady(blink)) then
+					fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+					return
+				end
+			else
+				if fooAllInOne.SleepReady(0.05) and tornado and Ability.IsCastable(tornado, myMana) then
+					if Menu.GetValue(fooAllInOne.optionHeroInvokerSkillshotStyle) == 0 then
+						local tornadoPrediction = Ability.GetCastPoint(tornado) + (Entity.GetAbsOrigin(enemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
+						Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, enemy, tornadoPrediction))
+						fooAllInOne.lastTick = os.clock()
+						return
+					else
+						Ability.CastPosition(tornado, Input.GetWorldCursorPos())
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+				if not Ability.IsReady(tornado) then
+					if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+						fooAllInOne.invokerInvokeAbility(myHero, chaosMeteor)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+		end
+		
+		if NPC.HasModifier(enemy, "modifier_invoker_tornado") and fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(chaosMeteor), Ability.GetName(sunStrike)) then
+			if fooAllInOne.SleepReady(0.05) and sunStrike and Ability.IsCastable(sunStrike, myMana) then
+				local distance = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() - NPC.GetAttackRange(myHero)
+					if distance < 0 then
+						distance = 0
+					end
+				local timeToPosition = distance / NPC.GetMoveSpeed(myHero)
+				if GameRules.GetGameTime() + timeToPosition < Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.7 then
+					if not NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(myHero)) then
+						fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(NPC.GetAttackRange(myHero)), myHero)	
+					else
+						if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.7 then
+							if fooAllInOne.SleepReady(0.05) and sunStrike and Ability.IsCastable(sunStrike, myMana) then
+								Ability.CastPosition(sunStrike, Entity.GetAbsOrigin(enemy))
+								fooAllInOne.lastTick = os.clock()
+								return
+							end
+						end
+					end
+				else
+					if not NPC.IsEntityInRange(myHero, enemy, 950) then
+						fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(950), myHero)	
+					else
+						if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.7 then
+							if fooAllInOne.SleepReady(0.05) and sunStrike and Ability.IsCastable(sunStrike, myMana) then
+								Ability.CastPosition(sunStrike, Entity.GetAbsOrigin(enemy))
+								fooAllInOne.lastTick = os.clock()
+								return
+							end
+						end
+					end
+				end
+			end			
+		
+			if not Ability.IsReady(tornado) and not Ability.IsReady(sunStrike) then
+				if NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+					if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+						if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+							Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
+							fooAllInOne.lastTick = os.clock()
+							return
+						end
+					end
+				end
+			end
+		end
+		
+
+		if not Ability.IsReady(chaosMeteor) then
+			if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+				fooAllInOne.invokerInvokeAbility(myHero, deafeningBlast)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+			if fooAllInOne.SleepReady(0.05) and deafeningBlast and Ability.IsCastable(deafeningBlast, myMana) and fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+				if NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+					local blastTime = ((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1100) - 0.25
+					if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - blastTime - NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) then
+						Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+		end
+
+		if not Ability.IsReady(tornado) and not Ability.IsReady(sunStrike) and not Ability.IsReady(chaosMeteor) and not Ability.IsReady(deafeningBlast) then
+			if refresher and Ability.IsCastable(refresher, myMana) then
+				Ability.CastNoTarget(refresher)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+	end
+
+	if not Ability.IsReady(refresher) then
+		if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+			Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy))
+			fooAllInOne.lastTick = os.clock()
+			return
+		end
+		if not Ability.IsReady(chaosMeteor) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, sunStrike) then
+			if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+				fooAllInOne.invokerInvokeAbility(myHero, sunStrike)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+		if fooAllInOne.InvokerIsAbilityInvoked(myHero, sunStrike) then
+			if fooAllInOne.SleepReady(0.05) and sunStrike and Ability.IsCastable(sunStrike, myMana) then
+					Ability.CastPosition(sunStrike, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(300))
+					fooAllInOne.lastTick = os.clock()
+					return
+			end
+		end
+		if not Ability.IsReady(sunStrike) then
+			if fooAllInOne.SleepReady(0.05) and deafeningBlast and Ability.IsCastable(deafeningBlast, myMana) and fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+				Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+	end
+
+	if not NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+		fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+		return
+	end		
+end
+
+function fooAllInOne.InvokerComboRefresherAghaTornadoEmpMeteorBlast(myHero, myMana, enemy, tornado, emp, chaosMeteor, deafeningBlast, aghanims, refresher, blink, invoke)
+
+	if not aghanims then return end
+	if not refresher then return end
+
+	if Ability.IsReady(refresher) then
+		if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(emp), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
+			if not NPC.IsEntityInRange(myHero, enemy, 1000) then
+				if blink and Ability.IsReady(blink) then
+					if NPC.IsEntityInRange(myHero, enemy, 1150 + NPC.GetAttackRange(myHero)) then
+						Ability.CastPosition(blink, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(600))
+						return
+					else
+						if fooAllInOne.SleepReady(0.1) then
+							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, Entity.GetAbsOrigin(enemy), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, npc, queue, showEffects)
+							fooAllInOne.lastTick = os.clock()
+							return
+						end
+					end
+				end
+				if not blink or (blink and not Ability.IsReady(blink)) then
+					fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+					return
+				end
+			else
+				if fooAllInOne.SleepReady(0.05) and tornado and Ability.IsCastable(tornado, myMana) then
+					if Menu.GetValue(fooAllInOne.optionHeroInvokerSkillshotStyle) == 0 then
+						local tornadoPrediction = Ability.GetCastPoint(tornado) + (Entity.GetAbsOrigin(enemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
+						Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, enemy, tornadoPrediction))
+						fooAllInOne.lastTick = os.clock()
+						fooAllInOne.lastCastTime = os.clock()
+						return
+					else
+						Ability.CastPosition(tornado, Input.GetWorldCursorPos())
+						fooAllInOne.lastTick = os.clock()
+						fooAllInOne.lastCastTime = os.clock()
+						return
+					end
+				end
+				if fooAllInOne.SleepReady(0.05) and emp and Ability.IsCastable(emp, myMana) then
+					local travelTime = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000
+					local tornadoTiming = fooAllInOne.invokerTornadoLiftDuration[Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0))] + travelTime
+					if os.clock() - fooAllInOne.lastCastTime > tornadoTiming - 2.9 + 0.05 then
+						if NPC.IsEntityInRange(myHero, enemy, 925) then
+							Ability.CastPosition(emp, Entity.GetAbsOrigin(enemy))
+							fooAllInOne.lastTick = os.clock()
+							return
+						else
+							Ability.CastPosition(emp, Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(925))
+							fooAllInOne.lastTick = os.clock()
+							return
+						end
+					end
+				end
+				if not Ability.IsReady(tornado) and not Ability.IsReady(emp) then
+					if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+						fooAllInOne.invokerInvokeAbility(myHero, chaosMeteor)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+		end
+		
+		if NPC.HasModifier(enemy, "modifier_invoker_tornado") and fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(chaosMeteor), Ability.GetName(emp)) then
+			if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+				local distance = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() - NPC.GetAttackRange(myHero)
+					if distance < 0 then
+						distance = 0
+					end
+				local timeToPosition = distance / NPC.GetMoveSpeed(myHero)
+				if GameRules.GetGameTime() + timeToPosition < Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+					if not NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(myHero)) then
+						fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(NPC.GetAttackRange(myHero)), myHero)	
+					else
+						if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+							if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+								Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
+								fooAllInOne.lastTick = os.clock()
+								return
+							end
+						end
+					end
+				else
+					if not NPC.IsEntityInRange(myHero, enemy, 950) then
+						fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(950), myHero)	
+					else
+						if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+							if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+								Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
+								fooAllInOne.lastTick = os.clock()
+								return
+							end
+						end
+					end
+				end
+			end			
+		end
+		
+
+		if not Ability.IsReady(chaosMeteor) then
+			if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+				fooAllInOne.invokerInvokeAbility(myHero, deafeningBlast)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+			if fooAllInOne.SleepReady(0.05) and deafeningBlast and Ability.IsCastable(deafeningBlast, myMana) and fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+				if NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+					local blastTime = ((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1100) - 0.25
+					if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - blastTime - NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) then
+						Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+		end
+
+		if not Ability.IsReady(tornado) and not Ability.IsReady(emp) and not Ability.IsReady(chaosMeteor) and not Ability.IsReady(deafeningBlast) then
+			if refresher and Ability.IsCastable(refresher, myMana) then
+				Ability.CastNoTarget(refresher)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+	end
+
+	if not Ability.IsReady(refresher) and Ability.SecondsSinceLastUse(refresher) > 0 and Ability.SecondsSinceLastUse(refresher) < 3 then
+		if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+			Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy))
+			fooAllInOne.lastTick = os.clock()
+			return
+		end
+		if not Ability.IsReady(chaosMeteor) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, emp) then
+			if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+				fooAllInOne.invokerInvokeAbility(myHero, emp)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+		if fooAllInOne.InvokerIsAbilityInvoked(myHero, emp) then
+			if fooAllInOne.SleepReady(0.05) and emp and Ability.IsCastable(emp, myMana) then
+					Ability.CastPosition(emp, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(300))
+					fooAllInOne.lastTick = os.clock()
+					return
+			end
+		end
+		if not Ability.IsReady(emp) then
+			if fooAllInOne.SleepReady(0.05) and deafeningBlast and Ability.IsCastable(deafeningBlast, myMana) and fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+				Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+	end
+
+	if not NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+		fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+		return
+	end		
+end
+
+function fooAllInOne.InvokerComboRefresherAghaBlastMeteorSunstrike(myHero, myMana, enemy, deafeningBlast, chaosMeteor, sunStrike, blink, aghanims, refresher, invoke)
+
+	if not aghanims then return end
+	if not refresher then return end
+	if not blink then return end
+
+	if Ability.IsReady(refresher) then
+		if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(deafeningBlast), Ability.GetName(chaosMeteor)) and invoke and Ability.IsReady(invoke) then
+			if not NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(myHero)) then
+				if blink and Ability.IsReady(blink) then
+					if NPC.IsEntityInRange(myHero, enemy, 1150 + NPC.GetAttackRange(myHero)) then
+						Ability.CastPosition(blink, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(NPC.GetAttackRange(myHero)-50))
+						fooAllInOne.lastTick = os.clock()
+						return
+					else
+						fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy), myHero)
+						return
+					end
+				end
+			else
+				if fooAllInOne.SleepReady(0.05) and deafeningBlast and Ability.IsCastable(deafeningBlast, myMana) then
+					Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+				
+				if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+					Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy))
+					fooAllInOne.lastTick = os.clock()
+					return
+				end
+
+				if not Ability.IsReady(deafeningBlast) and not Ability.IsReady(chaosMeteor) then
+					if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+						fooAllInOne.invokerInvokeAbility(myHero, sunStrike)
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+		end
+		
+		if NPC.HasModifier(enemy, "modifier_invoker_deafening_blast_knockback") and fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(sunStrike), Ability.GetName(deafeningBlast)) then
+			if fooAllInOne.SleepReady(0.05) and sunStrike and Ability.IsCastable(sunStrike, myMana) then
+				Ability.CastPosition(sunStrike, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(300))
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+	
+		if not Ability.IsReady(deafeningBlast) and not Ability.IsReady(chaosMeteor) and not Ability.IsReady(sunStrike) then
+			if refresher and Ability.IsCastable(refresher, myMana) then
+				Ability.CastNoTarget(refresher)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+	end
+
+	if not Ability.IsReady(refresher) then
+		if fooAllInOne.SleepReady(0.05) and deafeningBlast and Ability.IsCastable(deafeningBlast, myMana) then
+			if not NPC.HasModifier(enemy, "modifier_invoker_deafening_blast_knockback") then
+				Ability.CastPosition(deafeningBlast, Entity.GetAbsOrigin(enemy))
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+		if not Ability.IsReady(deafeningBlast) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, chaosMeteor) then
+			if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
+				fooAllInOne.invokerInvokeAbility(myHero, chaosMeteor)
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+		if not Ability.IsReady(deafeningBlast) and fooAllInOne.InvokerIsAbilityInvoked(myHero, chaosMeteor) then
+			if fooAllInOne.SleepReady(0.05) and sunStrike and Ability.IsCastable(sunStrike, myMana) then
+				Ability.CastPosition(sunStrike, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(300))
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+		if not Ability.IsReady(sunStrike) then
+			if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) and fooAllInOne.InvokerIsAbilityInvoked(myHero, chaosMeteor) then
+				Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy))
+				fooAllInOne.lastTick = os.clock()
+				return
+			end
+		end
+	end
+
+	fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
+	return
+
+end
+
+
+function fooAllInOne.InvokerPreInvoke(myHero, myMana, invoke)
+
+	if os.clock() - fooAllInOne.lastTick < 0.5 then return end
+
+	if Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0)) < 1 or Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1)) < 1 or Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 2)) < 1 then
+		fooAllInOne.PreInvokeSkills = {}
+		return
+	end
+
+	local skill1
+	local skill2
+	for _, v in ipairs(fooAllInOne.PreInvokeSkills) do
+		if v then
+			skill1 = v[1]
+			skill2 = v[2]
+		end
+	end
+		
+	local invokeChecker = fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(skill1), Ability.GetName(skill2))
+
+	if invokeChecker then
+		fooAllInOne.PreInvokeSkills = {}
+		return
+	end
+
+	if next(fooAllInOne.PreInvokeSkills) == nil then return end
+
+	if Ability.GetName(NPC.GetAbilityByIndex(myHero, 3)) ~= Ability.GetName(skill2) then
+		if invoke and Ability.IsCastable(invoke, myMana) then
+			fooAllInOne.invokerInvokeAbility(myHero, skill2)
+			fooAllInOne.lastTick = os.clock()
+			return
+		end
+	end
+
+	if Ability.GetName(NPC.GetAbilityByIndex(myHero, 3)) == Ability.GetName(skill2) then
+		if invoke and Ability.IsCastable(invoke, myMana) then
+			fooAllInOne.invokerInvokeAbility(myHero, skill1)
+			fooAllInOne.lastTick = os.clock()
+			return
+		end
+	end
+end
+			
+function fooAllInOne.InvokerIsAbilityInvoked(myHero, skill)
+
+	for i = 3, 4 do
+		if Ability.GetName(NPC.GetAbilityByIndex(myHero, i)) == Ability.GetName(skill) then
+			return true
+		end
+	end
+	
+	return false
+
+end
+	
+
+function fooAllInOne.InvokerInvokedChecker(myHero, skill1, skill2)
+
+	if Ability.GetName(NPC.GetAbilityByIndex(myHero,3)) == skill1 and Ability.GetName(NPC.GetAbilityByIndex(myHero,4)) == skill2 then
+		return true
+	end
+	
+	return false
+
+end
 
 function fooAllInOne.invokerInvokeAbility(myHero, ability)
+
 	if not ability then return end
 
 	local skillName = Ability.GetName(ability)
@@ -4522,7 +5957,435 @@ function fooAllInOne.invokerInvokeAbility(myHero, ability)
 
 end
 
+function fooAllInOne.InvokerDraw(myHero)
 
+	if not Menu.IsEnabled(fooAllInOne.optionHeroInvoker) then return end
+
+	local w, h = Renderer.GetScreenSize()
+	Renderer.SetDrawColor(255, 255, 255)
+
+	local startX = w - 300 - Menu.GetValue(fooAllInOne.optionHeroInvokerPanelXPos)
+	local startY = 300 + Menu.GetValue(fooAllInOne.optionHeroInvokerPanelYPos)
+
+	local numberCombos = 9
+	local maxSkills = 6
+
+	if Menu.IsKeyDownOnce(fooAllInOne.optionHeroInvokerToggleKey) then
+		fooAllInOne.Toggler = not fooAllInOne.Toggler
+	end
+
+	if not fooAllInOne.Toggler then return end
+		
+	 -- black background
+	Renderer.SetDrawColor(0, 0, 0, 150)
+	Renderer.DrawFilledRect(startX, startY, (38 * maxSkills) + 4, (40 * numberCombos) + 10)
+
+	-- black border
+	Renderer.SetDrawColor(0, 0, 0, 255)
+	Renderer.DrawOutlineRect(startX, startY, (38 * maxSkills) + 4, (40 * numberCombos) + 10)
+
+	local hoveringOverCombo1 = Input.IsCursorInRect(startX+1, startY+1+40*0 + 0, (38 * maxSkills)+2 , 40)
+	local hoveringOverCombo2 = Input.IsCursorInRect(startX+1, startY+1+40*1 + 1, (38 * maxSkills)+2 , 40)
+	local hoveringOverCombo3 = Input.IsCursorInRect(startX+1, startY+1+40*2 + 2, (38 * maxSkills)+2 , 40)
+	local hoveringOverCombo4 = Input.IsCursorInRect(startX+1, startY+1+40*3 + 3, (38 * maxSkills)+2 , 40)
+	local hoveringOverCombo5 = Input.IsCursorInRect(startX+1, startY+1+40*4 + 4, (38 * maxSkills)+2 , 40)
+	local hoveringOverCombo6 = Input.IsCursorInRect(startX+1, startY+1+40*5 + 5, (38 * maxSkills)+2 , 40)
+	local hoveringOverCombo7 = Input.IsCursorInRect(startX+1, startY+1+40*6 + 6, (38 * maxSkills)+2 , 40)
+	local hoveringOverCombo8 = Input.IsCursorInRect(startX+1, startY+1+40*7 + 7, (38 * maxSkills)+2 , 40)
+	local hoveringOverCombo9 = Input.IsCursorInRect(startX+1, startY+1+40*8 + 8, (38 * maxSkills)+2 , 40)
+
+	local sunStrike = NPC.GetAbility(myHero, "invoker_sun_strike")
+	local emp = NPC.GetAbility(myHero, "invoker_emp")
+	local tornado = NPC.GetAbility(myHero, "invoker_tornado")
+	local deafeningBlast = NPC.GetAbility(myHero, "invoker_deafening_blast")
+	local chaosMeteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
+	local coldSnap = NPC.GetAbility(myHero, "invoker_cold_snap")
+	local forgeSpirit = NPC.GetAbility(myHero, "invoker_forge_spirit")
+
+	if hoveringOverCombo1 and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerAutoInvoke) then
+			if fooAllInOne.InvokerComboSelector ~= 1 then
+				fooAllInOne.PreInvokeSkills = {{coldSnap, forgeSpirit}}
+				fooAllInOne.InvokerComboSelector = 1
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		else
+			if fooAllInOne.InvokerComboSelector ~= 1 then
+				fooAllInOne.InvokerComboSelector = 1
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		end
+	elseif hoveringOverCombo2 and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerAutoInvoke) then
+			if fooAllInOne.InvokerComboSelector ~= 2 then
+				fooAllInOne.PreInvokeSkills = {{emp, tornado}}
+				fooAllInOne.InvokerComboSelector = 2
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		else
+			if fooAllInOne.InvokerComboSelector ~= 2 then
+				fooAllInOne.InvokerComboSelector = 2
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		end
+	elseif hoveringOverCombo3 and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerAutoInvoke) then
+			if fooAllInOne.InvokerComboSelector ~= 3 then
+				fooAllInOne.PreInvokeSkills = {{chaosMeteor, tornado}}
+				fooAllInOne.InvokerComboSelector = 3
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		else
+			if fooAllInOne.InvokerComboSelector ~= 3 then
+				fooAllInOne.InvokerComboSelector = 3
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		end
+	elseif hoveringOverCombo4 and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerAutoInvoke) then
+			if fooAllInOne.InvokerComboSelector ~= 4 then
+				fooAllInOne.PreInvokeSkills = {{chaosMeteor, sunStrike}}
+				fooAllInOne.InvokerComboSelector = 4
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		else
+			if fooAllInOne.InvokerComboSelector ~= 4 then
+				fooAllInOne.InvokerComboSelector = 4
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		end
+	elseif hoveringOverCombo5 and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerAutoInvoke) then
+			if fooAllInOne.InvokerComboSelector ~= 5 then
+				fooAllInOne.PreInvokeSkills = {{emp, tornado}}
+				fooAllInOne.InvokerComboSelector = 5
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		else
+			if fooAllInOne.InvokerComboSelector ~= 5 then
+				fooAllInOne.InvokerComboSelector = 5
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		end
+	elseif hoveringOverCombo6 and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerAutoInvoke) then
+			if fooAllInOne.InvokerComboSelector ~= 6 then
+				fooAllInOne.PreInvokeSkills = {{sunStrike, tornado}}
+				fooAllInOne.InvokerComboSelector = 6
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		else
+			if fooAllInOne.InvokerComboSelector ~= 6 then
+				fooAllInOne.InvokerComboSelector = 6
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		end
+	elseif hoveringOverCombo7 and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerAutoInvoke) then
+			if fooAllInOne.InvokerComboSelector ~= 7 then
+				fooAllInOne.PreInvokeSkills = {{sunStrike, tornado}}
+				fooAllInOne.InvokerComboSelector = 7
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		else
+			if fooAllInOne.InvokerComboSelector ~= 7 then
+				fooAllInOne.InvokerComboSelector = 7
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		end
+	elseif hoveringOverCombo8 and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerAutoInvoke) then
+			if fooAllInOne.InvokerComboSelector ~= 8 then
+				fooAllInOne.PreInvokeSkills = {{emp, tornado}}
+				fooAllInOne.InvokerComboSelector = 8
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		else
+			if fooAllInOne.InvokerComboSelector ~= 8 then
+				fooAllInOne.InvokerComboSelector = 8
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		end
+	elseif hoveringOverCombo9 and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerAutoInvoke) then
+			if fooAllInOne.InvokerComboSelector ~= 9 then
+				fooAllInOne.PreInvokeSkills = {{deafeningBlast, chaosMeteor}}
+				fooAllInOne.InvokerComboSelector = 9
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		else
+			if fooAllInOne.InvokerComboSelector ~= 9 then
+				fooAllInOne.InvokerComboSelector = 9
+			else
+				fooAllInOne.InvokerComboSelector = 0
+			end
+		end
+	end
+
+	-- border
+	if fooAllInOne.InvokerComboSelector == 1 then
+		Renderer.SetDrawColor(0, 255, 0, 255)
+		Renderer.DrawOutlineRect(startX+1, startY+1+40*0 + 0, (38 * maxSkills)+2 , 40)
+	end
+	if fooAllInOne.InvokerComboSelector == 2 then
+		Renderer.SetDrawColor(0, 255, 0, 255)
+		Renderer.DrawOutlineRect(startX+1, startY+1+40*1 + 1, (38 * maxSkills)+2 , 40)
+	end
+	if fooAllInOne.InvokerComboSelector == 3 then
+		Renderer.SetDrawColor(0, 255, 0, 255)
+		Renderer.DrawOutlineRect(startX+1, startY+1+40*2 + 2, (38 * maxSkills)+2 , 40)
+	end
+	if fooAllInOne.InvokerComboSelector == 4 then
+		Renderer.SetDrawColor(0, 255, 0, 255)
+		Renderer.DrawOutlineRect(startX+1, startY+1+40*3 + 3, (38 * maxSkills)+2 , 40)
+	end
+	if fooAllInOne.InvokerComboSelector == 5 then
+		Renderer.SetDrawColor(0, 255, 0, 255)
+		Renderer.DrawOutlineRect(startX+1, startY+1+40*4 + 4, (38 * maxSkills)+2 , 40)
+	end
+	if fooAllInOne.InvokerComboSelector == 6 then
+		Renderer.SetDrawColor(0, 255, 0, 255)
+		Renderer.DrawOutlineRect(startX+1, startY+1+40*5 + 5, (38 * maxSkills)+2 , 40)
+	end
+	if fooAllInOne.InvokerComboSelector == 7 then
+		Renderer.SetDrawColor(0, 255, 0, 255)
+		Renderer.DrawOutlineRect(startX+1, startY+1+40*6 + 6, (38 * maxSkills)+2 , 40)
+	end
+	if fooAllInOne.InvokerComboSelector == 8 then
+		Renderer.SetDrawColor(0, 255, 0, 255)
+		Renderer.DrawOutlineRect(startX+1, startY+1+40*7 + 7, (38 * maxSkills)+2 , 40)
+	end
+	if fooAllInOne.InvokerComboSelector == 9 then
+		Renderer.SetDrawColor(0, 255, 0, 255)
+		Renderer.DrawOutlineRect(startX+1, startY+1+40*8 + 8, (38 * maxSkills)+2 , 40)
+	end
+
+	local imageHandleSnap = fooAllInOne.InvokerCachedIconsSnap
+	if imageHandleSnap == nil then
+		imageHandleSnap = Renderer.LoadImage("resource/flash3/images/spellicons/" .. "invoker_cold_snap" .. ".png")
+		fooAllInOne.InvokerCachedIconsSnap = imageHandleSnap
+	end
+	local imageHandleSunStrike = fooAllInOne.InvokerCachedIconsSunStrike
+	if imageHandleSunStrike == nil then
+		imageHandleSunStrike = Renderer.LoadImage("resource/flash3/images/spellicons/" .. "invoker_sun_strike" .. ".png")
+		fooAllInOne.InvokerCachedIconsSunStrike = imageHandleSunStrike
+	end
+	local imageHandleEmp = fooAllInOne.InvokerCachedIconsEmp
+	if imageHandleEmp == nil then
+		imageHandleEmp = Renderer.LoadImage("resource/flash3/images/spellicons/" .. "invoker_emp" .. ".png")
+		fooAllInOne.InvokerCachedIconsEmp = imageHandleEmp
+	end
+	local imageHandleTornado = fooAllInOne.InvokerCachedIconsTornado
+	if imageHandleTornado == nil then
+		imageHandleTornado = Renderer.LoadImage("resource/flash3/images/spellicons/" .. "invoker_tornado" .. ".png")
+		fooAllInOne.InvokerCachedIconsTornado = imageHandleTornado
+	end
+	local imageHandleAlacrity = fooAllInOne.InvokerCachedIconsAlacrity
+	if imageHandleAlacrity == nil then
+		imageHandleAlacrity = Renderer.LoadImage("resource/flash3/images/spellicons/" .. "invoker_alacrity" .. ".png")
+		fooAllInOne.InvokerCachedIconsAlacrity = imageHandleAlacrity
+	end
+	local imageHandleBlast = fooAllInOne.InvokerCachedIconsBlast
+	if imageHandleBlast == nil then
+		imageHandleBlast = Renderer.LoadImage("resource/flash3/images/spellicons/" .. "invoker_deafening_blast" .. ".png")
+		fooAllInOne.InvokerCachedIconsBlast = imageHandleBlast
+	end
+	local imageHandleMeteor = fooAllInOne.InvokerCachedIconsMeteor
+	if imageHandleMeteor == nil then
+		imageHandleMeteor = Renderer.LoadImage("resource/flash3/images/spellicons/" .. "invoker_chaos_meteor" .. ".png")
+		fooAllInOne.InvokerCachedIconsMeteor = imageHandleMeteor
+	end
+	local imageHandleIcewall = fooAllInOne.InvokerCachedIconsIcewall
+	if imageHandleIcewall == nil then
+		imageHandleIcewall = Renderer.LoadImage("resource/flash3/images/spellicons/" .. "invoker_ice_wall" .. ".png")
+		fooAllInOne.InvokerCachedIconsIcewall = imageHandleIcewall
+	end
+	local imageHandleSpirit = fooAllInOne.InvokerCachedIconsSpirit
+	if imageHandleSpirit == nil then
+		imageHandleSpirit = Renderer.LoadImage("resource/flash3/images/spellicons/" .. "invoker_forge_spirit" .. ".png")
+		fooAllInOne.InvokerCachedIconsSpirit = imageHandleSpirit
+	end
+	local imageHandleAgha = fooAllInOne.InvokerCachedIconsAgha
+	if imageHandleAgha == nil then
+		imageHandleAgha = Renderer.LoadImage("resource/flash3/images/items/" .. "ultimate_scepter" .. ".png")
+		fooAllInOne.InvokerCachedIconsAgha = imageHandleAgha
+	end
+	local imageHandleRefresher = fooAllInOne.InvokerCachedIconsRefresher
+	if imageHandleRefresher == nil then
+		imageHandleRefresher = Renderer.LoadImage("resource/flash3/images/items/" .. "refresher" .. ".png")
+		fooAllInOne.InvokerCachedIconsRefresher = imageHandleRefresher
+	end
+	local imageHandleDagger = fooAllInOne.InvokerCachedIconsDagger
+	if imageHandleDagger == nil then
+		imageHandleDagger = Renderer.LoadImage("resource/flash3/images/items/" .. "blink" .. ".png")
+		fooAllInOne.InvokerCachedIconsDagger = imageHandleDagger
+	end
+	local imageHandleEul = fooAllInOne.InvokerCachedIconsEul
+	if imageHandleEul == nil then
+		imageHandleEul = Renderer.LoadImage("resource/flash3/images/items/" .. "cyclone" .. ".png")
+		fooAllInOne.InvokerCachedIconsEul = imageHandleEul
+	end
+
+	-- combo CS, Forge, Alacrity
+	if fooAllInOne.InvokerComboSelector == 1 then
+		if fooAllInOne.InvokerInvokedChecker(myHero, "invoker_cold_snap", "invoker_forge_spirit") and Ability.IsReady(NPC.GetAbility(myHero, "invoker_invoke")) then
+			Renderer.SetDrawColor(0, 205, 0, 255)
+		else
+			Renderer.SetDrawColor(255, 255, 0, 255)
+		end
+	else	
+		Renderer.SetDrawColor(255, 255, 255, 150)
+	end
+	Renderer.DrawImage(imageHandleSnap, startX+2+38*0, startY+2, 38, 38)
+	Renderer.DrawImage(imageHandleSpirit, startX+2+38*1, startY+2, 38, 38)
+	Renderer.DrawImage(imageHandleAlacrity, startX+2+38*2, startY+2, 38, 38)
+
+	-- combo Tornado, EMP, Icewall
+	if fooAllInOne.InvokerComboSelector == 2 then
+		if fooAllInOne.InvokerInvokedChecker(myHero, "invoker_emp", "invoker_tornado") and Ability.IsReady(NPC.GetAbility(myHero, "invoker_invoke")) then
+			Renderer.SetDrawColor(0, 205, 0, 255)
+		else
+			Renderer.SetDrawColor(255, 255, 0, 255)
+		end
+	else	
+		Renderer.SetDrawColor(255, 255, 255, 150)
+	end
+	Renderer.DrawImage(imageHandleTornado, startX+2+38*0, startY+3+40*1, 38, 38)
+	Renderer.DrawImage(imageHandleEmp, startX+2+38*1, startY+3+40*1, 38, 38)
+	Renderer.DrawImage(imageHandleIcewall, startX+2+38*2, startY+3+40*1, 38, 38)
+	Renderer.DrawText(fooAllInOne.font, startX+9+38*3, startY+7+40*1, "or", 1)
+	Renderer.DrawImage(imageHandleSnap, startX+2+38*4, startY+3+40*1, 38, 38)
+
+	-- combo Tornado, Meteor, Blast
+	if fooAllInOne.InvokerComboSelector == 3 then
+		if fooAllInOne.InvokerInvokedChecker(myHero, "invoker_chaos_meteor", "invoker_tornado") and Ability.IsReady(NPC.GetAbility(myHero, "invoker_invoke")) then
+			Renderer.SetDrawColor(0, 205, 0, 255)
+		else
+			Renderer.SetDrawColor(255, 255, 0, 255)
+		end
+	else	
+		Renderer.SetDrawColor(255, 255, 255, 150)
+	end
+	Renderer.DrawImage(imageHandleTornado, startX+2+38*0, startY+4+40*2, 38, 38)
+	Renderer.DrawImage(imageHandleMeteor, startX+2+38*1, startY+4+40*2, 38, 38)
+	Renderer.DrawImage(imageHandleBlast, startX+2+38*2, startY+4+40*2, 38, 38)
+
+	-- combo Eul, Sunstrike, Meteor, Blast
+	if fooAllInOne.InvokerComboSelector == 4 then
+		if fooAllInOne.InvokerInvokedChecker(myHero, "invoker_chaos_meteor", "invoker_sun_strike") and Ability.IsReady(NPC.GetAbility(myHero, "invoker_invoke")) then
+			Renderer.SetDrawColor(0, 205, 0, 255)
+		else
+			Renderer.SetDrawColor(255, 255, 0, 255)
+		end
+	else	
+		Renderer.SetDrawColor(255, 255, 255, 150)
+	end
+	Renderer.DrawImage(imageHandleEul, startX+2+38*0, startY+5+40*3, 38, 38)
+	Renderer.DrawImage(imageHandleSunStrike, startX+2+38*1, startY+5+40*3, 38, 38)
+	Renderer.DrawImage(imageHandleMeteor, startX+2+38*2, startY+5+40*3, 38, 38)
+	Renderer.DrawImage(imageHandleBlast, startX+2+38*3, startY+5+40*3, 38, 38)
+
+	-- combo Tornado, EMP, Meteor, Blast
+	if fooAllInOne.InvokerComboSelector == 5 then
+		if fooAllInOne.InvokerInvokedChecker(myHero, "invoker_emp", "invoker_tornado") and Ability.IsReady(NPC.GetAbility(myHero, "invoker_invoke")) then
+			Renderer.SetDrawColor(0, 205, 0, 255)
+		else
+			Renderer.SetDrawColor(255, 255, 0, 255)
+		end
+	else	
+		Renderer.SetDrawColor(255, 255, 255, 150)
+	end
+	Renderer.DrawImage(imageHandleAgha, startX+2+38*0, startY+6+40*4, 38, 38)
+	Renderer.DrawImage(imageHandleTornado, startX+2+38*1, startY+6+40*4, 38, 38)
+	Renderer.DrawImage(imageHandleEmp, startX+2+38*2, startY+6+40*4, 38, 38)
+	Renderer.DrawImage(imageHandleMeteor, startX+2+38*3, startY+6+40*4, 38, 38)
+	Renderer.DrawImage(imageHandleBlast, startX+2+38*4, startY+6+40*4, 38, 38)
+
+	-- combo Tornado, Sunstrike, Meteor, Blast
+	if fooAllInOne.InvokerComboSelector == 6 then
+		if fooAllInOne.InvokerInvokedChecker(myHero, "invoker_sun_strike", "invoker_tornado") and Ability.IsReady(NPC.GetAbility(myHero, "invoker_invoke")) then
+			Renderer.SetDrawColor(0, 205, 0, 255)
+		else
+			Renderer.SetDrawColor(255, 255, 0, 255)
+		end
+	else	
+		Renderer.SetDrawColor(255, 255, 255, 150)
+	end
+	Renderer.DrawImage(imageHandleAgha, startX+2+38*0, startY+7+40*5, 38, 38)
+	Renderer.DrawImage(imageHandleTornado, startX+2+38*1, startY+7+40*5, 38, 38)
+	Renderer.DrawImage(imageHandleSunStrike, startX+2+38*2, startY+7+40*5, 38, 38)
+	Renderer.DrawImage(imageHandleMeteor, startX+2+38*3, startY+7+40*5, 38, 38)
+	Renderer.DrawImage(imageHandleBlast, startX+2+38*4, startY+7+40*5, 38, 38)
+
+	-- combo Tornado, Sunstrike, Meteor, Blast, Refresher
+	if fooAllInOne.InvokerComboSelector == 7 then
+		if fooAllInOne.InvokerInvokedChecker(myHero, "invoker_sun_strike", "invoker_tornado") and Ability.IsReady(NPC.GetAbility(myHero, "invoker_invoke")) then
+			Renderer.SetDrawColor(0, 205, 0, 255)
+		else
+			Renderer.SetDrawColor(255, 255, 0, 255)
+		end
+	else	
+		Renderer.SetDrawColor(255, 255, 255, 150)
+	end
+	Renderer.DrawImage(imageHandleRefresher, startX+2+38*0, startY+8+40*6, 38, 38)
+	Renderer.DrawImage(imageHandleAgha, startX+2+38*1, startY+8+40*6, 38, 38)
+	Renderer.DrawImage(imageHandleTornado, startX+2+38*2, startY+8+40*6, 38, 38)
+	Renderer.DrawImage(imageHandleSunStrike, startX+2+38*3, startY+8+40*6, 38, 38)
+	Renderer.DrawImage(imageHandleMeteor, startX+2+38*4, startY+8+40*6, 38, 38)
+	Renderer.DrawImage(imageHandleBlast, startX+2+38*5, startY+8+40*6, 38, 38)
+
+	-- combo Tornado, Sunstrike, Meteor, Blast, Refresher
+	if fooAllInOne.InvokerComboSelector == 8 then
+		if fooAllInOne.InvokerInvokedChecker(myHero, "invoker_emp", "invoker_tornado") and Ability.IsReady(NPC.GetAbility(myHero, "invoker_invoke")) then
+			Renderer.SetDrawColor(0, 205, 0, 255)
+		else
+			Renderer.SetDrawColor(255, 255, 0, 255)
+		end
+	else	
+		Renderer.SetDrawColor(255, 255, 255, 150)
+	end
+	Renderer.DrawImage(imageHandleRefresher, startX+2+38*0, startY+9+40*7, 38, 38)
+	Renderer.DrawImage(imageHandleAgha, startX+2+38*1, startY+9+40*7, 38, 38)
+	Renderer.DrawImage(imageHandleTornado, startX+2+38*2, startY+9+40*7, 38, 38)
+	Renderer.DrawImage(imageHandleEmp, startX+2+38*3, startY+9+40*7, 38, 38)
+	Renderer.DrawImage(imageHandleMeteor, startX+2+38*4, startY+9+40*7, 38, 38)
+	Renderer.DrawImage(imageHandleBlast, startX+2+38*5, startY+9+40*7, 38, 38)
+
+	-- combo Dagger, Blast, Meteor, Sunstrike
+	if fooAllInOne.InvokerComboSelector == 9 then
+		if fooAllInOne.InvokerInvokedChecker(myHero, "invoker_deafening_blast", "invoker_chaos_meteor") and Ability.IsReady(NPC.GetAbility(myHero, "invoker_invoke")) then
+			Renderer.SetDrawColor(0, 205, 0, 255)
+		else
+			Renderer.SetDrawColor(255, 255, 0, 255)
+		end
+	else	
+		Renderer.SetDrawColor(255, 255, 255, 150)
+	end
+	Renderer.DrawImage(imageHandleRefresher, startX+2+38*0, startY+10+40*8, 38, 38)
+	Renderer.DrawImage(imageHandleAgha, startX+2+38*1, startY+10+40*8, 38, 38)
+	Renderer.DrawImage(imageHandleDagger, startX+2+38*2, startY+10+40*8, 38, 38)
+	Renderer.DrawImage(imageHandleBlast, startX+2+38*3, startY+10+40*8, 38, 38)
+	Renderer.DrawImage(imageHandleMeteor, startX+2+38*4, startY+10+40*8, 38, 38)
+	Renderer.DrawImage(imageHandleSunStrike, startX+2+38*5, startY+10+40*8, 38, 38)
+
+end
 				
 
 -- killsteal functions
