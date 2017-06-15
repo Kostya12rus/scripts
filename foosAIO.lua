@@ -3743,7 +3743,7 @@ function fooAllInOne.ArcWardenFight(myHero, enemy, tempestDoubleEntity, arcWarde
 	local diffusalBlade = NPC.GetItem(tempestDoubleEntity, "item_diffusal_blade", true)
 	if not diffusalBlade then
 		for i = 2, 2 do
-			diffusalBlade = NPC.GetItem(myHero, "item_diffusal_blade_" .. i, true)
+			diffusalBlade = NPC.GetItem(tempestDoubleEntity, "item_diffusal_blade_" .. i, true)
 			if diffusalBlade then 
 				break 
 			end
