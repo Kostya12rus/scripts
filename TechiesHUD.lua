@@ -3,12 +3,15 @@ local TechiesHUD = {}
 TechiesHUD.optionTotal = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD" }, "TechiesHUD", "Activating the script")
 
 TechiesHUD.optionDetonate = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Auto mines", "Auto detonate remote mines")
-
+TechiesHUD.optionDetonateFast = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Fast detonate", "Detonate if the enemy cannot escape")
 TechiesHUD.optionLegitDetonate = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Auto mines mode", "Standart(needful) or legit(all)")
+
+TechiesHUD.optionDetonateCam = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action" }, "Show auto detonate position", "Show the place of automatic detonation, return camera after 1 second on your hero")
 
 TechiesHUD.optionAutoPlant = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action", "AutoPlant" }, "Auto plant mines", "Automatically plant mines in the places indicated by you. ") --Use the button Set position and a shift to create several positions. Use the simple key Set position that would clear all positions
 TechiesHUD.optionAutoPlantKey = Menu.AddKeyOption({ "Hero Specific", "Techies", "TechiesHUD", "Action", "AutoPlant" }, "Set position", Enum.ButtonCode.KEY_T)
 TechiesHUD.optionAutoPlantNumMines = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action", "AutoPlant" }, "Number of mines", "Number of mines for planting", 1, 100)
+TechiesHUD.optionAutoPlantStackRange = Menu.AddOption({ "Hero Specific", "Techies", "TechiesHUD", "Action", "AutoPlant" }, "Use closest remote mine for position", "Radius to the nearest mine", 0, 500, 10)
 
 Menu.SetValueName(TechiesHUD.optionLegitDetonate, 1, "legit")
 Menu.SetValueName(TechiesHUD.optionLegitDetonate, 0, "standart")
@@ -83,6 +86,8 @@ local mines_num = {}
 local check_detonate = 0
 local spot_for_plant = {}
 local plant_time = 0
+local hero_cam_time = nil
+local remote_create_time = {}
 function TechiesHUD.OnGameStart()
 	size_x, size_y = Renderer.GetScreenSize()
 	mines_time = {}
@@ -98,11 +103,13 @@ function TechiesHUD.OnGameStart()
 	check_detonate = 0
 	spot_for_plant = {}
 	plant_time = 0
+	hero_cam_time = nil
 end
 
 function TechiesHUD.OnEntityDestroy(ent)
 	if NPC.GetUnitName(ent) == "npc_dota_techies_remote_mine" then
 		mines_damage[Entity.GetIndex(ent)] = nil
+		remote_create_time[Entity.GetIndex(ent)] = nil
 	end
 end
 
@@ -138,6 +145,35 @@ function DrawCircle(UnitPos, radius)
 	end
 end
 
+function CheckMove(Unit, Unit2, pred_time)
+	local UnitPos = Entity.GetAbsOrigin(Unit)
+	local UnitPos2 = Entity.GetAbsOrigin(Unit2)
+	local MoveSpeed = NPC.GetMoveSpeed(Unit)
+	local TurnRate = 0.0942 / NPC.GetTurnRate(Unit)
+	local firstRotate = Entity.GetAbsRotation(Unit):GetYaw() - 90
+	local x4, y4
+	local dergee = 30
+	local check = 1
+	for angle = 0, 360 / dergee / 2 do
+		local radius = (MoveSpeed * pred_time) - (TurnRate * ((angle * dergee) / 180) * MoveSpeed)
+		x4 = 0 * math.cos((firstRotate + (angle * dergee)) / 57.3) - radius * math.sin((firstRotate + (angle * dergee)) / 57.3)
+		y4 = radius * math.cos((firstRotate + (angle * dergee)) / 57.3) + 0 * math.sin((firstRotate + (angle * dergee)) / 57.3)
+		if (UnitPos - UnitPos2 + Vector(x4, y4, 0)):Length() > 425 then
+			check = 0
+		end
+	end
+	firstRotate = 0 - firstRotate
+	for angle = 0, 360 / dergee / 2 do
+		local radius = (MoveSpeed * pred_time) - (TurnRate * ((angle * dergee) / 180) * MoveSpeed)
+		x4 = 0 * math.cos((firstRotate + (angle * dergee)) / -57.3) - radius * math.sin((firstRotate + (angle * dergee)) / -57.3)
+		y4 = radius * math.cos((firstRotate + (angle * dergee)) / -57.3) + 0 * math.sin((firstRotate + (angle * dergee)) / -57.3)
+		if (UnitPos - UnitPos2 + Vector(x4, y4, 0)):Length() > 425 then
+			check = 0
+		end
+	end
+	return check
+end
+
 function TechiesHUD.OnDraw()
 	if not Menu.IsEnabled(TechiesHUD.optionTotal) then return end
 
@@ -170,7 +206,7 @@ function TechiesHUD.OnDraw()
 		DrawCircle(cast_pos, 400)
 	end
 
-	if Menu.GetValue(TechiesHUD.optionAutoPlant) == 1 then
+	if Menu.IsEnabled(TechiesHUD.optionAutoPlant) then
 		for i, spot in pairs(spot_for_plant) do
 			local x, y, visible = Renderer.WorldToScreen(spot.position)
 			if visible then
@@ -243,6 +279,19 @@ function TechiesHUD.OnDraw()
 					Renderer.SetDrawColor(0, 255, 0, 255)
 					DrawCircle(UnitPos, 425)
 				end
+				if remote_create_time[Entity.GetIndex(Unit)] == nil then
+					remote_create_time[Entity.GetIndex(Unit)] = GameRules.GetGameTime()
+				end
+				if GameRules.GetGameTime() - remote_create_time[Entity.GetIndex(Unit)] < Ability.GetCastPoint(remote) and NPC.GetModifier(Unit, "modifier_techies_remote_mine") == nil then
+					local x, y, visible = Renderer.WorldToScreen(UnitPos)
+					Renderer.SetDrawColor(255, 255, 255, 255)
+					Renderer.DrawText(TechiesHUD.font, x, y - 20, math.floor((Ability.GetCastPoint(remote) - (GameRules.GetGameTime() - remote_create_time[Entity.GetIndex(Unit)])) * 100) / 100, 0)
+				end
+				if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil and GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_remote_mine")) < 2 then
+					local x, y, visible = Renderer.WorldToScreen(UnitPos)
+					Renderer.SetDrawColor(255, 255, 255, math.floor(255 * ((2 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_remote_mine")))) / 2)))
+					Renderer.DrawText(TechiesHUD.font, x, y - 20, math.floor((2 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_remote_mine")))) * 100) / 100, 0)
+				end
 				if mines_num[i] == nil then
 					mines_num[i] = 1
 				end
@@ -300,7 +349,7 @@ function TechiesHUD.OnDraw()
 
 				if Menu.IsEnabled(TechiesHUD.optionForce) and force ~= nil then -- force stuff line
 					local x, y, visible = Renderer.WorldToScreen(UnitPos)
-					if visible and Menu.GetValue(TechiesHUD.optionForceDrawLine) == 1 then
+					if visible and Menu.IsEnabled(TechiesHUD.optionForceDrawLine) then
 						Renderer.SetDrawColor(255, 255, 255, 255)
 						local rotate = Entity.GetAbsRotation(Unit):GetYaw()
 						local x4 = 600 * math.cos(rotate / 57.3) - 0 * math.sin(rotate / 57.3)
@@ -316,7 +365,7 @@ function TechiesHUD.OnDraw()
 				local Hp_all = Entity.GetMaxHealth(Unit) / ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit))
 
 				Renderer.SetDrawColor(0, 255, 0, 255)
-				if Menu.GetValue(TechiesHUD.optionPanelInfoColumn) == 1 then
+				if Menu.IsEnabled(TechiesHUD.optionPanelInfoColumn) then
 					if Entity.GetTeamNum(myHero) == 2 then
 						Renderer.DrawText(TechiesHUD.HUDfont, size_x / 2 + 30 + (53 + Menu.GetValue(TechiesHUD.optionPanelInfoDistRight) * (-1) ^ Menu.GetValue(TechiesHUD.optionPanelInfoDistRightInvert)) * (Hero.GetPlayerID(Unit) - 4) + Menu.GetValue(TechiesHUD.optionPanelInfoXR) * (-1) ^ Menu.GetValue(TechiesHUD.optionPanelInfoXRInvert), 32 + Menu.GetValue(TechiesHUD.optionPanelInfoY) * (-1) ^ Menu.GetValue(TechiesHUD.optionPanelInfoYInvert), (math.ceil(Hp * 10) / 10), 0)
 						Renderer.DrawText(TechiesHUD.HUDfont, size_x / 2 + 30 + (53 + Menu.GetValue(TechiesHUD.optionPanelInfoDistRight) * (-1) ^ Menu.GetValue(TechiesHUD.optionPanelInfoDistRightInvert)) * (Hero.GetPlayerID(Unit) - 4) + Menu.GetValue(TechiesHUD.optionPanelInfoXR) * (-1) ^ Menu.GetValue(TechiesHUD.optionPanelInfoXRInvert), 52 + Menu.GetValue(TechiesHUD.optionPanelInfoY) * (-1) ^ Menu.GetValue(TechiesHUD.optionPanelInfoYInvert) + Menu.GetValue(TechiesHUD.optionPanelInfoYColumn) * (-1) ^ Menu.GetValue(TechiesHUD.optionPanelInfoYColumnInvert), (math.ceil(Hp_all * 10) / 10), 0)
@@ -351,18 +400,34 @@ function TechiesHUD.OnUpdate()
 	local remote = NPC.GetAbilityByIndex(myHero, 5)
 	local remote_damage = Ability.GetLevelSpecialValueFor(remote, "damage")
 	local force = NPC.GetItem(myHero, "item_force_staff", 1)
-
-	if Menu.GetValue(TechiesHUD.optionAutoPlant) == 1 then
+	if Menu.IsEnabled(TechiesHUD.optionAutoPlant) then
 		if not Input.IsInputCaptured() then
 			if Menu.IsKeyDownOnce(TechiesHUD.optionAutoPlantKey) then
 				if Input.IsKeyDown(Enum.ButtonCode.KEY_LSHIFT) then
-					Log.Write("cheShift")
 					local spot = {}
-					spot.position = Input.GetWorldCursorPos()
+					local closest_remote = nil
+					local cursor_pos = Input.GetWorldCursorPos()
+					if Menu.GetValue(TechiesHUD.optionAutoPlantStackRange) ~= 0 then
+						for i = 0, NPCs.Count() do
+							local Unit = NPCs.Get(i)
+							local UnitPos = Entity.GetAbsOrigin(Unit)
+							if NPC.IsPositionInRange(Unit, cursor_pos, Menu.GetValue(TechiesHUD.optionAutoPlantStackRange), Enum.TeamType.TEAM_FRIEND)
+							and NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
+							then
+								if closest_remote == nil or (UnitPos - cursor_pos):Length() < (closest_remote - cursor_pos):Length() then
+									closest_remote = UnitPos
+								end
+							end
+						end
+					end
+					if closest_remote == nil then
+						spot.position = cursor_pos
+					else
+						spot.position = closest_remote
+					end
 					spot.num_mines = 0
 					table.insert(spot_for_plant, spot)
 				else
-					Log.Write("che")
 					spot_for_plant = {}
 				end
 			end
@@ -379,8 +444,7 @@ function TechiesHUD.OnUpdate()
 				end
 			end
 		end
-		--Log.Write(GameRules.GetGameTime() - plant_time)
-		if remote ~= nil and Ability.GetLevel(remote) ~= 0 and Ability.GetCooldownTimeLeft(remote) == 0 and not Ability.IsInAbilityPhase(remote) and GameRules.GetGameTime() - plant_time > 2 then
+		if remote ~= nil and Ability.GetLevel(remote) ~= 0 and Ability.GetCooldownTimeLeft(remote) == 0 and not Ability.IsInAbilityPhase(remote) and GameRules.GetGameTime() - plant_time > Ability.GetCastPoint(remote) + 0.1 then
 			local step = 0
 			for i, spot in pairs(spot_for_plant) do
 				if spot.num_mines < Menu.GetValue(TechiesHUD.optionAutoPlantNumMines) and step == 0 then
@@ -400,6 +464,12 @@ function TechiesHUD.OnUpdate()
 		end
 	end
 
+	if hero_cam_time ~= nil and GameRules.GetGameTime() - hero_cam_time > 1 then
+		local myHero_pos = Entity.GetAbsOrigin(myHero)
+		Engine.ExecuteCommand("dota_camera_set_lookatpos " .. myHero_pos:GetX() .. " " .. myHero_pos:GetY())
+		hero_cam_time = nil
+	end
+
 	for i = 0, NPCs.Count() do
 		local Unit = NPCs.Get(i)
 		local UnitPos = Entity.GetAbsOrigin(Unit)
@@ -408,24 +478,28 @@ function TechiesHUD.OnUpdate()
 			and Entity.GetTeamNum(Unit) ~= Entity.GetTeamNum(myHero)
 			and not NPC.IsIllusion(Unit)
 			and not Entity.IsDormant(Unit)
-			and (NPC.IsKillable(Unit) or (NPC.GetUnitName(Unit) == "npc_dota_hero_skeleton_king" and Menu.GetValue(TechiesHUD.optionDetonateWk) == 1) or (NPC.HasItem(Unit, "item_aegis", 1) and Menu.GetValue(TechiesHUD.optionDetonateAegis) == 1))
+			and (NPC.IsKillable(Unit) or (NPC.GetUnitName(Unit) == "npc_dota_hero_skeleton_king" and Menu.IsEnabled(TechiesHUD.optionDetonateWk)) or (NPC.HasItem(Unit, "item_aegis", 1) and Menu.IsEnabled(TechiesHUD.optionDetonateAegis)))
 			and Entity.IsAlive(Unit)
 			then
 				if hero_time[i] == nil then
 					hero_time[i] = 0
 				end
 				local remote_sum_damage = 0
+				local fast_remote_sum_damage = 0
 				local force_remote_sum_damage = 0
 				for j = 0, NPCs.Count() do -- calc sum damage
 					local Unit2 = NPCs.Get(j)
-					if NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil then
+					if NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil and Entity.IsAlive(Unit2) then
 						if mines_damage[Entity.GetIndex(Unit2)] == nil then
 							mines_damage[Entity.GetIndex(Unit2)] = remote_damage
 						end
 						if NPC.IsPositionInRange(Unit2, UnitPos, 425, 0) then -- - NPC.GetMoveSpeed(Unit) * 0.1
 							remote_sum_damage = remote_sum_damage + mines_damage[Entity.GetIndex(Unit2)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)
+							if CheckMove(Unit, Unit2, 0.3 + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) + 0.04 * (Entity.GetHealth(Unit) / remote_damage)) == 1 and Menu.IsEnabled(TechiesHUD.optionDetonateFast)
+							then
+								fast_remote_sum_damage = fast_remote_sum_damage + mines_damage[Entity.GetIndex(Unit2)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)
+							end
 						end
-
 						local rotate = Entity.GetAbsRotation(Unit):GetYaw()
 						local remote_sum_damage = 0
 						local tmp_remote_sum_damage = 0
@@ -437,7 +511,6 @@ function TechiesHUD.OnUpdate()
 						end
 					end
 				end -- calc sum damage
-
 				if Menu.IsEnabled(TechiesHUD.optionDetonate) then -- auto detonate
 					if Menu.IsEnabled(TechiesHUD.optionForce) then -- auto force stuff
 						if force ~= nil then
@@ -462,23 +535,36 @@ function TechiesHUD.OnUpdate()
 						end
 					end -- auto force stuff
 
-					if remote_sum_damage * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit) then
+					if (remote_sum_damage * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit) or fast_remote_sum_damage * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit)) and NPC.HasModifier(Unit, "modifier_item_forcestaff_active") ~= 1 then
 						if hero_time[i] == 0 then
 							hero_time[i] = GameRules.GetGameTime()
 						end
 						local remote_need_damage = Entity.GetHealth(Unit) + NPC.GetHealthRegen(Unit) * 0.3
-						if GameRules.GetGameTime() - check_detonate > 0.5 and (hero_time[i] ~= 0) and (GameRules.GetGameTime() - hero_time[i] > Menu.GetValue(TechiesHUD.optionDelay) / 1000) then
+						if GameRules.GetGameTime() - check_detonate > 0.5 and hero_time[i] ~= 0 and (GameRules.GetGameTime() - hero_time[i] > Menu.GetValue(TechiesHUD.optionDelay) / 1000 or fast_remote_sum_damage * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit)) then
+							local unit_pos = nil
 							for j = 0, NPCs.Count() do
 								local Unit2 = NPCs.Get(j)
 								if NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil
+								and Entity.IsAlive(Unit2)
 								and NPC.IsPositionInRange(Unit2, UnitPos, 425, 0)
 								then
-									if remote_need_damage > 0 or Menu.GetValue(TechiesHUD.optionLegitDetonate) == 1 then
+									if remote_need_damage > 0 or Menu.IsEnabled(TechiesHUD.optionLegitDetonate) then
+										if Menu.IsEnabled(TechiesHUD.optionDetonateCam) then
+											unit_pos = Entity.GetAbsOrigin(Unit)
+										end
 										Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, 0, Vector(0, 0, 0), NPC.GetAbilityByIndex(Unit2, 0), Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, Unit2, 0, 0)
 										check_detonate = GameRules.GetGameTime()
 										remote_need_damage = remote_need_damage - (mines_damage[Entity.GetIndex(Unit2)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit)
 									end
 								end
+							end
+							if unit_pos ~= nil then
+								local x, y = Renderer.WorldToScreen(unit_pos)
+								if x < 0 or x > size_x or y < 0 or y > size_y then
+									Engine.ExecuteCommand("dota_camera_set_lookatpos " .. unit_pos:GetX() .. " " .. unit_pos:GetY())
+									hero_cam_time = GameRules.GetGameTime()
+								end
+								unit_pos = nil
 							end
 						end
 					else
@@ -495,6 +581,15 @@ end
 function TechiesHUD.OnPrepareUnitOrders(orders)
     if not Menu.IsEnabled(TechiesHUD.optionTotal) then return true end
 
+	local myHero = Heroes.GetLocal()
+
+	if not myHero then
+		return true
+	end
+	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_techies" then
+		return true
+	end
+
 	if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION and orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO then return true end
     if not orders.ability then return true end
 
@@ -503,26 +598,37 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 		return true
 	end
 
-	if Menu.GetValue(TechiesHUD.optionFDFailSwitch) == 1 and Ability.GetName(orders.ability) == "techies_focused_detonate" then
+	if Menu.IsEnabled(TechiesHUD.optionFDFailSwitch) and Ability.GetName(orders.ability) == "techies_focused_detonate" then
 		if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) then
 			Player.PrepareUnitOrders(orders.player, Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION, orders.target, Input.GetWorldCursorPos(), orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
 			return false
 		end
+		local remote_damage = Ability.GetLevelSpecialValueFor(NPC.GetAbilityByIndex(myHero, 5), "damage")
 		local hp = {}
+		local num_ready_mines = 0
 		for i = 0, NPCs.Count() do
 			local Unit = NPCs.Get(i)
 			local UnitPos = Entity.GetAbsOrigin(Unit)
 			if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
 			and NPC.IsPositionInRange(Unit, orders.position, 700, 0)
 			then
+				num_ready_mines = num_ready_mines + 1
+				if mines_damage[Entity.GetIndex(Unit)] == nil then
+					mines_damage[Entity.GetIndex(Unit)] = remote_damage
+				end
 				local num_enemy = 0
-				for j, v in pairs(NPC.GetHeroesInRadius(Unit, 425, Enum.TeamType.TEAM_ENEMY)) do
-					if hp[Entity.GetIndex(v)] == nil then
-						hp[Entity.GetIndex(v)] = Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3
-					end
-					if hp[Entity.GetIndex(v)] > 0 or Menu.GetValue(TechiesHUD.optionFDFailSwitchMode) == 1 then
-						hp[Entity.GetIndex(v)] = hp[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(v)
-						num_enemy = num_enemy + 1
+				for j, v in pairs(NPC.GetHeroesInRadius(Unit, 425 - 24, Enum.TeamType.TEAM_ENEMY)) do
+					if Entity.IsAlive(v)
+					and not Entity.IsDormant(v)
+					and (NPC.IsKillable(v) or NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" or NPC.HasItem(v, "item_aegis", 1) or NPC.GetModifier(v, "modifier_dazzle_shallow_grave") ~= nil)
+					then
+						if hp[Entity.GetIndex(v)] == nil then
+							hp[Entity.GetIndex(v)] = Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3
+						end
+						if mines_damage[Entity.GetIndex(Unit)] ~= nil and hp[Entity.GetIndex(v)] > 0 or Menu.IsEnabled(TechiesHUD.optionFDFailSwitchMode) then
+							hp[Entity.GetIndex(v)] = hp[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(v)
+							num_enemy = num_enemy + 1
+						end
 					end
 				end
 				if num_enemy ~= 0 then

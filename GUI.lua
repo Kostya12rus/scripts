@@ -242,7 +242,7 @@ function CheckKeys()
 	if current_key ~= "" then
 		for k, v in pairs(GUI.CallBackKey) do
 			if current_key == GUI.Data[v["itemcode"]] and v["type"] == down_type then
-				GUI.Items[k]["items"][v["order"]]["callback"]()
+				GUI.Items[v['menucode']]["items"][v["order"]]["callback"]()
 			end
 		end
 	end
@@ -387,15 +387,16 @@ function GUI.AddMenuItem(menucode, itemcode, name, control, ...)
 			end
 		end
 		if select(2, ...) ~= nil then
-			GUI.CallBackKey[menucode] = {}
-			GUI.CallBackKey[menucode]["order"] = order
-			GUI.CallBackKey[menucode]["itemcode"] = itemcode
+			GUI.CallBackKey[itemcode] = {}
+			GUI.CallBackKey[itemcode]["order"] = order
+			GUI.CallBackKey[itemcode]["menucode"] = menucode
+			GUI.CallBackKey[itemcode]["itemcode"] = itemcode
 			GUI.Items[menucode]["items"][order]["callback"] = select(2, ...)
 		end
 		if select(3, ...) == nil then
-			GUI.CallBackKey[menucode]["type"] = 0
+			GUI.CallBackKey[itemcode]["type"] = 0
 		else
-			GUI.CallBackKey[menucode]["type"] = select(3, ...)
+			GUI.CallBackKey[itemcode]["type"] = select(3, ...)
 		end
 		if temp_data ~= nil and temp_data ~= "" then GUI.Set(itemcode, temp_data) end
 		
