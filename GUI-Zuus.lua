@@ -33,6 +33,10 @@ BTW.Locale = {
 		["english"] = "Combo key",
 		["russian"] = "Клавиша комбо"
 	},
+	["orbwalker"] = {
+		["english"] = "Attack when combo",
+		["russian"] = "Атаковать при комбо"
+	},
 	["slider"] = {
 		["english"] = "Closest to mouse range",
 		["russian"] = "Радиус поиска ближнего"
@@ -96,6 +100,7 @@ function BTW.OnDraw()
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "ordercombo", BTW.Locale["order"], 
 			GUI.MenuType.OrderBox, BTW.Items, "", "item_", 36, 36)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "combo", BTW.Locale["combo"], GUI.MenuType.Key, "K", BTW.Combo, 0)
+		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "orbwalker", BTW.Locale["orbwalker"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "closest", BTW.Locale["slider"], GUI.MenuType.Slider, 100, 1500, 200)
 	end
 	
@@ -122,7 +127,7 @@ function BTW.Combo()
 		BTW.Cast(ordercast[i], BTW.Hero, enemy, NPC.GetAbsOrigin(enemy), BTW.MP)
 	end
 
-	if not NPC.HasModifier(hero, "modifier_item_ethereal_blade_slow") then
+	if not NPC.HasModifier(hero, "modifier_item_ethereal_blade_slow") and GUI.IsEnabled(BTW.Identity .. "orbwalker") then
 		Player.PrepareUnitOrders(Players.GetLocal(), 4, enemy, Vector(0,0,0), enemy, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, BTW.Hero)
 	end
 end
