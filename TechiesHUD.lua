@@ -6,8 +6,8 @@ TechiesHUD.Locale = {
 		["english"] = "TechiesHUD"
 	},
 	["desc"] = {
-		["english"] = "TechiesHUD v1.0",
-		["russian"] = "TechiesHUD v1.0"
+		["english"] = "TechiesHUD v1.0.1",
+		["russian"] = "TechiesHUD v1.0.1"
 	},
 	["optionDetonate"] = {
 		["english"] = "Auto detonate remote mines",
@@ -133,9 +133,17 @@ TechiesHUD.Locale = {
 		["english"] = "Auto detonate remote mines if they can kill the enemy",
 		["russian"] = "Авто взрывание remote mines если они могут убить врага"
 	},
-	["autoStackSection"] = {
+	["autoStackSection1"] = {
 		["english"] = "Automatically plant mines in the places indicated by you",
 		["russian"] = "Автоматически ставит remote mines в отмеченые места"
+	},
+	["autoStackSection2"] = {
+		["english"] = "Use the key \"Set position\" and a shift to create several positions",
+		["russian"] = "Используйте клавишу \"Указать позицию\" и Shift что бы указать позиции"
+	},
+	["autoStackSection3"] = {
+		["english"] = "Use the simple key \"Set position\" that would clear all positions",
+		["russian"] = "Просто нажмите клавишу \"Указать позицию\" что бы очистить все позиции"
 	},
 	["stackMinesSection"] = {
 		["english"] = "Puts mines as close as possible to each other",
@@ -184,10 +192,6 @@ TechiesHUD.Locale = {
 		}
 	}
 }
-
-TechiesHUD.font = Renderer.LoadFont("Tahoma", Config.ReadInt("TechiesHUD", "font", 10), Enum.FontWeight.EXTRABOLD)
-
-TechiesHUD.HUDfont = Renderer.LoadFont("Tahoma",  Config.ReadInt("TechiesHUD", "Bar_font", 15), Enum.FontWeight.BOLD)
 
 local optionTotal
 local optionUpdate
@@ -268,23 +272,6 @@ function TechiesHUD.OnEntityDestroy(ent)
 	end
 end
 
-function TechiesHUD.OnMenuOptionChange(option, oldValue, newValue)
-	if option == TechiesHUD.optionFont then
-		TechiesHUD.font = Renderer.LoadFont("Tahoma", newValue, Enum.FontWeight.EXTRABOLD)
-		Config.WriteInt("TechiesHUD", "font", newValue)
-	end
-	if option == TechiesHUD.optionFontTopBar then
-		TechiesHUD.HUDfont = Renderer.LoadFont("Tahoma", newValue, Enum.FontWeight.EXTRABOLD)
-		Config.WriteInt("TechiesHUD", "Bar_font", newValue)
-	end
-	if option == TechiesHUD.optionCircleResolution then
-		Config.WriteInt("TechiesHUD", "Circle res", newValue)
-	end
-	if option == TechiesHUD.optionForceDelay then
-		Config.WriteInt("TechiesHUD", "Force Stuff delay", newValue)
-	end
-end
-
 function DrawCircle(UnitPos, radius)
 	local x1, y1 = Renderer.WorldToScreen(UnitPos)
 	if x1 < size_x and x1 > 0 and y1 < size_y and y1 > 0 then
@@ -348,14 +335,22 @@ function TechiesHUD.UpdateGUISettings()
 	optionAutoPlantNumMines = GUI.Get(TechiesHUD.Identity .. "optionAutoPlantNumMines")
 	optionDetonateWk = GUI.IsEnabled(TechiesHUD.Identity .. "optionDetonateWk")
 	optionDetonateAegis = GUI.IsEnabled(TechiesHUD.Identity .. "optionDetonateAegis")
-	for k, v in pairs(GUI.Get(TechiesHUD.Identity .. "optionLegitDetonate", 1)) do
-		optionLegitDetonate = v == 1
+	if GUI.Get(TechiesHUD.Identity .. "optionLegitDetonate", 1) and 1 or 0 == 1 then
+		for k, v in pairs(GUI.Get(TechiesHUD.Identity .. "optionLegitDetonate", 1)) do
+			optionLegitDetonate = v == 1
+		end
+	else
+		optionLegitDetonate = false
 	end
 	optionDetonateCam = GUI.IsEnabled(TechiesHUD.Identity .. "optionDetonateCam")
 
 	optionFDFailSwitch = GUI.IsEnabled(TechiesHUD.Identity .. "optionFDFailSwitch")
-	for k, v in pairs(GUI.Get(TechiesHUD.Identity .. "optionFDFailSwitchMod", 1)) do
-		optionFDFailSwitchMode = v == 1
+	if GUI.Get(TechiesHUD.Identity .. "optionFDFailSwitchMod", 1) and 1 or 0 == 1 then
+		for k, v in pairs(GUI.Get(TechiesHUD.Identity .. "optionFDFailSwitchMod", 1)) do
+			optionFDFailSwitchMode = v == 1
+		end
+	else
+		optionFDFailSwitchMode = false
 	end
 	optionPanelInfoXL = GUI.Get(TechiesHUD.Identity .. "optionPanelInfoXL")
 	optionPanelInfoXR = GUI.Get(TechiesHUD.Identity .. "optionPanelInfoXR")
@@ -368,11 +363,11 @@ function TechiesHUD.UpdateGUISettings()
 
 	if GUI.Get(TechiesHUD.Identity .. "optionFont1") ~= optionFont1 then
 		optionFont1 = GUI.Get(TechiesHUD.Identity .. "optionFont1")
-		TechiesHUD.font = Renderer.LoadFont("Tahoma", optionFont1, Enum.FontWeight.EXTRABOLD)
+		TechiesHUD.font = Renderer.LoadFont("Tahoma", tonumber(optionFont1), Enum.FontWeight.EXTRABOLD)
 	end
 	if GUI.Get(TechiesHUD.Identity .. "optionFont2") ~= optionFont2 then
 		optionFont2 = GUI.Get(TechiesHUD.Identity .. "optionFont2")
-		TechiesHUD.HUDfont = Renderer.LoadFont("Tahoma", optionFont2, Enum.FontWeight.EXTRABOLD)
+		TechiesHUD.HUDfont = Renderer.LoadFont("Tahoma", tonumber(optionFont2), Enum.FontWeight.EXTRABOLD)
 	end
 end
 
@@ -393,7 +388,9 @@ function TechiesHUD.OnDraw()
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionDetonateCam", TechiesHUD.Locale["detonateCam"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionDelay", TechiesHUD.Locale["delayDetonate"], GUI.MenuType.Slider, 0, 2000, 700)
 
-		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "autoStackSection", TechiesHUD.Locale["autoStackSection"], GUI.MenuType.Label) -- Auto stack
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "autoStackSection1", TechiesHUD.Locale["autoStackSection1"], GUI.MenuType.Label) -- Auto stack
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "autoStackSection2", TechiesHUD.Locale["autoStackSection2"], GUI.MenuType.Label) -- Auto stack
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "autoStackSection3", TechiesHUD.Locale["autoStackSection3"], GUI.MenuType.Label) -- Auto stack
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAutoPlant", TechiesHUD.Locale["autoPlant"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAutoPlantNumMines", TechiesHUD.Locale["autoPlantNumMines"], GUI.MenuType.Slider, 1, 20, 6)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAutoPlantStackRange", TechiesHUD.Locale["autoPlantStackRange"], GUI.MenuType.Slider, 0,200, 200)
@@ -698,7 +695,6 @@ end
 
 function TechiesHUD.OnUpdate()
 	if not optionTotal then return end
-	if not optionUpdate then return end
 
 	local myHero = Heroes.GetLocal()
 
