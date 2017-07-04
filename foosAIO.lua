@@ -1,8 +1,8 @@
 -- foosAIO.lua
--- Version: beta.0.75.2
+-- Version: beta.0.75.6
 -- Author: foo0oo
 -- Release Date: 2017/05/03
--- Last Update: 2017/06/29
+-- Last Update: 2017/06/30
 
 local fooAllInOne = {}
 -- Menu Items
@@ -6005,6 +6005,13 @@ end
 
 function fooAllInOne.InvokerComboTornadoEmpIcewall(myHero, myMana, enemy, tornado, emp, iceWall, coldSnap, blink, invoke)
 
+	local rangeChecker
+		if 400 + (400 * Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1))) < 1000 then
+			rangeChecker = 400 + (400 * Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1)))
+		else
+			rangeChecker = 1000
+		end
+
 	if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(emp), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
 		if not NPC.IsEntityInRange(myHero, enemy, 1000) then
 			if blink and Ability.IsReady(blink) then
@@ -6045,7 +6052,7 @@ function fooAllInOne.InvokerComboTornadoEmpIcewall(myHero, myMana, enemy, tornad
 				end
 				if not Ability.IsReady(emp) then
 					if fooAllInOne.SleepReady(0.05) and tornado and Ability.IsCastable(tornado, myMana) then
-						if os.clock() - fooAllInOne.lastCastTime <= 2.9 - tornadoTiming - 0.1 then
+						if os.clock() - fooAllInOne.lastCastTime <= 2.9 - tornadoTiming - 0.5 then
 							fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil, myHero)
 							return
 						else	
@@ -6096,7 +6103,7 @@ function fooAllInOne.InvokerComboTornadoEmpIcewall(myHero, myMana, enemy, tornad
 				end
 			end
 			if not Ability.IsReady(emp) and not Ability.IsReady(tornado) and NPC.HasModifier(enemy, "modifier_invoker_tornado") then
-				local distance = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D()
+				local distance = math.abs((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() - 550)
 				local timeToTarget = distance / NPC.GetMoveSpeed(myHero)
 				if GameRules.GetGameTime() + timeToTarget <= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) then
 					if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
@@ -6118,10 +6125,11 @@ function fooAllInOne.InvokerComboTornadoEmpIcewall(myHero, myMana, enemy, tornad
 	if not Ability.IsReady(tornado) and not Ability.IsReady(emp) then
 		if fooAllInOne.InvokerIsAbilityInvoked(myHero, iceWall) then
 			if fooAllInOne.SleepReady(0.05) and iceWall and Ability.IsCastable(iceWall, myMana) then
-				if not NPC.IsEntityInRange(myHero, enemy, 250) then
-					fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(249), myHero)
+				if not NPC.IsEntityInRange(myHero, enemy, 550) then
+					fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(500), myHero)
 				else
-					Ability.CastNoTarget(iceWall)
+					fooAllInOne.InvokerIceWallHelper(myHero, enemy, iceWall, myMana)
+				--	Ability.CastNoTarget(iceWall)
 					fooAllInOne.lastTick = os.clock()
 					return
 				end
@@ -6450,7 +6458,7 @@ function fooAllInOne.InvokerComboAghaTornadoEmpMeteorBlast(myHero, myMana, enemy
 		if fooAllInOne.SleepReady(0.05) and emp and Ability.IsCastable(emp, myMana) then
 			local travelTime = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000
 			local tornadoTiming = fooAllInOne.invokerTornadoLiftDuration[Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0))] + travelTime
-			if os.clock() - fooAllInOne.lastCastTime > tornadoTiming - 2.9 + 0.05 then
+			if os.clock() - fooAllInOne.lastCastTime > tornadoTiming - 2.9 + 0.25 then
 				if NPC.IsEntityInRange(myHero, enemy, 925) then
 					Ability.CastPosition(emp, Entity.GetAbsOrigin(enemy))
 					fooAllInOne.lastTick = os.clock()
@@ -6890,66 +6898,67 @@ function fooAllInOne.InvokerComboRefresherAghaTornadoEmpMeteorBlast(myHero, myMa
 						return
 					end
 				end
-				if fooAllInOne.SleepReady(0.05) and emp and Ability.IsCastable(emp, myMana) then
-					local travelTime = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000
-					local tornadoTiming = fooAllInOne.invokerTornadoLiftDuration[Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0))] + travelTime
-					if os.clock() - fooAllInOne.lastCastTime > tornadoTiming - 2.9 + 0.05 then
-						if NPC.IsEntityInRange(myHero, enemy, 925) then
-							Ability.CastPosition(emp, Entity.GetAbsOrigin(enemy))
-							fooAllInOne.lastTick = os.clock()
-							return
-						else
-							Ability.CastPosition(emp, Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(925))
-							fooAllInOne.lastTick = os.clock()
-							return
-						end
-					end
-				end
-				if not Ability.IsReady(tornado) and not Ability.IsReady(emp) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, chaosMeteor) then
+				if not Ability.IsReady(tornado) then
 					if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) then
 						fooAllInOne.invokerInvokeAbility(myHero, chaosMeteor)
 						fooAllInOne.lastTick = os.clock()
 						return
 					end
-				end
+				end	
 			end
 		end
-		
-		if NPC.HasModifier(enemy, "modifier_invoker_tornado") and fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(chaosMeteor), Ability.GetName(emp)) then
-			if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
-				local distance = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() - NPC.GetAttackRange(myHero)
-					if distance < 0 then
-						distance = 0
-					end
-				local timeToPosition = distance / NPC.GetMoveSpeed(myHero)
-				if GameRules.GetGameTime() + timeToPosition < Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
-					if not NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(myHero)) then
-						fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(NPC.GetAttackRange(myHero)), myHero)	
+
+		if not Ability.IsReady(tornado) and fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(chaosMeteor), Ability.GetName(emp)) then
+			if fooAllInOne.SleepReady(0.05) and emp and Ability.IsCastable(emp, myMana) then
+				local travelTime = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000
+				local tornadoTiming = fooAllInOne.invokerTornadoLiftDuration[Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0))] + travelTime
+				if os.clock() - fooAllInOne.lastCastTime > tornadoTiming - 2.9 + 0.25 then
+					if NPC.IsEntityInRange(myHero, enemy, 925) then
+						Ability.CastPosition(emp, Entity.GetAbsOrigin(enemy))
+						fooAllInOne.lastTick = os.clock()
+						return
 					else
-						if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
-							if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
-								Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
-								fooAllInOne.lastTick = os.clock()
-								return
+						Ability.CastPosition(emp, Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(925))
+						fooAllInOne.lastTick = os.clock()
+						return
+					end
+				end
+			end
+			if NPC.HasModifier(enemy, "modifier_invoker_tornado") then
+				if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+					local distance = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() - NPC.GetAttackRange(myHero)
+						if distance < 0 then
+							distance = 0
+						end
+					local timeToPosition = distance / NPC.GetMoveSpeed(myHero)
+					if GameRules.GetGameTime() + timeToPosition < Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+						if not NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(myHero)) then
+							fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(NPC.GetAttackRange(myHero)), myHero)	
+						else
+							if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+								if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+									Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(100))
+									fooAllInOne.lastTick = os.clock()
+									return
+								end
 							end
 						end
-					end
-				else
-					if not NPC.IsEntityInRange(myHero, enemy, 950) then
-						fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(950), myHero)	
 					else
-						if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
-							if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
-								Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(250))
-								fooAllInOne.lastTick = os.clock()
-								return
+						if not NPC.IsEntityInRange(myHero, enemy, 950) then
+							fooAllInOne.GenericAttackIssuer("Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION", nil, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(950), myHero)	
+						else
+							if GameRules.GetGameTime() >= Modifier.GetDieTime(NPC.GetModifier(enemy, "modifier_invoker_tornado")) - 1.3 then
+								if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
+									Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(100))
+									fooAllInOne.lastTick = os.clock()
+									return
+								end
 							end
 						end
 					end
 				end
 			end			
-		end
-		
+		end		
 
 		if not Ability.IsReady(chaosMeteor) then
 			if fooAllInOne.SleepReady(0.05) and invoke and Ability.IsCastable(invoke, myMana) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
