@@ -6,8 +6,8 @@ TechiesHUD.Locale = {
 		["english"] = "TechiesHUD"
 	},
 	["desc"] = {
-		["english"] = "TechiesHUD v1.0.1",
-		["russian"] = "TechiesHUD v1.0.1"
+		["english"] = "TechiesHUD v1.1",
+		["russian"] = "TechiesHUD v1.1"
 	},
 	["optionDetonate"] = {
 		["english"] = "Auto detonate remote mines",
@@ -169,6 +169,26 @@ TechiesHUD.Locale = {
 		["english"] = "Circle resolution",
 		["russian"] = "Качество круга"
 	},
+	["altInfo"] = {
+		["english"] = "Show additional info if alt key pressed",
+		["russian"] = "Показывать дополнительную информацию, если нажата клавиша alt"
+	},
+	["altInfoDrawing"] = {
+		["english"] = "Alt info",
+		["russian"] = "Alt информация"
+	},
+	["altInfoRemoteNumberInManaPool"] = {
+		["english"] = "Show under the cursor a stock of remote mines in the manapool",
+		["russian"] = "Показывать под курсором запас remote mines в манапуле"
+	},
+	["altInfoEnemyNumRemote"] = {
+		["english"] = "Show under the enemy hero the number of remote mines needed to kill",
+		["russian"] = "Показывать под вражеским героем количество remote mines необходимых для убийства"
+	},
+	["altInfoNumLevelRemote"] = {
+		["english"] = "Show under remote mines, how many there are mines of a certain level",
+		["russian"] = "Показывать под remote mines, сколько там мин определенного уровня"
+	},
 	["font1"] = {
 		["english"] = "Size font for timings and blast off damage info",
 		["russian"] = "Размер шрифта для таймингов и информации о уроне blast off"
@@ -178,8 +198,8 @@ TechiesHUD.Locale = {
 		["russian"] = "Размер шрифта для верхней панели"
 	},
 	["empty"] = {
-		["english"] = "Empty",
-		["russian"] = "Пусто"
+		["english"] = "",
+		["russian"] = ""
 	},
 	["detonateMode"] = {
 		["english"] = {
@@ -229,6 +249,11 @@ local optionPanelInfoGemAndSentry
 local optionFont1
 local optionFont2
 
+local optionAltInfoDrawing
+local optionAltInfoRemoteNumberInManaPool
+local optionAltInfoNumLevelRemote
+local optionAltInfoEnemyNumRemote
+
 local size_x, size_y = Renderer.GetScreenSize()
 local mines_time = {}
 local mines_damage = {}
@@ -266,6 +291,7 @@ end
 
 function TechiesHUD.OnEntityDestroy(ent)
 	if not optionTotal then return end
+	if not Entity.IsNPC(ent) then return end
 	if NPC.GetUnitName(ent) == "npc_dota_techies_remote_mine" then
 		mines_damage[Entity.GetIndex(ent)] = nil
 		remote_create_time[Entity.GetIndex(ent)] = nil
@@ -369,6 +395,11 @@ function TechiesHUD.UpdateGUISettings()
 		optionFont2 = GUI.Get(TechiesHUD.Identity .. "optionFont2")
 		TechiesHUD.HUDfont = Renderer.LoadFont("Tahoma", tonumber(optionFont2), Enum.FontWeight.EXTRABOLD)
 	end
+
+	optionAltInfoDrawing = GUI.IsEnabled(TechiesHUD.Identity .. "optionAltInfoDrawing")
+	optionAltInfoRemoteNumberInManaPool = GUI.IsEnabled(TechiesHUD.Identity .. "optionAltInfoRemoteNumberInManaPool")
+	optionAltInfoNumLevelRemote = GUI.IsEnabled(TechiesHUD.Identity .. "optionAltInfoNumLevelRemote")
+	optionAltInfoEnemyNumRemote = GUI.IsEnabled(TechiesHUD.Identity .. "optionAltInfoEnemyNumRemote")
 end
 
 function TechiesHUD.OnDraw()
@@ -404,6 +435,14 @@ function TechiesHUD.OnDraw()
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "FDFailSwitchSection2", TechiesHUD.Locale["FDFailSwitchSection2"], GUI.MenuType.Label) -- FD FailSwitch
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionFDFailSwitch", TechiesHUD.Locale["FDFailSwitch"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionFDFailSwitchMod", TechiesHUD.Locale["FDFailSwitchTogleMode"], GUI.MenuType.SelectBox, TechiesHUD.Locale["detonateMode"], { 0 }, 1, nil)
+
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfo", TechiesHUD.Locale["altInfo"], GUI.MenuType.Label) -- Alt info
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfoDrawing", TechiesHUD.Locale["altInfoDrawing"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfoRemoteNumberInManaPool", TechiesHUD.Locale["altInfoRemoteNumberInManaPool"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfoNumLevelRemote", TechiesHUD.Locale["altInfoNumLevelRemote"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfoEnemyNumRemote", TechiesHUD.Locale["altInfoEnemyNumRemote"], GUI.MenuType.CheckBox, 1)
+
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionEmpty", TechiesHUD.Locale["empty"], GUI.MenuType.Label) -- Alt info
 
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "drawingOptionSection", TechiesHUD.Locale["drawingOptionSection"], GUI.MenuType.Label) -- Drawing
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionPanelInfo", TechiesHUD.Locale["panelInfo"], GUI.MenuType.CheckBox, 1)
@@ -475,9 +514,25 @@ function TechiesHUD.OnDraw()
 		end
 	end
 
+	if remote ~= nil and Ability.GetLevel(remote) ~= 0 and Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing and optionAltInfoRemoteNumberInManaPool then
+			local x, y = Renderer.WorldToScreen(Input.GetWorldCursorPos())
+			Renderer.SetDrawColor(255, 255, 255, 255)
+			local mp = Ability.GetCooldownTimeLeft(remote) * NPC.GetManaRegen(myHero) + NPC.GetMana(myHero)
+			local num_remote = 0
+			if (Ability.GetCooldownLength(remote) + Ability.GetCastPoint(remote)) * NPC.GetManaRegen(myHero) < Ability.GetManaCost(remote) then
+				while mp >= Ability.GetManaCost(remote) do
+					num_remote = num_remote + 1
+					mp = mp - Ability.GetManaCost(remote) + (Ability.GetCooldownLength(remote) + Ability.GetCastPoint(remote)) * NPC.GetManaRegen(myHero)
+				end
+				Renderer.DrawText(TechiesHUD.font, x, y - 20, num_remote +  math.ceil(mp / Ability.GetManaCost(remote) * 100) / 100, 0)
+			else
+				Renderer.DrawText(TechiesHUD.font, x, y - 20, "inf", 0)
+			end
+	end
+
 	remote_pos_draw = {}
 	mines_num = {}
-	for i = 0, NPCs.Count() do
+	for i = 1, NPCs.Count() do
 		local Unit = NPCs.Get(i)
 		local UnitPos = Entity.GetAbsOrigin(Unit)
 
@@ -558,17 +613,38 @@ function TechiesHUD.OnDraw()
 						local x, y, visible = Renderer.WorldToScreen(UnitPos)
 						if visible then
 							local num_mines = 0
-							for j = 0, NPCs.Count() do
+							local num_mines_1_lvl = 0
+							local num_mines_2_lvl = 0
+							local num_mines_3_lvl = 0
+							for j = 1, NPCs.Count() do
 								local Unit2 = NPCs.Get(j)
 								if NPC.IsPositionInRange(Unit2, UnitPos, 200, Enum.TeamType.TEAM_FRIEND)
 								and NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil
 								then
-									num_mines = num_mines + 1
+									if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing and optionAltInfoNumLevelRemote then
+										if mines_damage[Entity.GetIndex(Unit2)] == nil then
+											mines_damage[Entity.GetIndex(Unit2)] = remote_damage
+										end
+										local mines_level = (mines_damage[Entity.GetIndex(Unit2)] - 150) / 150
+										if mines_level == 1 then
+											num_mines_1_lvl = num_mines_1_lvl + 1
+										elseif mines_level == 2 then
+											num_mines_2_lvl = num_mines_2_lvl + 1
+										elseif mines_level == 3 then
+											num_mines_3_lvl = num_mines_3_lvl + 1
+										end
+									else
+										num_mines = num_mines + 1
+									end
 									mines_num[j] = 0
 								end
 							end
 							Renderer.SetDrawColor(255, 255, 255, 255)
-							Renderer.DrawText(TechiesHUD.font, x, y, num_mines, 0)
+							if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing and optionAltInfoNumLevelRemote then
+								Renderer.DrawText(TechiesHUD.font, x, y, "1:" .. num_mines_1_lvl .. " 2:" .. num_mines_2_lvl .. " 3:" .. num_mines_3_lvl, 0)
+							else
+								Renderer.DrawText(TechiesHUD.font, x, y, num_mines, 0)
+							end
 						end
 					end
 				end
@@ -623,6 +699,11 @@ function TechiesHUD.OnDraw()
 				local Hp = Entity.GetHealth(Unit) / ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit))
 				local Hp_all = Entity.GetMaxHealth(Unit) / ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit))
 
+				local x, y, visible = Renderer.WorldToScreen(UnitPos)
+				if visible and Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing and optionAltInfoEnemyNumRemote and not Entity.IsDormant(Unit) then
+					Renderer.SetDrawColor(255, 255, 255, 255)
+					Renderer.DrawText(TechiesHUD.font, x, y - 20, math.ceil(Hp * 10) / 10, 0)
+				end
 				Renderer.SetDrawColor(0, 255, 0, 255)
 				if optionPanelInfoColumn then
 					if Entity.GetTeamNum(myHero) == 2 then
@@ -669,7 +750,7 @@ function SetSpot()
 		local closest_remote = nil
 		local cursor_pos = Input.GetWorldCursorPos()
 		if optionAutoPlantStackRange ~= 0 then
-			for i = 0, NPCs.Count() do
+			for i = 1, NPCs.Count() do
 				local Unit = NPCs.Get(i)
 				local UnitPos = Entity.GetAbsOrigin(Unit)
 				if NPC.IsPositionInRange(Unit, cursor_pos, optionAutoPlantStackRange, Enum.TeamType.TEAM_FRIEND)
@@ -710,7 +791,7 @@ function TechiesHUD.OnUpdate()
 	if optionAutoPlant then
 		for i, spot in pairs(spot_for_plant) do
 			spot.num_mines = 0
-			for j = 0, NPCs.Count() do
+			for j = 1, NPCs.Count() do
 				local Unit2 = NPCs.Get(j)
 				if NPC.IsPositionInRange(Unit2, spot.position, 200, Enum.TeamType.TEAM_FRIEND)
 				and NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil
@@ -748,7 +829,7 @@ function TechiesHUD.OnUpdate()
 		local remote_sum_damage = {}
 		local fast_remote_sum_damage = {}
 		local force_remote_sum_damage = {}
-		for i = 0, NPCs.Count() do
+		for i = 1, NPCs.Count() do
 			local Unit = NPCs.Get(i)
 			local UnitPos = Entity.GetAbsOrigin(Unit)
 			if NPC.GetModifier(Unit, "modifier_techies_remote_mine") and Entity.IsAlive(Unit) then
@@ -784,7 +865,7 @@ function TechiesHUD.OnUpdate()
 				end
 			end
 		end
-		for i = 0, Heroes.Count() do
+		for i = 1, Heroes.Count() do
 			local Unit = Heroes.Get(i)
 			local UnitPos = Entity.GetAbsOrigin(Unit)
 			if Entity.IsHero(Unit)
@@ -793,6 +874,7 @@ function TechiesHUD.OnUpdate()
 			and not Entity.IsDormant(Unit)
 			and (NPC.IsKillable(Unit) or (NPC.GetUnitName(Unit) == "npc_dota_hero_skeleton_king" and optionDetonateWk) or (NPC.HasItem(Unit, "item_aegis", 1) and optionDetonateAegis))
 			and Entity.IsAlive(Unit)
+			and not NPC.HasModifier(Unit, "modifier_manta")
 			then
 				if hero_time[Entity.GetIndex(Unit)] == nil then
 					hero_time[Entity.GetIndex(Unit)] = 0
@@ -805,10 +887,10 @@ function TechiesHUD.OnUpdate()
 								forced_time = 0
 							end
 							if NPC.IsPositionInRange(myHero, UnitPos, 1000, 0)
-							and force_remote_sum_damage[Entity.GetIndex(Unit)] ~= nil and force_remote_sum_damage[Entity.GetIndex(Unit)] * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit) and GameRules.GetGameTime() - forc_time > 0.5 then
+							and force_remote_sum_damage[Entity.GetIndex(Unit)] ~= nil and force_remote_sum_damage[Entity.GetIndex(Unit)] * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit) and GameRules.GetGameTime() - forc_time > 0.5 and not Entity.IsTurning(Unit) then
 								if force_direction[i] == nil or force_direction[i] == 0 then
 									force_direction[i] = GameRules.GetGameTime()
-								elseif Ability.GetCooldownTimeLeft(force) == 0 and GameRules.GetGameTime() - force_direction[i] > Config.ReadInt("TechiesHUD", "Force Stuff delay", 500) / 1000 then
+								elseif Ability.GetCooldownTimeLeft(force) == 0 and GameRules.GetGameTime() - force_direction[i] > 0.2 then
 									Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET, Unit, Vector(0, 0, 0), force, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero, 0, 0)
 									forc_time = GameRules.GetGameTime()
 									hero_time[Entity.GetIndex(Unit)] =  1
@@ -827,7 +909,7 @@ function TechiesHUD.OnUpdate()
 						local remote_need_damage = Entity.GetHealth(Unit) + NPC.GetHealthRegen(Unit) * 0.3
 						if GameRules.GetGameTime() - check_detonate > 0.5 and hero_time[Entity.GetIndex(Unit)] ~= 0 and (GameRules.GetGameTime() - hero_time[Entity.GetIndex(Unit)] > optionDelay / 1000 or (fast_remote_sum_damage[Entity.GetIndex(Unit)] ~= nil and fast_remote_sum_damage[Entity.GetIndex(Unit)] * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit))) then
 							local unit_pos = nil
-							for j = 0, NPCs.Count() do
+							for j = 1, NPCs.Count() do
 								local Unit2 = NPCs.Get(j)
 								if NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil
 								and Entity.IsAlive(Unit2)
@@ -891,7 +973,7 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 		local remote_damage = Ability.GetLevelSpecialValueFor(NPC.GetAbilityByIndex(myHero, 5), "damage")
 		local hp = {}
 		local num_ready_mines = 0
-		for i = 0, NPCs.Count() do
+		for i = 1, NPCs.Count() do
 			local Unit = NPCs.Get(i)
 			local UnitPos = Entity.GetAbsOrigin(Unit)
 			if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
@@ -905,6 +987,7 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 				for j, v in pairs(NPC.GetHeroesInRadius(Unit, 425 - 24, Enum.TeamType.TEAM_ENEMY)) do
 					if Entity.IsAlive(v)
 					and not Entity.IsDormant(v)
+					and not NPC.HasModifier(Unit, "modifier_manta")
 					and (NPC.IsKillable(v) or NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" or NPC.HasItem(v, "item_aegis", 1) or NPC.GetModifier(v, "modifier_dazzle_shallow_grave") ~= nil)
 					then
 						if hp[Entity.GetIndex(v)] == nil then
@@ -929,7 +1012,7 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 		and Ability.GetName(orders.ability) ~= "techies_stasis_trap"
 		then return true end
 
-		for i = 0, NPCs.Count() do
+		for i = 1, NPCs.Count() do
 			local Unit = NPCs.Get(i)
 			local UnitPos = Entity.GetAbsOrigin(Unit)
 			if ((NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil

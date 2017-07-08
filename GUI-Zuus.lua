@@ -120,14 +120,14 @@ function BTW.Combo()
 	local ordercast = GUI.Get(BTW.Identity .. "ordercombo", 1)
 	if ordercast == nil then return end
     local position = Entity.GetAbsOrigin(enemy)   
-    local manapoint = NPC.GetMana(self)
+    local manapoint = NPC.GetMana(BTW.Hero)
 	
 	local prevcast = nil
 	for i = 1, Length(ordercast) do
 		BTW.Cast(ordercast[i], BTW.Hero, enemy, NPC.GetAbsOrigin(enemy), BTW.MP)
 	end
 
-	if not NPC.HasModifier(hero, "modifier_item_ethereal_blade_slow") and GUI.IsEnabled(BTW.Identity .. "orbwalker") then
+	if not NPC.HasModifier(enemy, "modifier_item_ethereal_blade_slow") and GUI.IsEnabled(BTW.Identity .. "orbwalker") then
 		Player.PrepareUnitOrders(Players.GetLocal(), 4, enemy, Vector(0,0,0), enemy, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, BTW.Hero)
 	end
 end
@@ -179,7 +179,7 @@ function BTW.StealCloud()
 	end
 		
 	for n, npc in pairs(Heroes.GetAll()) do	
-		if not Entity.IsDormant(npc) and Entity.IsAlive(npc) and not NPC.IsIllusion(npc) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+		if not Entity.IsDormant(npc) and Entity.IsAlive(npc) and not NPC.IsIllusion(npc) and not Entity.IsSameTeam(BTW.Hero, npc) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 			local boltdmg = Ability.GetDamage(BTW.Abilitys['zuus_lightning_bolt'])
 		
 			if Ability.GetLevel(BTW.Abilitys['zuus_static_field']) > 0 then
