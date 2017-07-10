@@ -169,7 +169,6 @@ function TechiesEX.DrawData()
 			end
 		end
 		if count > 0 then
-			local pos = NPC.GetAbsOrigin(v)
 			local x, y, visible = Renderer.WorldToScreen(v)
 			
 			Renderer.SetDrawColor(29, 32, 39, 200)

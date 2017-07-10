@@ -230,6 +230,7 @@ function ItemPanel.OnDraw()
 	local defx, xpos = math.floor(size * 128 / 72)
 	local total_heroes = 0
 	local max_items = 0
+	local iscd = GUI.IsEnabled(ItemPanel.Identity .. "cd")
 
 	for k, hero in pairs(Heroes.GetAll()) do		
 		if not NPC.IsIllusion(hero) and Entity.IsHero(hero) and not Entity.IsSameTeam(myHero, hero) then
@@ -248,7 +249,6 @@ function ItemPanel.OnDraw()
 					end
 					Renderer.DrawImage(imageHandle, xpos, ypos, size + 8, size)
 					local cd = math.ceil(Ability.GetCooldown(item))
-					local iscd = GUI.IsEnabled(ItemPanel.Identity .. "cd")
 					if Item.GetCurrentCharges(item) > 0 or (cd > 0 and iscd) then
 						Renderer.SetDrawColor(0, 0, 0, 200)
 						Renderer.DrawFilledRect(xpos, ypos, size + 8, size)

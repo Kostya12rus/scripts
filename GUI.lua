@@ -1,5 +1,6 @@
 GUI = {}
 GUI.Enabled = Menu.AddOption({ "GUI" }, "Enable", "")
+GUI.InGameMenu = Menu.AddOption({ "GUI" }, "In-game menu", "")
 GUI.Key = Menu.AddKeyOption({ "GUI" }, "Key", Enum.ButtonCode.KEY_BACKQUOTE)
 GUI.Locale =  Menu.AddOption({ "GUI"}, "Localization", "Select your primary language", 1, 3 )
 Menu.SetValueName(GUI.Locale, 1, "English")
@@ -33,8 +34,8 @@ GUI.Font.Footer = Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.Animation = 0
 GUI.GameState = -2
 GUI.Config = "GUI"
-GUI.Version = 170702
-GUI.TextVersion = 'v 17.07.02'
+GUI.Version = 170708
+GUI.TextVersion = 'v 17.07.08'
 
 GUI.GameStates = {}
 GUI.GameStates.OnGameMenu = -1
@@ -109,6 +110,7 @@ GUI.Theme.Back = nil
 GUI.Theme.RadioActive = nil
 GUI.Theme.RadioInActive = nil
 GUI.Theme.Close = nil
+GUI.Theme.Menu = nil
 
 GUI.Settings = {}
 GUI.Settings.PosX = -1
@@ -206,15 +208,35 @@ function GUI.OnDraw()
 	if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then leftclick = true end
 	if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_RIGHT) then rightclick = true end
 
+
 	if GUI.IsEnabled("gui:show") then 
 		GUI.DrawGUI(leftclick, rightclick)
 	end
 	local w, h = Renderer.GetScreenSize()
 	DrawNotices(w, h, leftclick)
 	
+	
+	if Engine.IsInGame() and Menu.IsEnabled(GUI.InGameMenu) then 
+		local tmi_loc_x = math.floor(w * 0.10)
+		local tmi_loc_y = math.floor(h * 0.01)
+		local size = math.floor(h * 0.032)
+		if Input.IsCursorInRect(tmi_loc_x, tmi_loc_y + 1, size, size) then
+			Renderer.SetDrawColor(255, 255, 255, 255)
+			if leftclick then
+				if GUI.IsEnabled("gui:show") then 
+					GUI.Set("gui:show", 0)
+				else 
+					GUI.Set("gui:show", 1)
+				end
+			end
+		else
+			Renderer.SetDrawColor(255, 255, 255, 180)
+		end
+		Renderer.DrawImage(GUI.Theme.Menu, tmi_loc_x, tmi_loc_y + 1, size, size)
+	end
+	
 	if GUI.DEBUG.Enabled then
 		Renderer.SetDrawColor(hex2rgb("#273142"))
-		local w, h = Renderer.GetScreenSize()
 		Renderer.DrawFilledRect(w - 300, 0, 300, 25)
 		Renderer.SetDrawColor(hex2rgb("#fff"))
 		Renderer.DrawText(GUI.Font.ContentSmallBold, w - 290, 5, "DEBUG")
@@ -1446,6 +1468,7 @@ function ApplyTheme()
 	GUI.Theme.RadioActive = Renderer.LoadImage("~/" .. f .. "/radio-active.png")
 	GUI.Theme.RadioInActive = Renderer.LoadImage("~/" .. f .. "/radio-inactive.png")
 	GUI.Theme.Close = Renderer.LoadImage("~/" .. f .. "/close.png")
+	GUI.Theme.Menu = Renderer.LoadImage("resource/flash3/images/badges/ti6_battle_pass_badge_4.png")
 end
 
 function GUI.GetThemeName()

@@ -76,6 +76,7 @@ function Weather.OnDraw()
 end
 
 function Weather.UpdateSelect(t)
+	if not GUI.IsEnabled(Weather.Identity) then return end
 	for k, v in pairs(t) do
 		if v == 10 then 
 			v = math.random(0, 9)
@@ -85,6 +86,7 @@ function Weather.UpdateSelect(t)
 end
 
 function NewGameStart(o, n)
+	if not GUI.IsEnabled(Weather.Identity) then return end
 	if GUI.IsEnabled(Weather.Identity .. "random") then
 		Engine.ExecuteCommand("cl_weather " .. math.random(1, 9))
 	else
