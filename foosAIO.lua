@@ -1,30 +1,31 @@
 -- foosAIO.lua
--- Version: beta.0.81.7
+-- Version: beta.0.84.2d
 -- Author: foo0oo
 -- Release Date: 2017/05/03
--- Last Update: 2017/07/07
+-- Last Update: 2017/07/11
 
 local fooAllInOne = {}
 -- Menu Items
 	-- general Menu
 fooAllInOne.optionEnable = Menu.AddOption({ "Utility","foos AllInOne" }, "1. Overall enabled", "Helpers helper")
 fooAllInOne.optionComboKey = Menu.AddKeyOption({ "Utility","foos AllInOne" }, "1.1 overall combo key", Enum.ButtonCode.KEY_SPACE)
-fooAllInOne.optionDebugEnable = Menu.AddOption({ "Utility","foos AllInOne" }, "9. Debug", "should be off, just for developers")
-fooAllInOne.optionOrbwalkEnable = Menu.AddOption({ "Utility","foos AllInOne", "7. Orbwalker" }, "Enabled", "if enabled, you will use orbwalker module instead of regular right clicks")
-fooAllInOne.optionOrbwalkDistance = Menu.AddOption({ "Utility","foos AllInOne", "7. Orbwalker" }, "Minimum distance", "ranged heroes will not go nearer then minimum range to target - values are percentage of your attack range - recommended: 50%- 70%", 30, 80, 10)
-fooAllInOne.optionOrbwalkOffset = Menu.AddOption({ "Utility","foos AllInOne", "7. Orbwalker" }, "Orbwalker offset", "set the offset - the higher the value, the less the distance your hero will move in-between attacks - if value = 0, you go full distance possible in backswing - recommended value: 10-20 because of ping, pathing, blocked pathing etc.", 0, 50, 5)
-fooAllInOne.optionOrbwalkKiting = Menu.AddOption({ "Utility","foos AllInOne", "7. Orbwalker" }, "kiting", "if enabled, your ranged hero tries to hit and run away if enemy is to close (only if turning-running-turning is faster then attack animation)")
-fooAllInOne.optionWorldToMinimapOffsetX = Menu.AddOption({ "Utility","foos AllInOne", "6. WorldToMinimap" }, "X-Offset", "Adjustment variable for World-to-minimap renderer", -30, 30, 1)
-fooAllInOne.optionWorldToMinimapOffsetY = Menu.AddOption({ "Utility","foos AllInOne", "6. WorldToMinimap" }, "Y-Offset", "Adjustment variable for World-to-minimap renderer", -30, 30, 1)
+fooAllInOne.optionDebugEnable = Menu.AddOption({ "Utility","foos AllInOne" }, "99. ***Debug***", "should be off, just for developers")
+fooAllInOne.optionOrbwalkEnable = Menu.AddOption({ "Utility","foos AllInOne", "8. Orbwalker" }, "Enabled", "if enabled, you will use orbwalker module instead of regular right clicks")
+fooAllInOne.optionOrbwalkDistance = Menu.AddOption({ "Utility","foos AllInOne", "8. Orbwalker" }, "Minimum distance", "ranged heroes will not go nearer then minimum range to target - values are percentage of your attack range - recommended: 50%- 70%", 30, 80, 10)
+fooAllInOne.optionOrbwalkOffset = Menu.AddOption({ "Utility","foos AllInOne", "8. Orbwalker" }, "Orbwalker offset", "set the offset - the higher the value, the less the distance your hero will move in-between attacks - if value = 0, you go full distance possible in backswing - recommended value: 10-20 because of ping, pathing, blocked pathing etc.", 0, 50, 5)
+fooAllInOne.optionOrbwalkKiting = Menu.AddOption({ "Utility","foos AllInOne", "8. Orbwalker" }, "kiting", "if enabled, your ranged hero tries to hit and run away if enemy is to close (only if turning-running-turning is faster then attack animation)")
+fooAllInOne.optionWorldToMinimapOffsetX = Menu.AddOption({ "Utility","foos AllInOne", "7. WorldToMinimap" }, "X-Offset", "Adjustment variable for World-to-minimap renderer", -30, 30, 1)
+fooAllInOne.optionWorldToMinimapOffsetY = Menu.AddOption({ "Utility","foos AllInOne", "7. WorldToMinimap" }, "Y-Offset", "Adjustment variable for World-to-minimap renderer", -30, 30, 1)
+
 	-- killsteal Menu
-fooAllInOne.optionKillStealEnable = Menu.AddOption({ "Utility","foos AllInOne", "8. Auto Kill Steal" }, "Enabled", "uses skill nukes to kill enemy (only nukes, no disable abilities)")
-fooAllInOne.optionKillStealInvoker = Menu.AddOption({ "Utility","foos AllInOne", "8. Auto Kill Steal", "Invoker" }, "1. Auto Sunstrike KillSteal", "tries to kill steal with sun strike")
-fooAllInOne.optionKillStealInvokerTurn = Menu.AddOption({ "Utility","foos AllInOne", "8. Auto Kill Steal", "Invoker" }, "5.2 Turn check adjustment", "amount of game ticks enemy must run in a straight line (30 ticks ~ 1 sec)", 10, 60, 5)
-fooAllInOne.optionKillStealAutoInvoke = Menu.AddOption({ "Utility","foos AllInOne", "8. Auto Kill Steal", "Invoker" }, "5.1 Auto Invoke Sunstrike", "will auto invoke SS if not in slot and enemy killable")
-fooAllInOne.optionKillStealInvokerTPpartice = Menu.AddOption({ "Utility","foos AllInOne", "8. Auto Kill Steal", "Invoker" }, "3. Killsteal on TPing enemies", "will kill tp'ing enemies if enemy HP is below DMG treshold")
-fooAllInOne.optionKillStealInvokerImmobil = Menu.AddOption({ "Utility","foos AllInOne", "8. Auto Kill Steal", "Invoker" }, "2. Killsteal on immobilized enemies", "will kill immobilized enemies if enemy HP is below DMG treshold")
-fooAllInOne.optionKillStealInvokerTreshold = Menu.AddOption({ "Utility","foos AllInOne", "8. Auto Kill Steal", "Invoker" }, "5.3 HP Treshold adjust", "will start casting sunstrike before HP is below sunstrike dmg (for incoming attacks e.g. from team) (in % of sunstrike dmg)", 0, 25, 5)
-fooAllInOne.optionKillStealInvokerRunning = Menu.AddOption({ "Utility","foos AllInOne", "8. Auto Kill Steal", "Invoker" }, "4. Killsteal on moving targets", "will try to kill moving enemies if enemy HP is below DMG treshold")
+fooAllInOne.optionKillStealEnable = Menu.AddOption({ "Utility","foos AllInOne", "9. Auto Kill Steal" }, "Enabled", "uses skill nukes to kill enemy (only nukes, no disable abilities)")
+fooAllInOne.optionKillStealInvoker = Menu.AddOption({ "Utility","foos AllInOne", "9. Auto Kill Steal", "Invoker" }, "1. Auto Sunstrike KillSteal", "tries to kill steal with sun strike")
+fooAllInOne.optionKillStealInvokerTurn = Menu.AddOption({ "Utility","foos AllInOne", "9. Auto Kill Steal", "Invoker" }, "5.2 Turn check adjustment", "amount of game ticks enemy must run in a straight line (30 ticks ~ 1 sec)", 10, 60, 5)
+fooAllInOne.optionKillStealAutoInvoke = Menu.AddOption({ "Utility","foos AllInOne", "9. Auto Kill Steal", "Invoker" }, "5.1 Auto Invoke Sunstrike", "will auto invoke SS if not in slot and enemy killable")
+fooAllInOne.optionKillStealInvokerTPpartice = Menu.AddOption({ "Utility","foos AllInOne", "9. Auto Kill Steal", "Invoker" }, "3. Killsteal on TPing enemies", "will kill tp'ing enemies if enemy HP is below DMG treshold")
+fooAllInOne.optionKillStealInvokerImmobil = Menu.AddOption({ "Utility","foos AllInOne", "9. Auto Kill Steal", "Invoker" }, "2. Killsteal on immobilized enemies", "will kill immobilized enemies if enemy HP is below DMG treshold")
+fooAllInOne.optionKillStealInvokerTreshold = Menu.AddOption({ "Utility","foos AllInOne", "9. Auto Kill Steal", "Invoker" }, "5.3 HP Treshold adjust", "will start casting sunstrike before HP is below sunstrike dmg (for incoming attacks e.g. from team) (in % of sunstrike dmg)", 0, 25, 5)
+fooAllInOne.optionKillStealInvokerRunning = Menu.AddOption({ "Utility","foos AllInOne", "9. Auto Kill Steal", "Invoker" }, "4. Killsteal on moving targets", "will try to kill moving enemies if enemy HP is below DMG treshold")
 
 	-- Items Menu
 fooAllInOne.optionItemEnable = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage" }, "Enabled", "Helpers helper")
@@ -45,6 +46,7 @@ fooAllInOne.optionItemManta = Menu.AddOption({ "Utility","foos AllInOne", "2. Au
 fooAllInOne.optionItemMjollnir = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage", "Items" }, "Use Item Mjollnir", "cast order - highest number will be cast first", 0, 10, 1)
 fooAllInOne.optionItemMedallion = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage", "Items" }, "Use Item Medallion of Courage", "cast order - highest number will be cast first", 0, 10, 1)
 fooAllInOne.optionItemCrest = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage", "Items" }, "Use Item Solar Crest", "cast order - highest number will be cast first", 0, 10, 1)
+
 	-- Linkens Menu
 fooAllInOne.optionLinkensEnable = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "Enabled", "Helpers helper")
 fooAllInOne.optionLinkensForce = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "Use Force Staff", "to break Linkens - highest number will be prioritized", 0, 6, 1)
@@ -54,6 +56,7 @@ fooAllInOne.optionLinkensHex = Menu.AddOption({ "Utility","foos AllInOne", "3. A
 fooAllInOne.optionLinkensBlood = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "Use Bloodthorn", "to break Linkens - highest number will be prioritized", 0, 6, 1)
 fooAllInOne.optionLinkensOrchid = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "Use Orchid", "to break Linkens - highest number will be prioritized", 0, 6, 1)
 fooAllInOne.optionLinkensPike = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "Use Pike", "to break Linkens - highest number will be prioritized", 0, 6, 1)
+
 	-- Utility Items Menu
 fooAllInOne.optionUtilityEnable = Menu.AddOption({ "Utility","foos AllInOne", "4. Auto Use Utility Items" }, "Enabled", "Helpers helper")
 fooAllInOne.optionUtilityMidas = Menu.AddOption({ "Utility","foos AllInOne", "4. Auto Use Utility Items", "Midas" }, "Auto Use Midas", "use midas on creeps automatically")
@@ -64,107 +67,126 @@ fooAllInOne.optionUtilityMek = Menu.AddOption({ "Utility","foos AllInOne", "4. A
 fooAllInOne.optionUtilityGreaves = Menu.AddOption({ "Utility","foos AllInOne", "4. Auto Use Utility Items" }, "Auto Use Greaves", "same as mek")
 fooAllInOne.optionUtilityTalon = Menu.AddOption({ "Utility","foos AllInOne", "4. Auto Use Utility Items" }, "Auto Use Talon", "will use talon on highest hp creep (only neutrals)")
 fooAllInOne.optionUtilityArcane = Menu.AddOption({ "Utility","foos AllInOne", "4. Auto Use Utility Items" }, "Auto Use Arcane Boots", "will use arcanes if you are mana missing or teammate in range is below 40% mana")
-	-- Hero Menu
-fooAllInOne.optionHeroAxe = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Axe" }, "Axe Combo", "basic axe script, will focus nearest hero to cursor")
-fooAllInOne.optionHeroAxeCulling = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Axe" }, "Auto culling blade", "ults everything that is in range and below hp threshold")
-fooAllInOne.optionHeroAxeJump = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Axe" }, "Axe Jump Style", "blink to nearest enemy to cursor or blink to best position if multiple enemies could be called", 0, 1, 1)
-fooAllInOne.optionHeroAxeForceBlink = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Axe" }, "Force blink", "hero will blink when combo button is pressed, even if no enemy is around (e.g. for blinking in FoW) or cursor is not in range of enemy (adjust the range below!)")
-fooAllInOne.optionHeroAxeForceBlinkRange = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Axe" }, "Force Blink Check Range", "if force blink is activated, hero will blink to mouse cursor instead of enemy, if mouse cursor is outside of force blink check range", 150, 750, 50)
-fooAllInOne.optionHeroClock = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts" }, "Clockwerk", "full combo with hookshot prediction (will not check for collision with npcs)")
-fooAllInOne.optionHeroSky = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts" }, "Skywrath", "full combo")
-fooAllInOne.optionHeroTiny = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts" }, "Tiny", "full combo")
-fooAllInOne.optionHeroWindrunner = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts" }, "Windrunner", "if branch in inventory, full combo with tree plant ;); else: if target shakled, then combo")
-fooAllInOne.optionHeroTimber = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts" }, "Timber", "meh, cant target trees.. timberchain to cursor, if enemys are hit, full combo with chakram prediction")
-fooAllInOne.optionHeroEmber = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Ember" }, "Ember Combo", "hold combo key -> full combo with remnant, release key after ~ 1 sec -> fist+chains")
-fooAllInOne.optionHeroEmberUlt = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Ember" }, "Ember Ult Usage in Combo", "", 0, 1, 1)
-fooAllInOne.optionHeroUrsa = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts" }, "Ursa", "full combo, trigger enrage if 2 or more heroes in range")
-fooAllInOne.optionHeroTA = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Templar Assassin" }, "TA Combo", "full combo")
-fooAllInOne.optionHeroTABlink = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Templar Assassin" }, "Use blink in Combo", "")
-fooAllInOne.optionHeroLegion = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts" }, "Legion Commander", "full combo")
-fooAllInOne.optionHeroSlardar = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Slardar" }, "Slardar Combo", "full combo")
-fooAllInOne.optionHeroSlardarStyle = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Slardar" }, "Slardar Jump Style", "blink to nearest enemy to cursor or blink to best position if multiple enemies could be crushed", 0, 1, 1)
-fooAllInOne.optionHeroClinkz = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Clinkz" }, "Clinkz Combo", "full combo")
-fooAllInOne.optionHeroClinkzUlt = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Clinkz" }, "Auto Ultimate", "auto ult on enemy creeps or neutrals when ready")
-fooAllInOne.optionHeroQoP = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Queen of Pain" }, "Queen of Pain Combo", "full combo; only uses ult if you have agahnims and ult can kill enemy")
-fooAllInOne.optionHeroQoPblink = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Queen of Pain" }, "Use blink in combo", "")
-fooAllInOne.optionHeroSven = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts" }, "Sven", "full combo, MoM after everything is used")
-fooAllInOne.optionHeroVisage = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Visage" }, "Visage Combo", "full combo with Familiars")
-fooAllInOne.optionHeroVisageDMGStacks = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Visage" }, "Familiar DMG stacks", "number of remaining familiar damage stacks when starting stun chain", 1, 6, 1)
-fooAllInOne.optionHeroArcWarden = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden" }, "1.0 Arc Warden Combo", "full combo with double")
-fooAllInOne.optionHeroArcWardenMagnetic = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden" }, "1.1 Use magnetic field", "cast magnetic field with main hero in combo (double always uses magnetic field)")
-fooAllInOne.optionHeroArcWardenPush = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden" }, "3.0 Arc Warden TP Push Mode", "push mode with double, if you have BoTs")
-fooAllInOne.optionHeroArcWardenTempest = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden" }, "2.0 Tempest double combo", "will only combo with your double, not with main. BUTTON NEEDS TO BE PRESSED DOWN! will target first enemies nearest mouse, then enemies in range, then creeps in range, if nothing in range, it will push (fountain or cursor)")
-fooAllInOne.optionArcWardenPushKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden" }, "3.1TP Push Key", Enum.ButtonCode.KEY_P)
-fooAllInOne.optionHeroArcWardenPushTPStyle = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden" }, "3.2 TP targeting style", "", 0, 1, 1)
-fooAllInOne.optionHeroArcWardenPushTPSelect = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden" }, "3.3 Auto line selector", "", 0, 1, 1)
-fooAllInOne.optionArcWardenTempestKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden" }, "2.1 Tempest double combo/push key", Enum.ButtonCode.KEY_O)
-fooAllInOne.optionHeroArcWardenTempestTarget = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden" }, "2.2 Tempest direction", "if tempest double combo/push key is pressed, push in the direction of cursor or enemy fountain", 0, 1, 1)
-fooAllInOne.optionHeroArcWardenDraw = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden", "Drawings" }, "Draw Item Cooldowns on Double", "will shot the cooldown of BoTs, midas, necronomicon")
---fooAllInOne.optionHeroArcWardenFont = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden", "Drawings" }, "Font size", "", 10, 50, 5)
-fooAllInOne.optionHeroArcWardenXPos = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden", "Drawings" }, "X-position", "", -500, 500, 10)
-fooAllInOne.optionHeroArcWardenYPos = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Arc Warden", "Drawings" }, "Y-position", "", -500, 500, 10)
-fooAllInOne.optionHeroMorphling = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Morphling" }, "Morphling Combo", "full shotgun combo")
-fooAllInOne.optionHeroMorphlingKill = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Morphling" }, "Draw kill indicator", "will draw a kill indicator if target is killable with full shotgun combo")
-fooAllInOne.optionHeroPuck = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Puck" }, "1. Puck Combo", "basic puck script")
-fooAllInOne.optionHeroPuckJump = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Puck" }, "1.1 Puck Jump Style", "blink to nearest enemy to cursor or blink to best position if multiple enemies could be hit", 0, 1, 1)
-fooAllInOne.optionHeroPuckPanic = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Puck" }, "2. Puck Panic", "basic defensive actions when panic button is pressed")
-fooAllInOne.optionHeroPuckPanicKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Puck" }, "2.3 Puck Panic Key", Enum.ButtonCode.KEY_P)
-fooAllInOne.optionHeroPuckPanicDirection = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Puck" }, "2.1 Puck Panic Direction", "the direction in which blink or orb is casted", 0, 1, 1)
-fooAllInOne.optionHeroPuckComboAltKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Puck" }, "1.3 Puck Alt Key", Enum.ButtonCode.KEY_LCONTROL)
-fooAllInOne.optionHeroPuckDefend = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Puck" }, "2.2 Auto defend", "auto use waning rift when enemy jumps you")
-fooAllInOne.optionHeroPuckOrbInit = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Puck" }, "1.2 Orb Initiation", "will initiate with orb, if no blink dagger; will jaunt to orb, if target is hit")
-fooAllInOne.optionHeroProphet = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Natures Prophet" }, "Prophet Helper", "Lane Pusher with Treants")
-fooAllInOne.optionHeroProphetToggleKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Natures Prophet" }, "Toggle Key", Enum.ButtonCode.KEY_P)
-fooAllInOne.optionProphetDrawToggle = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Natures Prophet", "Drawings" }, "1. Draw Toggle Notification", "")
-fooAllInOne.optionProphetDrawKS = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Natures Prophet", "Drawings" }, "2. Draw KS Notification", "will show you, if an enemy is below 20% hp")
-fooAllInOne.optionProphetDrawKSminimap = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Natures Prophet", "Drawings" }, "3. Draw KS Target on Minimap", "draws a notification where an enemy below 20% HP is on minimap")
-fooAllInOne.optionHeroInvoker = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker" }, "1. Invoker Combo", "basic Invoker combos")
-fooAllInOne.optionHeroInvokerSwitch = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker" }, "1.2 Auto switch dynamic mode", "auto switches to dynamic mode after combo is fully executed")
-fooAllInOne.optionHeroInvokerAltKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker" }, "1.3 Invoker Alt Key", Enum.ButtonCode.KEY_LCONTROL)
-fooAllInOne.optionHeroInvokerToggleKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "2. Panel" }, "Panel toggle key", Enum.ButtonCode.KEY_P)
-fooAllInOne.optionHeroInvokerSkillshotStyle = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker" }, "1.1 Skillshot Style", "use build-in prediction or use cursor position for tornado targeting", 0, 1, 1)
-fooAllInOne.optionHeroInvokerAutoInvoke = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "2. Panel" }, "Auto Invoke", "hero will auto invoke required skills after selecting the combo")
-fooAllInOne.optionHeroInvokerPanelCD = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "2. Panel" }, "Show skill cooldowns", "", 0, 2, 1)
-fooAllInOne.optionHeroInvokerPanelXPos = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "2. Panel" }, "X-position", "", -200, 500, 10)
-fooAllInOne.optionHeroInvokerPanelYPos = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "2. Panel" }, "Y-position", "", -500, 500, 10)
-fooAllInOne.optionHeroInvokerIcewallEnable = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "3. Fast Icewall" }, "Enable", "fast icewall (invoke icewall if not invoked)")
-fooAllInOne.optionHeroInvokerIcewallKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "3. Fast Icewall" }, "activation key", Enum.ButtonCode.KEY_O)
-fooAllInOne.optionHeroInvokerCancelEnable = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "4. Cancel Channelling abilities" }, "Auto cancel", "will auto use snap or tornado to cancel enemy channelling spells or TPing, will invoke snap or tornado if not invoked")
-fooAllInOne.optionHeroInvokerInstanceHelper = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "5. Instance helper" }, "auto instance switch", "QQQ if hp missing, WWW if running, EEE if attacking")
-fooAllInOne.optionHeroInvokerInstanceDelay = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "5. Instance helper" }, "delay between instance switch", "", 1, 12, 1)
-fooAllInOne.optionHeroInvokerCombo1Skill1 = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 1", "select skill", 0, 9, 1)
-fooAllInOne.optionHeroInvokerCombo1Skill2 = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 2", "select skill", 0, 9, 1)
-fooAllInOne.optionHeroInvokerCombo1Skill3 = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 3", "select skill", 0, 9, 1)
-fooAllInOne.optionHeroInvokerCombo1Skill4 = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 4", "select skill", 0, 9, 1)
-fooAllInOne.optionHeroInvokerCombo1Skill5 = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 5", "select skill", 0, 9, 1)
-fooAllInOne.optionHeroInvokerCombo1Skill6 = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 6", "select skill", 0, 9, 1)
-fooAllInOne.optionHeroInvokerLockTarget = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker" }, "1.4 target lock in combo", "your target is locked as long as you keep combo button pressed, if target dies or runs away (range 1500), target lock is lifted")
-fooAllInOne.optionHeroInvokerLockTargetIndicator = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker" }, "1.5 render indicator for locked target", "will show some particles")
-fooAllInOne.optionHeroInvokerLockTargetIndicatorStyle = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker" }, "1.6 particle style", "", 0, 1, 1)
-fooAllInOne.optionHeroInvokerGhostKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker" }, "1.7 Hake Fast Ghost Walk Key", Enum.ButtonCode.KEY_F5)
---fooAllInOne.optionHeroInvokerCombo2Skill1 = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "Custom Combo", "Combo 2" }, "Skill 1", "select skill", 0, 9, 1)
---fooAllInOne.optionHeroInvokerCombo2Skill2 = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "Custom Combo", "Combo 2" }, "Skill 2", "select skill", 0, 9, 1)
---fooAllInOne.optionHeroInvokerCombo2Skill3 = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "Custom Combo", "Combo 2" }, "Skill 3", "select skill", 0, 9, 1)
---fooAllInOne.optionHeroInvokerCombo2Skill4 = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "Custom Combo", "Combo 2" }, "Skill 4", "select skill (only with agha)", 0, 9, 1)
-fooAllInOne.optionHeroAntiMage = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Anti-Mage" }, "1. Anti-Mage Combo", "basic Anti-Mage combo")
-fooAllInOne.optionHeroAntiMageBlink = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Anti-Mage" }, "2. Use Anti-Mage blink in combo", "")
-fooAllInOne.optionHeroAntiMageVoid = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Anti-Mage" }, "3. Auto use mana void if target killable", "will select target with most mana missing and tries to kill as many enemies as possible")
-fooAllInOne.optionHeroPA = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Phantom Assassin" }, "1. PA Combo", "basic PA combo")
-fooAllInOne.optionHeroPADagger = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Phantom Assassin", "2. Auto dagger" }, "1. Auto use dagger", "will always dagger the lowest hp target in dagger range")
-fooAllInOne.optionHeroPADaggerThreshold = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Phantom Assassin", "2. Auto dagger" }, "4. Mana treshold", "will stop auto casting dagger below treshold", 20, 80, 10)
-fooAllInOne.optionHeroPADaggerToggleKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Phantom Assassin", "2. Auto dagger" }, "2. Toggle Key", Enum.ButtonCode.KEY_P)
-fooAllInOne.optionHeroPADaggerDraw = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Phantom Assassin", "2. Auto dagger" }, "3. draw toggle state", "")
 
-fooAllInOne.optionHeroInvokerDynCS = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "1. invoker_cold_snap", "", 0, 9, 1)
-fooAllInOne.optionHeroInvokerDynFS = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "2. invoker_forge_spirit", "", 0, 9, 1)
-fooAllInOne.optionHeroInvokerDynAL = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "3. invoker_alacrity", "", 0, 9, 1)
-fooAllInOne.optionHeroInvokerDynIW = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "4. invoker_ice_wall", "", 0, 9, 1)
-fooAllInOne.optionHeroInvokerDynTO = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "5. invoker_tornado", "", 0, 9, 1)
-fooAllInOne.optionHeroInvokerDynEMP = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "6. invoker_emp", "", 0, 9, 1)
-fooAllInOne.optionHeroInvokerDynSS = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "7. invoker_sun_strike", "", 0, 9, 1)
-fooAllInOne.optionHeroInvokerDynCM = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "8. invoker_chaos_meteor", "", 0, 9, 1)
-fooAllInOne.optionHeroInvokerDynDB = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "9. invoker_deafening_blast", "", 0, 9, 1)
-fooAllInOne.optionHeroInvokerDynOrder = Menu.AddOption({ "Utility","foos AllInOne", "5. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "0. USE CUSTOM PRIORITIES", "if enabled, you can set the priority order of spells used in dynamic mode, TEST your order before playing an actual game!")	
+	-- Defensive Items Menu
+fooAllInOne.optionDefensiveItems = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items" }, "0. Enabled", "will pop defensive items when in danger (self or ally)")
+fooAllInOne.optionDefensiveItemsGlimmer = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items" }, "3. Glimmer Cape", "will be cast on self/ally if in danger or channelling ability or tping outside of base")
+fooAllInOne.optionDefensiveItemslotusOrb = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items" }, "4. Lotus Orb", "on self/ally when in danger")
+fooAllInOne.optionDefensiveItemsCrimson = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items" }, "5. Crimson Guard", "self/ally when in danger")
+fooAllInOne.optionDefensiveItemsCrest = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items" }, "6. Solar Crest", "on self/ally when in danger")
+fooAllInOne.optionDefensiveItemsPipe = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items" }, "7. Pipe", "self/ally when in danger")
+fooAllInOne.optionDefensiveItemsBKB = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items", "2. BKB" }, "0. Enabled", "will trigger BKB if one of the abilities below is around and ready and if there are at least #min. enemies around (set option)")
+fooAllInOne.optionDefensiveItemsBKBEnemies = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items", "2. BKB" }, "1. Min. enemies around", "", 1, 5, 1)
+fooAllInOne.optionDefensiveItemsBKBRadius = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items", "2. BKB" }, "2. Search radius", "radius to search for enemies and abilities", 500, 1000, 100)
+fooAllInOne.optionDefensiveItemsSatanic = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items" }, "8. Satanic", "logic tbd")
+fooAllInOne.optionDefensiveItemsThreshold = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items" }, "1. HP Threshold", "below this treshold, npc is always treated as in danger (regardless of stun, root, ...) (in life %)", 10, 50, 10)
+
+	-- Hero Menu
+fooAllInOne.optionHeroAxe = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Axe" }, "Axe Combo", "basic axe script, will focus nearest hero to cursor")
+fooAllInOne.optionHeroAxeCulling = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Axe" }, "Auto culling blade", "ults everything that is in range and below hp threshold")
+fooAllInOne.optionHeroAxeJump = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Axe" }, "Axe Jump Style", "blink to nearest enemy to cursor or blink to best position if multiple enemies could be called", 0, 1, 1)
+fooAllInOne.optionHeroAxeForceBlink = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Axe" }, "Force blink", "hero will blink when combo button is pressed, even if no enemy is around (e.g. for blinking in FoW) or cursor is not in range of enemy (adjust the range below!)")
+fooAllInOne.optionHeroAxeForceBlinkRange = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Axe" }, "Force Blink Check Range", "if force blink is activated, hero will blink to mouse cursor instead of enemy, if mouse cursor is outside of force blink check range", 150, 750, 50)
+fooAllInOne.optionHeroClock = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts" }, "Clockwerk", "full combo with hookshot prediction (will not check for collision with npcs)")
+fooAllInOne.optionHeroSky = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts" }, "Skywrath", "full combo")
+fooAllInOne.optionHeroTiny = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts" }, "Tiny", "full combo")
+fooAllInOne.optionHeroWindrunner = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts" }, "Windrunner", "if branch in inventory, full combo with tree plant ;); else: if target shakled, then combo")
+fooAllInOne.optionHeroTimber = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts" }, "Timber", "meh, cant target trees.. timberchain to cursor, if enemys are hit, full combo with chakram prediction")
+fooAllInOne.optionHeroEmber = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Ember" }, "Ember Combo", "hold combo key -> full combo with remnant, release key after ~ 1 sec -> fist+chains")
+fooAllInOne.optionHeroEmberUlt = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Ember" }, "Ember Ult Usage in Combo", "", 0, 1, 1)
+fooAllInOne.optionHeroUrsa = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts" }, "Ursa", "full combo, trigger enrage if 2 or more heroes in range")
+fooAllInOne.optionHeroTA = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Templar Assassin" }, "TA Combo", "full combo")
+fooAllInOne.optionHeroTABlink = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Templar Assassin" }, "Use blink in Combo", "")
+fooAllInOne.optionHeroLegion = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts" }, "Legion Commander", "full combo")
+fooAllInOne.optionHeroSlardar = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Slardar" }, "Slardar Combo", "full combo")
+fooAllInOne.optionHeroSlardarStyle = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Slardar" }, "Slardar Jump Style", "blink to nearest enemy to cursor or blink to best position if multiple enemies could be crushed", 0, 1, 1)
+fooAllInOne.optionHeroClinkz = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Clinkz" }, "Clinkz Combo", "full combo")
+fooAllInOne.optionHeroClinkzUlt = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Clinkz" }, "Auto Ultimate", "auto ult on enemy creeps or neutrals when ready")
+fooAllInOne.optionHeroQoP = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Queen of Pain" }, "Queen of Pain Combo", "full combo; only uses ult if you have agahnims and ult can kill enemy")
+fooAllInOne.optionHeroQoPblink = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Queen of Pain" }, "Use blink in combo", "")
+fooAllInOne.optionHeroQoPAutoUlt = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Queen of Pain" }, "Auto Cast Ult", "will kill steal on targets in range", 0, 2, 1)
+fooAllInOne.optionHeroSven = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts" }, "Sven", "full combo, MoM after everything is used")
+fooAllInOne.optionHeroVisage = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Visage" }, "Visage Combo", "full combo with Familiars")
+fooAllInOne.optionHeroVisageDMGStacks = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Visage" }, "Familiar DMG stacks", "number of remaining familiar damage stacks when starting stun chain", 1, 6, 1)
+fooAllInOne.optionHeroArcWarden = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "1.0 Arc Warden Combo", "full combo with double")
+fooAllInOne.optionHeroArcWardenMagnetic = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "1.1 Use magnetic field", "cast magnetic field with main hero in combo (double always uses magnetic field)")
+fooAllInOne.optionHeroArcWardenSpark = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "1.2 Use spark", "cast spark with main hero and double")
+fooAllInOne.optionHeroArcWardenFlux = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "1.3 Use flux", "cast flux with main hero and double")
+fooAllInOne.optionHeroArcWardenPush = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "3.0 Arc Warden TP Push Mode", "push mode with double, if you have BoTs")
+fooAllInOne.optionHeroArcWardenTempest = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "2.0 Tempest double combo", "will only combo with your double, not with main. BUTTON NEEDS TO BE PRESSED DOWN! will target first enemies nearest mouse, then enemies in range, then creeps in range, if nothing in range, it will push (fountain or cursor)")
+fooAllInOne.optionArcWardenPushKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "3.1TP Push Key", Enum.ButtonCode.KEY_P)
+fooAllInOne.optionHeroArcWardenPushTPStyle = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "3.2 TP targeting style", "", 0, 1, 1)
+fooAllInOne.optionHeroArcWardenPushTPSelect = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "3.3 Auto line selector", "", 0, 1, 1)
+fooAllInOne.optionArcWardenTempestKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "2.1 Tempest double combo/push key", Enum.ButtonCode.KEY_O)
+fooAllInOne.optionHeroArcWardenTempestTarget = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden" }, "2.2 Tempest direction", "if tempest double combo/push key is pressed, push in the direction of cursor or enemy fountain", 0, 1, 1)
+fooAllInOne.optionHeroArcWardenDraw = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden", "Drawings" }, "Draw Item Cooldowns on Double", "will shot the cooldown of BoTs, midas, necronomicon")
+--fooAllInOne.optionHeroArcWardenFont = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden", "Drawings" }, "Font size", "", 10, 50, 5)
+fooAllInOne.optionHeroArcWardenXPos = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden", "Drawings" }, "X-position", "", -500, 500, 10)
+fooAllInOne.optionHeroArcWardenYPos = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Arc Warden", "Drawings" }, "Y-position", "", -500, 500, 10)
+fooAllInOne.optionHeroMorphling = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Morphling" }, "Morphling Combo", "full shotgun combo")
+fooAllInOne.optionHeroMorphlingKill = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Morphling" }, "Draw kill indicator", "will draw a kill indicator if target is killable with full shotgun combo")
+fooAllInOne.optionHeroPuck = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Puck" }, "1. Puck Combo", "basic puck script")
+fooAllInOne.optionHeroPuckJump = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Puck" }, "1.1 Puck Jump Style", "blink to nearest enemy to cursor or blink to best position if multiple enemies could be hit", 0, 1, 1)
+fooAllInOne.optionHeroPuckPanic = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Puck" }, "2. Puck Panic", "basic defensive actions when panic button is pressed")
+fooAllInOne.optionHeroPuckPanicKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Puck" }, "2.3 Puck Panic Key", Enum.ButtonCode.KEY_P)
+fooAllInOne.optionHeroPuckPanicDirection = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Puck" }, "2.1 Puck Panic Direction", "the direction in which blink or orb is casted", 0, 1, 1)
+fooAllInOne.optionHeroPuckComboAltKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Puck" }, "1.3 Puck Alt Key", Enum.ButtonCode.KEY_LCONTROL)
+fooAllInOne.optionHeroPuckDefend = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Puck" }, "2.2 Auto defend", "auto use waning rift when enemy jumps you")
+fooAllInOne.optionHeroPuckOrbInit = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Puck" }, "1.2 Orb Initiation", "will initiate with orb, if no blink dagger; will jaunt to orb, if target is hit")
+fooAllInOne.optionHeroProphet = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Natures Prophet" }, "Prophet Helper", "Lane Pusher with Treants")
+fooAllInOne.optionHeroProphetToggleKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Natures Prophet" }, "Toggle Key", Enum.ButtonCode.KEY_P)
+fooAllInOne.optionProphetDrawToggle = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Natures Prophet", "Drawings" }, "1. Draw Toggle Notification", "")
+fooAllInOne.optionProphetDrawKS = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Natures Prophet", "Drawings" }, "2. Draw KS Notification", "will show you, if an enemy is below 20% hp")
+fooAllInOne.optionProphetDrawKSminimap = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Natures Prophet", "Drawings" }, "3. Draw KS Target on Minimap", "draws a notification where an enemy below 20% HP is on minimap")
+fooAllInOne.optionHeroInvoker = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "1. General" }, "1. Invoker Combo", "basic Invoker combos")
+fooAllInOne.optionHeroInvokerSwitch = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "1. General" }, "1.2 Auto switch dynamic mode", "auto switches to dynamic mode after combo is fully executed")
+fooAllInOne.optionHeroInvokerAltKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "1. General" }, "1.3 Invoker Alt Key", Enum.ButtonCode.KEY_LCONTROL)
+fooAllInOne.optionHeroInvokerToggleKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "2. Panel" }, "Panel toggle key", Enum.ButtonCode.KEY_P)
+fooAllInOne.optionHeroInvokerSkillshotStyle = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "1. General" }, "1.1 Skillshot Style", "use build-in prediction or use cursor position for tornado targeting", 0, 1, 1)
+fooAllInOne.optionHeroInvokerTornadoItems = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "1. General" }, "1.7 Activate items before tornado", "will cast items even if enemies are going to be tornado'ed")
+fooAllInOne.optionHeroInvokerDisableBuildIn = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "1. General" }, "1.8 Disable hake build-in invo features", "hake build-in invoker helper is disabled while pressing combo button; you can now easily use script and build-in features at the same time")
+fooAllInOne.optionHeroInvokerDisableBuildInGetOption = Menu.GetOption({ "Hero Specific", "Invoker" }, "Euls/Tornado Combo Helper")
+fooAllInOne.optionHeroInvokerAutoInvoke = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "2. Panel" }, "Auto Invoke", "hero will auto invoke required skills after selecting the combo")
+fooAllInOne.optionHeroInvokerPanelCD = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "2. Panel" }, "Show skill cooldowns", "", 0, 2, 1)
+fooAllInOne.optionHeroInvokerPanelXPos = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "2. Panel" }, "X-position", "", -200, 500, 10)
+fooAllInOne.optionHeroInvokerPanelYPos = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "2. Panel" }, "Y-position", "", -500, 500, 10)
+fooAllInOne.optionHeroInvokerIcewallEnable = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "3. Fast Icewall" }, "Enable", "fast icewall (invoke icewall if not invoked)")
+fooAllInOne.optionHeroInvokerIcewallKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "3. Fast Icewall" }, "activation key", Enum.ButtonCode.KEY_O)
+fooAllInOne.optionHeroInvokerCancelEnable = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "4. Cancel Channelling abilities" }, "Auto cancel", "will auto use snap or tornado to cancel enemy channelling spells or TPing, will invoke snap or tornado if not invoked")
+fooAllInOne.optionHeroInvokerInstanceHelper = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "5. Instance helper" }, "auto instance switch", "QQQ if hp missing, WWW if running, EEE if attacking")
+fooAllInOne.optionHeroInvokerInstanceDelay = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "5. Instance helper" }, "delay between instance switch", "", 1, 12, 1)
+fooAllInOne.optionHeroInvokerCombo1Skill1 = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 1", "select skill", 0, 9, 1)
+fooAllInOne.optionHeroInvokerCombo1Skill2 = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 2", "select skill", 0, 9, 1)
+fooAllInOne.optionHeroInvokerCombo1Skill3 = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 3", "select skill", 0, 9, 1)
+fooAllInOne.optionHeroInvokerCombo1Skill4 = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 4", "select skill", 0, 9, 1)
+fooAllInOne.optionHeroInvokerCombo1Skill5 = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 5", "select skill", 0, 9, 1)
+fooAllInOne.optionHeroInvokerCombo1Skill6 = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "6. Custom Combo", "Combo 1" }, "Skill 6", "select skill", 0, 9, 1)
+fooAllInOne.optionHeroInvokerLockTarget = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "1. General" }, "1.4 target lock in combo", "your target is locked as long as you keep combo button pressed, if target dies or runs away (range 1500), target lock is lifted")
+fooAllInOne.optionHeroInvokerLockTargetIndicator = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "1. General" }, "1.5 render indicator for locked target", "will show some particles")
+fooAllInOne.optionHeroInvokerLockTargetIndicatorStyle = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "1. General" }, "1.6 particle style", "", 0, 1, 1)
+fooAllInOne.optionHeroAntiMage = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Anti-Mage" }, "1. Anti-Mage Combo", "basic Anti-Mage combo")
+fooAllInOne.optionHeroAntiMageBlink = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Anti-Mage" }, "2. Use Anti-Mage blink in combo", "")
+fooAllInOne.optionHeroAntiMageVoid = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Anti-Mage" }, "3. Auto use mana void if target killable", "will select target with most mana missing and tries to kill as many enemies as possible")
+fooAllInOne.optionHeroPA = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Phantom Assassin" }, "1. PA Combo", "basic PA combo")
+fooAllInOne.optionHeroPADagger = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Phantom Assassin", "2. Auto dagger" }, "1. Auto use dagger", "will always dagger the lowest hp target in dagger range")
+fooAllInOne.optionHeroPADaggerThreshold = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Phantom Assassin", "2. Auto dagger" }, "4. Mana treshold", "will stop auto casting dagger below treshold", 20, 80, 10)
+fooAllInOne.optionHeroPADaggerToggleKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Phantom Assassin", "2. Auto dagger" }, "2. Toggle Key", Enum.ButtonCode.KEY_P)
+fooAllInOne.optionHeroPADaggerDraw = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Phantom Assassin", "2. Auto dagger" }, "3. draw toggle state", "")
+fooAllInOne.optionHeroInvokerDynCS = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "1. invoker_cold_snap", "", 0, 9, 1)
+fooAllInOne.optionHeroInvokerDynFS = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "2. invoker_forge_spirit", "", 0, 9, 1)
+fooAllInOne.optionHeroInvokerDynAL = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "3. invoker_alacrity", "", 0, 9, 1)
+fooAllInOne.optionHeroInvokerDynIW = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "4. invoker_ice_wall", "", 0, 9, 1)
+fooAllInOne.optionHeroInvokerDynTO = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "5. invoker_tornado", "", 0, 9, 1)
+fooAllInOne.optionHeroInvokerDynEMP = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "6. invoker_emp", "", 0, 9, 1)
+fooAllInOne.optionHeroInvokerDynSS = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "7. invoker_sun_strike", "", 0, 9, 1)
+fooAllInOne.optionHeroInvokerDynCM = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "8. invoker_chaos_meteor", "", 0, 9, 1)
+fooAllInOne.optionHeroInvokerDynDB = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "9. invoker_deafening_blast", "", 0, 9, 1)
+fooAllInOne.optionHeroInvokerDynOrder = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "7. Dynamic Combo", }, "0. USE CUSTOM PRIORITIES", "if enabled, you can set the priority order of spells used in dynamic mode, TEST your order before playing an actual game!")	
+fooAllInOne.invokerDisplayOption = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "8. Invoker Spell Panel" }, "Enable", "draw the invoker skill panel with cooldowns")
+fooAllInOne.invokerDisplaySizeOption = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "8. Invoker Spell Panel" }, "Cooldown Display Size", "", 21, 200, 5)
+fooAllInOne.invokerDisplayY = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "8. Invoker Spell Panel" }, "Y position", "Vertical position on screen", -500, 500, 10)
+fooAllInOne.invokerDisplayX = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "8. Invoker Spell Panel" }, "X position", "Horizontal position on screen", -200, 200, 10)
+fooAllInOne.invokerDisplaySortAbilitiesOption = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "8. Invoker Spell Panel" }, "Sort Abilities by Name", "")
 
 	-- Menu set values
 Menu.SetValueName(fooAllInOne.optionItemVeil, 0, 'OFF')
@@ -250,7 +272,9 @@ Menu.SetValueName(fooAllInOne.optionHeroInvokerInstanceDelay, 9, '2.25')
 Menu.SetValueName(fooAllInOne.optionHeroInvokerInstanceDelay, 10, '2.50')
 Menu.SetValueName(fooAllInOne.optionHeroInvokerInstanceDelay, 11, '2.75')
 Menu.SetValueName(fooAllInOne.optionHeroInvokerInstanceDelay, 12, '3.00')
-
+Menu.SetValueName(fooAllInOne.optionHeroQoPAutoUlt, 0, 'OFF')
+Menu.SetValueName(fooAllInOne.optionHeroQoPAutoUlt, 1, 'only with aghanims')
+Menu.SetValueName(fooAllInOne.optionHeroQoPAutoUlt, 2, 'ALWAYS')
 Menu.SetValueName(fooAllInOne.optionHeroInvokerCombo1Skill1, 0, 'none')
 Menu.SetValueName(fooAllInOne.optionHeroInvokerCombo1Skill1, 1, 'tornado')
 Menu.SetValueName(fooAllInOne.optionHeroInvokerCombo1Skill1, 2, 'emp')
@@ -372,6 +396,10 @@ Menu.SetValueName(fooAllInOne.optionHeroInvokerDynDB, 0, 'will not be invoked')
 --Menu.SetValueName(fooAllInOne.optionHeroInvokerCombo2Skill4, 9, 'alacrity')
 
 	-- global Variables
+fooAllInOne.IconPath = "resource/flash3/images/small_boost_icons/"
+fooAllInOne.font = Renderer.LoadFont("Tahoma", 25, Enum.FontWeight.EXTRABOLD)
+fooAllInOne.invokerDisplayspellIconPath = "resource/flash3/images/spellicons/"
+
 fooAllInOne.lastCastTime = 0
 fooAllInOne.lastCastTime2 = 0
 fooAllInOne.lastCastTime3 = 0
@@ -379,6 +407,7 @@ fooAllInOne.lastTick = 0
 fooAllInOne.delay = 0
 fooAllInOne.itemDelay = 0
 fooAllInOne.lastItemCast = 0
+fooAllInOne.lastDefItemPop = 0
 fooAllInOne.lastItemTick = 0
 fooAllInOne.ItemCastStop = false
 fooAllInOne.ControlledUnitCastTime = 0
@@ -391,14 +420,10 @@ fooAllInOne.LastTickManta2 = 0
 fooAllInOne.ArcWardenEntity = nil
 fooAllInOne.GenericUpValue = false
 fooAllInOne.lastPosition = Vector(0, 0, 0)
-fooAllInOne.PuckOrbHitSim = {}
 fooAllInOne.PuckOrbCastTime = 0
 fooAllInOne.Toggler = false
 fooAllInOne.TogglerTime = 0
 fooAllInOne.PreInvoke = false
-fooAllInOne.PreInvokeSkills = {}
-fooAllInOne.IconPath = "resource/flash3/images/small_boost_icons/"
-fooAllInOne.font = Renderer.LoadFont("Tahoma", 25, Enum.FontWeight.EXTRABOLD)
 fooAllInOne.InvokerCachedIconsSnap = nil
 fooAllInOne.InvokerCachedIconsSunStrike = nil
 fooAllInOne.InvokerCachedIconsEmp = nil
@@ -420,6 +445,9 @@ fooAllInOne.InvokerLastChangedInstance = 0
 fooAllInOne.InvokerCaptureManualInstances = 0
 fooAllInOne.InvokerLockedTarget = nil
 fooAllInOne.invokerChannellingKillstealTimer = 0
+fooAllInOne.invokerCaptureGhostwalkActivation = 0
+fooAllInOne.invokerDisplayNeedsInit = true
+fooAllInOne.getInvokerSettings = nil
 fooAllInOne.AttackProjectileCreate = 0
 fooAllInOne.AttackAnimationCreate = 0
 fooAllInOne.AttackParticleCreate = 0
@@ -429,28 +457,63 @@ fooAllInOne.TPParticleIndex = nil
 fooAllInOne.TPParticleTime = 0
 fooAllInOne.TPParticleUnit = nil
 fooAllInOne.TPParticlePosition = Vector()
-
-
 fooAllInOne.GlimpseParticleIndex = nil
 fooAllInOne.GlimpseParticleTime = 0
 fooAllInOne.GlimpseParticleUnit = nil
 fooAllInOne.GlimpseParticlePosition = Vector()
 fooAllInOne.GlimpseParticleIndexStart = nil
 fooAllInOne.GlimpseParticlePositionStart = Vector()
-
 fooAllInOne.particleNextTime = 0
 fooAllInOne.currentParticle = nil
-
-fooAllInOne.enemyHeroTable = {}
-fooAllInOne.InvokerKSparticleProcess = {{nil, nil, 0, nil, Vector()}}
-
 
 	-- global Tables
 fooAllInOne.LinkensBreakerItemOrder = {}
 fooAllInOne.ItemCastOrder = {}
 fooAllInOne.rotationTable = {}
-fooAllInOne.invokerInvokeOrder =
-		{
+fooAllInOne.PuckOrbHitSim = {}
+fooAllInOne.enemyHeroTable = {}
+fooAllInOne.InvokerKSparticleProcess = {{nil, nil, 0, nil, Vector()}}
+fooAllInOne.PreInvokeSkills = {}
+fooAllInOne.invokerDisplayCachedIcons = {}
+fooAllInOne.preemptiveBKB = {}
+
+fooAllInOne.preemptiveBKBtable = {
+	"alchemist_unstable_concoction_throw",
+	"beastmaster_primal_roar",
+	"centaur_hoof_stomp",
+	"chaos_knight_chaos_bolt",
+	"crystal_maiden_frostbite",
+	"death_prophet_silence",
+	"dragon_knight_dragon_tail",
+	"drow_ranger_wave_of_silence",
+	"earth_spirit_boulder_smash",
+	"earthshaker_fissure",
+	"ember_spirit_searing_chains",
+	"invoker_tornado",
+	"jakiro_ice_path",
+	"lion_impale",
+	"lion_voodoo",
+	"naga_siren_ensnare",
+	"nyx_assassin_impale",
+	"puck_dream_coil",
+	"rubick_telekinesis",
+	"sandking_burrowstrike",
+	"shadow_shaman_shackles",
+	"shadow_shaman_voodoo",
+	"skeleton_king_hellfire_blast",
+	"slardar_slithereen_crush",
+	"storm_spirit_electric_vortex",
+	"sven_storm_bolt",
+	"tidehunter_ravage",
+	"tiny_avalanche",
+	"vengefulspirit_magic_missile",
+	"warlock_rain_of_chaos",
+	"windrunner_shackleshot",
+	"slark_pounce",
+	"ogre_magi_fireblast",
+	"meepo_poof" }
+
+fooAllInOne.invokerInvokeOrder = {
 	invoker_sun_strike = { 2, 2, 2 },
 	invoker_emp = { 1, 1, 1 },
 	invoker_tornado = { 0, 1, 1 },
@@ -460,9 +523,10 @@ fooAllInOne.invokerInvokeOrder =
 	invoker_chaos_meteor = { 1, 2, 2 },
 	invoker_cold_snap = { 0, 0, 0 },
 	invoker_ice_wall = { 0, 0, 2 },
-	invoker_forge_spirit = { 0, 2, 2 }
-		}
+	invoker_forge_spirit = { 0, 2, 2 } }
+
 fooAllInOne.invokerTornadoLiftDuration = { 0.8, 1.1, 1.4, 1.7, 2.0, 2.3, 2.6, 2.9 }
+
 fooAllInOne.orbAttackTable = {
 	npc_dota_hero_clinkz = "clinkz_searing_arrows",
 	npc_dota_hero_drow_ranger = "drow_ranger_frost_arrows",
@@ -470,8 +534,7 @@ fooAllInOne.orbAttackTable = {
 	npc_dota_hero_huskar = "huskar_burning_spear",
 	npc_dota_hero_obsidian_destroyer = "obsidian_destroyer_arcane_orb",
 	npc_dota_hero_silencer = "silencer_glaives_of_wisdom",
-	npc_dota_hero_viper = "viper_poison_attack"
-		}
+	npc_dota_hero_viper = "viper_poison_attack"}
 
 fooAllInOne.attackPointTable = {
 	npc_dota_hero_abaddon = { 0.56, 0.41, 0 },
@@ -586,8 +649,8 @@ fooAllInOne.attackPointTable = {
 	npc_dota_hero_winter_wyvern = { 0.25, 0.8, 700 },
 	npc_dota_hero_witch_doctor = { 0.4, 0.5, 1200 },
 	npc_dota_hero_skeleton_king = { 0.56, 0.44, 0 },
-	npc_dota_hero_zuus = { 0.633, 0.366, 1100 }
-		}
+	npc_dota_hero_zuus = { 0.633, 0.366, 1100 } }
+
 fooAllInOne.AbilityList = {
 	{ "npc_dota_hero_abaddon", "abaddon_death_coil", "nuke", "target" , "target_damage" },
 	{ "npc_dota_hero_abaddon", "abaddon_frostmourne", "utility", "0" , "0" },
@@ -619,7 +682,7 @@ fooAllInOne.AbilityList = {
 	{ "npc_dota_hero_axe", "axe_culling_blade", "nuke", "target" , "0" },
 	{ "npc_dota_hero_axe", "axe_battle_hunger", "utility", "0" , "0" },
 	{ "npc_dota_hero_axe", "axe_counter_helix", "utility", "0" , "0" },
-	{ "npc_dota_hero_bane", "bane_brain_sap", "nuke", "target" , "brain_sap_damage" },
+	{ "npc_dota_hero_bane", "bane_brain_sap", "pure", "target" , "brain_sap_damage" },
 	{ "npc_dota_hero_bane", "bane_fiends_grip", "nuke", "target" , "0" },
 	{ "npc_dota_hero_bane", "bane_enfeeble", "utility", "0" , "0" },
 	{ "npc_dota_hero_bane", "bane_nightmare", "utility", "0" , "0" },
@@ -672,7 +735,7 @@ fooAllInOne.AbilityList = {
 	{ "npc_dota_hero_chaos_knight", "chaos_knight_chaos_strike", "utility", "0" , "0" },
 	{ "npc_dota_hero_chaos_knight", "chaos_knight_phantasm", "utility", "0" , "0" },
 	{ "npc_dota_hero_chaos_knight", "chaos_knight_reality_rift", "utility", "0" , "0" },
-	{ "npc_dota_hero_chen", "chen_test_of_faith", "nuke", "target" , "damage_min" },
+	{ "npc_dota_hero_chen", "chen_test_of_faith", "pure", "target" , "damage_min" },
 	{ "npc_dota_hero_chen", "chen_hand_of_god", "utility", "0" , "0" },
 	{ "npc_dota_hero_chen", "chen_holy_persuasion", "utility", "0" , "0" },
 	{ "npc_dota_hero_chen", "chen_penitence", "utility", "0" , "0" },
@@ -861,7 +924,7 @@ fooAllInOne.AbilityList = {
 	{ "npc_dota_hero_magnataur", "magnataur_reverse_polarity", "disable", "no target" , "0" },
 	{ "npc_dota_hero_magnataur", "magnataur_empower", "utility", "0" , "0" },
 	{ "npc_dota_hero_magnataur", "magnataur_skewer", "utility", "0" , "0" },
-	{ "npc_dota_hero_medusa", "medusa_mystic_snake", "nuke", "target" , "snake_damage" },
+	{ "npc_dota_hero_medusa", "medusa_mystic_snake", "pure", "target" , "snake_damage" },
 	{ "npc_dota_hero_medusa", "medusa_mana_shield", "utility", "0" , "0" },
 	{ "npc_dota_hero_medusa", "medusa_split_shot", "utility", "0" , "0" },
 	{ "npc_dota_hero_medusa", "medusa_stone_gaze", "utility", "0" , "0" },
@@ -1002,7 +1065,7 @@ fooAllInOne.AbilityList = {
 	{ "npc_dota_hero_shadow_shaman", "shadow_shaman_shackles", "disable", "target" , "0" },
 	{ "npc_dota_hero_shadow_shaman", "shadow_shaman_voodoo", "disable", "target" , "0" },
 	{ "npc_dota_hero_shadow_shaman", "shadow_shaman_mass_serpent_ward", "utility", "0" , "0" },
-	{ "npc_dota_hero_shredder", "shredder_whirling_death", "nuke", "no target" , "whirling_damage" },
+	{ "npc_dota_hero_shredder", "shredder_whirling_death", "pure", "no target" , "whirling_damage" },
 	{ "npc_dota_hero_shredder", "shredder_chakram", "nuke", "position" , "0" },
 	{ "npc_dota_hero_shredder", "shredder_chakram_2", "nuke", "position" , "0" },
 	{ "npc_dota_hero_shredder", "shredder_reactive_armor", "utility", "0" , "0" },
@@ -1070,7 +1133,7 @@ fooAllInOne.AbilityList = {
 	{ "npc_dota_hero_tidehunter", "tidehunter_anchor_smash", "nuke", "no target" , "0" },
 	{ "npc_dota_hero_tidehunter", "tidehunter_gush", "nuke", "target" , "0" },
 	{ "npc_dota_hero_tidehunter", "tidehunter_kraken_shell", "utility", "0" , "0" },
-	{ "npc_dota_hero_tinker", "tinker_laser", "nuke", "target" , "laser_damage" },
+	{ "npc_dota_hero_tinker", "tinker_laser", "pure", "target" , "laser_damage" },
 	{ "npc_dota_hero_tinker", "tinker_heat_seeking_missile", "nuke", "no target" , "0" },
 	{ "npc_dota_hero_tinker", "tinker_march_of_the_machines", "utility", "0" , "0" },
 	{ "npc_dota_hero_tinker", "tinker_rearm", "utility", "0" , "0" },
@@ -1156,8 +1219,12 @@ fooAllInOne.AbilityList = {
 	{ "npc_dota_hero_zuus", "zuus_lightning_bolt", "nuke", "skillshot" , "0" },
 	{ "npc_dota_hero_zuus", "zuus_thundergods_wrath", "nuke", "no target" , "0" },
 	{ "npc_dota_hero_zuus", "zuus_cloud", "utility", "0" , "0" },
-	{ "npc_dota_hero_zuus", "zuus_static_field", "utility", "0" , "0" } 
-		}
+	{ "npc_dota_hero_zuus", "zuus_static_field", "utility", "0" , "0" } }
+
+fooAllInOne.preemptiveBKB = {}
+for i = 1, #fooAllInOne.preemptiveBKBtable do
+	fooAllInOne.preemptiveBKB[i] = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items", "2. BKB", "3. dangerous disables" }, fooAllInOne.preemptiveBKBtable[i], "")
+end
 
 function fooAllInOne.ResetGlobalVariables()
 
@@ -1165,27 +1232,26 @@ function fooAllInOne.ResetGlobalVariables()
 	fooAllInOne.lastCastTime2 = 0
 	fooAllInOne.lastCastTime3 = 0
 	fooAllInOne.lastTick = 0
-	fooAllInOne.lastItemCast = 0
 	fooAllInOne.delay = 0
 	fooAllInOne.itemDelay = 0
+	fooAllInOne.lastItemCast = 0
+	fooAllInOne.lastDefItemPop = 0
 	fooAllInOne.lastItemTick = 0
 	fooAllInOne.ItemCastStop = false
 	fooAllInOne.ControlledUnitCastTime = 0
+	fooAllInOne.ControlledUnitPauseTime = 0
 	fooAllInOne.lastAttackTime = 0
 	fooAllInOne.lastAttackTime2 = 0
 	fooAllInOne.LastTarget = nil
 	fooAllInOne.LastTickManta1 = 0
 	fooAllInOne.LastTickManta2 = 0
-	fooAllInOne.ControlledUnitPauseTime = 0
 	fooAllInOne.ArcWardenEntity = nil
 	fooAllInOne.GenericUpValue = false
 	fooAllInOne.lastPosition = Vector(0, 0, 0)
-	fooAllInOne.PuckOrbHitSim = {}
 	fooAllInOne.PuckOrbCastTime = 0
 	fooAllInOne.Toggler = false
 	fooAllInOne.TogglerTime = 0
 	fooAllInOne.PreInvoke = false
-	fooAllInOne.PreInvokeSkills = {}
 	fooAllInOne.InvokerCachedIconsSnap = nil
 	fooAllInOne.InvokerCachedIconsSunStrike = nil
 	fooAllInOne.InvokerCachedIconsEmp = nil
@@ -1207,10 +1273,14 @@ function fooAllInOne.ResetGlobalVariables()
 	fooAllInOne.InvokerCaptureManualInstances = 0
 	fooAllInOne.InvokerLockedTarget = nil
 	fooAllInOne.invokerChannellingKillstealTimer = 0
+	fooAllInOne.invokerCaptureGhostwalkActivation = 0
+	fooAllInOne.invokerDisplayNeedsInit = true
+	fooAllInOne.getInvokerSettings = nil
 	fooAllInOne.AttackProjectileCreate = 0
 	fooAllInOne.AttackAnimationCreate = 0
 	fooAllInOne.AttackParticleCreate = 0
 	fooAllInOne.InAttackBackswing = false
+	fooAllInOne.OrbwalkerDelay = 0
 	fooAllInOne.TPParticleIndex = nil
 	fooAllInOne.TPParticleTime = 0
 	fooAllInOne.TPParticleUnit = nil
@@ -1221,13 +1291,16 @@ function fooAllInOne.ResetGlobalVariables()
 	fooAllInOne.GlimpseParticlePosition = Vector()
 	fooAllInOne.GlimpseParticleIndexStart = nil
 	fooAllInOne.GlimpseParticlePositionStart = Vector()
-	fooAllInOne.InvokerKSparticleProcess = {{nil, nil, 0, nil, Vector()}}
 	fooAllInOne.particleNextTime = 0
 	fooAllInOne.currentParticle = nil
 	fooAllInOne.LinkensBreakerItemOrder = {}
 	fooAllInOne.ItemCastOrder = {}
 	fooAllInOne.rotationTable = {}
+	fooAllInOne.PuckOrbHitSim = {}
 	fooAllInOne.enemyHeroTable = {}
+	fooAllInOne.InvokerKSparticleProcess = {{nil, nil, 0, nil, Vector()}}
+	fooAllInOne.PreInvokeSkills = {}
+	fooAllInOne.invokerDisplayCachedIcons = {}
 
 end
 
@@ -1363,8 +1436,11 @@ function fooAllInOne.OnUpdate()
 		end
 	end
 
---fooAllInOne.KunkkaCombo(myHero, enemy)
+	if Menu.IsEnabled(fooAllInOne.optionDefensiveItems) then
+		fooAllInOne.useDefensiveItems(myHero, enemy)
+	end
 
+--fooAllInOne.KunkkaCombo(myHero, enemy)
 
 --	for n in pairs(fooAllInOne) do 
 --		Log.Write(tostring(n))
@@ -1391,8 +1467,8 @@ function fooAllInOne.OnUpdate()
 --	Log.Write(tostring(NPC.GetUnitName(npc)) .. " " .. tostring(Entity.GetOwner(npc)) .. " " .. tostring(Entity.OwnedBy(npc, myHero)))
 --	end
 
---	local modifiers = NPC.GetModifiers(myHero)
---	Log.Write(NPC.GetMovementSpeed(myHero))
+--	local modifiers = NPC.GetModifiers(fooAllInOne.ArcWardenEntity)
+--	Log.Write(fooAllInOne.GetMoveSpeed(enemy))
 --	for _, modifier in ipairs(modifiers) do
 --	local modifierName = Modifier.GetName(modifier)
 --	Log.Write(modifierName)
@@ -1423,7 +1499,7 @@ function fooAllInOne.OnParticleCreate(particle)
 
 	if particle.name == "teleport_start" then
 		if particle.entityForModifiers ~= Heroes.GetLocal() then
-			if particle.entityForModifiers ~= nil and not Entity.IsSameTeam(Heroes.GetLocal(), particle.entityForModifiers) then
+			if not Entity.IsSameTeam(Heroes.GetLocal(), particle.entityForModifiers) then
 				fooAllInOne.TPParticleIndex = particle.index
 				fooAllInOne.TPParticleTime = GameRules.GetGameTime()
 				fooAllInOne.TPParticleUnit = particle.entityForModifiers
@@ -1432,7 +1508,7 @@ function fooAllInOne.OnParticleCreate(particle)
 	end
 
 	if particle.name == "furion_sprout" then
-		if particle.entityForModifiers ~= nil and Entity.IsSameTeam(Heroes.GetLocal(), particle.entityForModifiers) then
+		if Entity.IsSameTeam(Heroes.GetLocal(), particle.entityForModifiers) then
 			fooAllInOne.InvokerKSparticleProcess[1][1] = particle.index
 			fooAllInOne.InvokerKSparticleProcess[1][2] = particle.name
 			fooAllInOne.InvokerKSparticleProcess[1][3] = GameRules.GetGameTime()
@@ -1441,7 +1517,7 @@ function fooAllInOne.OnParticleCreate(particle)
 	end
 
 	if particle.name == "rattletrap_cog_deploy" then
-		if particle.entity ~= nil and Entity.IsSameTeam(Heroes.GetLocal(), particle.entity) then
+		if Entity.IsSameTeam(Heroes.GetLocal(), particle.entity) then
 			fooAllInOne.InvokerKSparticleProcess[1][1] = particle.index
 			fooAllInOne.InvokerKSparticleProcess[1][2] = particle.name
 			fooAllInOne.InvokerKSparticleProcess[1][3] = GameRules.GetGameTime()
@@ -1451,14 +1527,14 @@ function fooAllInOne.OnParticleCreate(particle)
 	end
 
 	if particle.name == "disruptor_glimpse_targetend" then
-		if particle.entityForModifiers ~= nil and not Entity.IsSameTeam(Heroes.GetLocal(), particle.entityForModifiers) then
+		if not Entity.IsSameTeam(Heroes.GetLocal(), particle.entityForModifiers) then
 			fooAllInOne.GlimpseParticleIndex = particle.index
 			fooAllInOne.GlimpseParticleTime = GameRules.GetGameTime()
 		end
 	end
 
 	if particle.name == "disruptor_glimpse_targetstart" then
-		if particle.entityForModifiers ~= nil and not Entity.IsSameTeam(Heroes.GetLocal(), particle.entityForModifiers) then
+		if not Entity.IsSameTeam(Heroes.GetLocal(), particle.entityForModifiers) then
 			fooAllInOne.GlimpseParticleIndexStart = particle.index
 		end
 	end
@@ -1471,6 +1547,7 @@ function fooAllInOne.OnParticleUpdate(particle)
 	if not Heroes.GetLocal() then return end
 	if not particle.position then return end
 	if particle.position:__tostring() == Vector(1.0, 1.0, 1.0):__tostring() then return end
+	if particle.controlPoint > 0 then return end
 
 	if particle.index  == fooAllInOne.TPParticleIndex then
 		fooAllInOne.TPParticlePosition = particle.position
@@ -1541,6 +1618,17 @@ function fooAllInOne.OnLinearProjectileCreate(projectile)
 	
 end
 
+function fooAllInOne.OnParticleDestroy(particle)
+
+	if not particle then return end
+	if not Heroes.GetLocal() then return end
+
+	if particle.index  == fooAllInOne.TPParticleIndex then
+		fooAllInOne.TPParticlePosition = Vector()
+	end
+
+end
+
 function fooAllInOne.OnDraw()
 
 	local myHero = Heroes.GetLocal()
@@ -1570,6 +1658,7 @@ function fooAllInOne.OnDraw()
 
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then
 		fooAllInOne.InvokerDraw(myHero)
+		fooAllInOne.invokerDisplayDrawDisplay(myHero)
 	end
 
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_phantom_assassin" then
@@ -1589,11 +1678,7 @@ function fooAllInOne.OnPrepareUnitOrders(orders)
     
 	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerInstanceHelper) then
 		if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then
-			if not Menu.IsKeyDown(fooAllInOne.optionHeroInvokerGhostKey) then
-				fooAllInOne.invokerProcessInstances(myHero, orders.order)
-			elseif not Menu.IsKeyDownOnce(fooAllInOne.optionHeroInvokerGhostKey) then
-				fooAllInOne.invokerProcessInstances(myHero, orders.order)
-			end
+			fooAllInOne.invokerProcessInstances(myHero, orders.order)
 		end
 	end
 	
@@ -1736,8 +1821,13 @@ function fooAllInOne.OnMenuOptionChange(option, old, new)
 		option == fooAllInOne.optionLinkensHalberd or
 		option == fooAllInOne.optionLinkensHex or
 		option == fooAllInOne.optionLinkensBlood or
-		option == fooAllInOne.optionLinkensOrchid then
+		option == fooAllInOne.optionLinkensOrchid or
+		option == fooAllInOne.optionLinkensPike then
         		fooAllInOne.setOrderLinkens(false)
+    	end
+
+	if option == fooAllInOne.invokerDisplaySizeOption then
+        	fooAllInOne.invokerDisplayInit()
     	end
 
 end
@@ -1826,7 +1916,7 @@ function fooAllInOne.castLinearPrediction(myHero, enemy, adjustmentVariable)
 		if enemyRotation and enemyOrigin then
 			if not NPC.IsRunning(enemy) then
 				return enemyOrigin
-			else return enemyOrigin:__add(enemyRotation:Normalized():Scaled(NPC.GetMoveSpeed(enemy) * adjustmentVariable * (1 - cosGamma)))
+			else return enemyOrigin:__add(enemyRotation:Normalized():Scaled(fooAllInOne.GetMoveSpeed(enemy) * adjustmentVariable * (1 - cosGamma)))
 			end
 		end
 end
@@ -1916,6 +2006,20 @@ function fooAllInOne.GetMoveSpeed(enemy)
 		return (base_speed + bonus_speed) * 0.5
 	end
 
+	if NPC.HasModifier(enemy, "modifier_spirit_breaker_charge_of_darkness") then
+		local chargeAbility = NPC.GetAbility(enemy, "spirit_breaker_charge_of_darkness")
+		if chargeAbility then
+			local specialAbility = NPC.GetAbility(enemy, "special_bonus_unique_spirit_breaker_2")
+			if specialAbility then
+				 if Ability.GetLevel(specialAbility) < 1 then
+					return Ability.GetLevel(chargeAbility) * 50 + 550
+				else
+					return Ability.GetLevel(chargeAbility) * 50 + 1050
+				end
+			end
+		end
+	end
+			
     	return base_speed + bonus_speed
 end
 
@@ -2437,22 +2541,26 @@ function fooAllInOne.OrbWalker(myHero, enemy)
 		end
 	else
 		if (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() > breakPoint then
-			if os.clock() - fooAllInOne.OrbwalkerDelay > 0.05 + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) then
-				local targetVector = Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(moveDistance)
-				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, targetVector, ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, myHero, queue, showEffects)
-				fooAllInOne.OrbwalkerDelay = os.clock()
-				return
+			if os.clock() - fooAllInOne.OrbwalkerDelay > attackBackSwing + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) then
+				if moveDistance > 50 then
+					local targetVector = Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(moveDistance)
+					Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, targetVector, ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, myHero, queue, showEffects)
+					fooAllInOne.OrbwalkerDelay = os.clock()
+					return
+				end
 			end
 	
 		end
 		if Menu.IsEnabled(fooAllInOne.optionOrbwalkKiting) then
 			if NPC.IsRanged(myHero) then
 				if (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() < breakPoint - 50 then
-					if kiteDistance > 50 then
-						local targetVector = Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(kiteDistance)
-						Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, targetVector, ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, myHero, queue, showEffects)
-						fooAllInOne.OrbwalkerDelay = os.clock()
-						return
+					if os.clock() - fooAllInOne.OrbwalkerDelay > attackBackSwing + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) then
+						if kiteDistance > 50 then
+							local targetVector = Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(kiteDistance)
+							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, target, targetVector, ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, myHero, queue, showEffects)
+							fooAllInOne.OrbwalkerDelay = os.clock()
+							return
+						end
 					end
 				end
 			end
@@ -3573,6 +3681,296 @@ function fooAllInOne.utilityItemTalon(myHero, talon, midas)
 		return
 	end
 end
+
+function fooAllInOne.useDefensiveItems(myHero, enemy)
+
+	if not myHero then return end
+	if not Menu.IsEnabled(fooAllInOne.optionDefensiveItems) then return end
+
+	if os.clock() - fooAllInOne.lastDefItemPop < 0.25 then return end
+
+	if fooAllInOne.ItemCastStop then return end
+	if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return end
+	if NPC.IsStunned(myHero) then return end
+	if NPC.HasModifier(myHero, "modifier_axe_berserkers_call") then return end
+	if NPC.HasModifier(myHero, "modifier_legion_commander_duel") then return end
+
+	local myMana = NPC.GetMana(myHero)
+
+	local glimmerCape = NPC.GetItem(myHero, "item_glimmer_cape", true)
+	local lotusOrb = NPC.GetItem(myHero, "item_lotus_orb", true)
+	local crimsonGuard = NPC.GetItem(myHero, "item_crimson_guard", true)
+	local pipe = NPC.GetItem(myHero, "item_pipe", true)
+	local solarCrest = NPC.GetItem(myHero, "item_solar_crest", true)
+	local BKB = NPC.GetItem(myHero, "item_black_king_bar", true)
+	local satanic = NPC.GetItem(myHero, "item_satanic", true)
+
+	if Menu.IsEnabled(fooAllInOne.optionDefensiveItemsGlimmer) then
+		if glimmerCape and Ability.IsCastable(glimmerCape, myMana) then
+			if fooAllInOne.IsNPCinDanger(myHero, myHero) then
+				Ability.CastTarget(glimmerCape, myHero)
+				fooAllInOne.lastDefItemPop = os.clock()
+				return
+			end
+			if NPC.IsChannellingAbility(myHero) then
+				if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then
+					Ability.CastTarget(glimmerCape, myHero)
+					fooAllInOne.lastDefItemPop = os.clock()
+					return
+				end
+			end
+			if NPC.HasModifier(myHero, "modifier_teleporting") then
+				local myFountain = fooAllInOne.GetMyFountainPos(myHero)
+				if not NPC.IsPositionInRange(myHero, myFountain, 2500, 0) then
+					Ability.CastTarget(glimmerCape, myHero)
+					fooAllInOne.lastDefItemPop = os.clock()
+					return
+				end
+			end
+			local teamMatesAround = NPC.GetHeroesInRadius(myHero, 1000, Enum.TeamType.TEAM_FRIEND)
+			if next(teamMatesAround) ~= nil then
+				for _, ally in ipairs(teamMatesAround) do
+					if ally and not NPC.IsIllusion(ally) and Entity.IsAlive(ally) then
+						if fooAllInOne.IsNPCinDanger(myHero, ally) or NPC.IsChannellingAbility(ally) then
+							Ability.CastTarget(glimmerCape, ally)
+							fooAllInOne.lastDefItemPop = os.clock()
+							break
+							return
+						end
+					end
+				end
+			end
+		end
+	end
+				
+	if Menu.IsEnabled(fooAllInOne.optionDefensiveItemslotusOrb) then
+		if lotusOrb and Ability.IsCastable(lotusOrb, myMana) then
+			if fooAllInOne.IsNPCinDanger(myHero, myHero) then
+				Ability.CastTarget(lotusOrb, myHero)
+				fooAllInOne.lastDefItemPop = os.clock()
+				return
+			end
+			local teamMatesAround = NPC.GetHeroesInRadius(myHero, 875, Enum.TeamType.TEAM_FRIEND)
+			if next(teamMatesAround) ~= nil then
+				for _, ally in ipairs(teamMatesAround) do
+					if ally and not NPC.IsIllusion(ally) and Entity.IsAlive(ally) then
+						if fooAllInOne.IsNPCinDanger(myHero, ally) then
+							Ability.CastTarget(lotusOrb, ally)
+							fooAllInOne.lastDefItemPop = os.clock()
+							break
+							return
+						end
+					end
+				end
+			end
+		end
+	end
+	
+	if Menu.IsEnabled(fooAllInOne.optionDefensiveItemsCrimson) then
+		if crimsonGuard and Ability.IsCastable(crimsonGuard, myMana) then
+			if fooAllInOne.IsNPCinDanger(myHero, myHero) then
+				Ability.CastNoTarget(crimsonGuard)
+				fooAllInOne.lastDefItemPop = os.clock()
+				return
+			end
+			local teamMatesAround = NPC.GetHeroesInRadius(myHero, 875, Enum.TeamType.TEAM_FRIEND)
+			if next(teamMatesAround) ~= nil then
+				for _, ally in ipairs(teamMatesAround) do
+					if ally and not NPC.IsIllusion(ally) and Entity.IsAlive(ally) then
+						if fooAllInOne.IsNPCinDanger(myHero, ally) then
+							Ability.CastNoTarget(crimsonGuard)
+							fooAllInOne.lastDefItemPop = os.clock()
+							break
+							return
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if Menu.IsEnabled(fooAllInOne.optionDefensiveItemsCrest) then
+		if solarCrest and Ability.IsCastable(solarCrest, myMana) then
+			local teamMatesAround = NPC.GetHeroesInRadius(myHero, 975, Enum.TeamType.TEAM_FRIEND)
+			if next(teamMatesAround) ~= nil then
+				for _, ally in ipairs(teamMatesAround) do
+					if ally and not NPC.IsIllusion(ally) and Entity.IsAlive(ally) then
+						if fooAllInOne.IsNPCinDanger(myHero, ally) then
+							Ability.CastTarget(solarCrest, ally)
+							fooAllInOne.lastDefItemPop = os.clock()
+							break
+							return
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if Menu.IsEnabled(fooAllInOne.optionDefensiveItemsPipe) then
+		if pipe and Ability.IsCastable(pipe, myMana) then
+			if fooAllInOne.IsNPCinDanger(myHero, myHero) then
+				Ability.CastNoTarget(pipe)
+				fooAllInOne.lastDefItemPop = os.clock()
+				return
+			end
+			local teamMatesAround = NPC.GetHeroesInRadius(myHero, 875, Enum.TeamType.TEAM_FRIEND)
+			if next(teamMatesAround) ~= nil then
+				for _, ally in ipairs(teamMatesAround) do
+					if ally and not NPC.IsIllusion(ally) and Entity.IsAlive(ally) then
+						if fooAllInOne.IsNPCinDanger(myHero, ally) then
+							Ability.CastNoTarget(pipe)
+							fooAllInOne.lastDefItemPop = os.clock()
+							break
+							return
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if Menu.IsEnabled(fooAllInOne.optionDefensiveItemsBKB) then
+		if BKB and Ability.IsReady(BKB) then
+			if fooAllInOne.shouldCastBKB(myHero) == true then
+				Ability.CastNoTarget(BKB)
+				fooAllInOne.lastDefItemPop = os.clock()
+				return
+			end
+		end
+	end
+	
+	if Menu.IsEnabled(fooAllInOne.optionDefensiveItemsSatanic) then
+		if satanic and Ability.IsCastable(satanic, myMana) then			
+			if fooAllInOne.shouldCastSatanic(myHero, enemy) == true then
+				Ability.CastNoTarget(satanic)
+				fooAllInOne.lastDefItemPop = os.clock()
+				return
+			end
+		end
+	end
+end
+
+function fooAllInOne.IsNPCinDanger(myHero, npc)
+
+	if not myHero then return end
+	if not npc or NPC.IsIllusion(npc) or not Entity.IsAlive(npc) then return false end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
+
+	if NPC.IsStunned(npc) or NPC.IsSilenced(npc) then return true end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED) then return true end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_HEXED) then return true end
+	if fooAllInOne.TargetDisableTimer(myHero, npc) > GameRules.GetGameTime() then return true end
+
+	if Entity.GetHealth(npc) <= Menu.GetValue(fooAllInOne.optionDefensiveItemsThreshold)/100 * Entity.GetMaxHealth(npc) then return true end
+
+	return false
+end
+
+function fooAllInOne.shouldCastBKB(myHero)
+
+	if not myHero then return end
+	if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
+
+	local dangerousRangeTable = {
+		alchemist_unstable_concoction_throw = 775,
+		beastmaster_primal_roar = 600,
+		centaur_hoof_stomp = 315,
+		chaos_knight_chaos_bolt = 500,
+		crystal_maiden_frostbite = 525,
+		dragon_knight_dragon_tail = 400,
+		drow_ranger_wave_of_silence = 900,
+		earth_spirit_boulder_smash = 300,
+		earthshaker_fissure = 1400,
+		ember_spirit_searing_chains = 400,
+		invoker_tornado = 1000,
+		jakiro_ice_path = 1200,
+		lion_impale = 500,
+		lion_voodoo = 500,
+		naga_siren_ensnare = 650,
+		nyx_assassin_impale = 700,
+		puck_dream_coil = 750,
+		rubick_telekinesis = 625,
+		sandking_burrowstrike = 650,
+		shadow_shaman_shackles = 400,
+		shadow_shaman_voodoo = 500,
+		skeleton_king_hellfire_blast = 525,
+		slardar_slithereen_crush = 400,
+		storm_spirit_electric_vortex = 400,
+		sven_storm_bolt = 600,
+		tidehunter_ravage = 1025,
+		tiny_avalanche = 600,
+		vengefulspirit_magic_missile = 500,
+		warlock_rain_of_chaos = 1200,
+		windrunner_shackleshot = 800,
+		slark_pounce = 700,
+		ogre_magi_fireblast = 475,
+		meepo_poof = 400
+			}
+
+	local enemyTable = {}
+	local enemiesAround = Entity.GetHeroesInRadius(myHero, Menu.GetValue(fooAllInOne.optionDefensiveItemsBKBRadius), Enum.TeamType.TEAM_ENEMY)
+		for _, enemy in ipairs(enemiesAround) do
+			if enemy then
+				if not Entity.IsDormant(enemy) and not NPC.IsIllusion(enemy) and not NPC.IsStunned(enemy) and not NPC.IsSilenced(enemy) then
+					table.insert(enemyTable, enemy)
+				end
+			end
+		end
+
+	if next(enemyTable) == nil then return false end
+
+	local tempTable = {}
+	for i = 1, #fooAllInOne.preemptiveBKBtable do
+		if Menu.IsEnabled(fooAllInOne.preemptiveBKB[i]) then
+			table.insert(tempTable, fooAllInOne.preemptiveBKBtable[i])
+		end
+	end
+
+	if next(tempTable) == nil then return false end
+
+	local searchAbility
+	for _, enemy in ipairs(enemyTable) do
+		for _, ability in ipairs(tempTable) do
+			if NPC.HasAbility(enemy, ability) then
+				if NPC.GetAbility(enemy, ability) ~= nil and Ability.IsReady(NPC.GetAbility(enemy, ability)) then
+					if Ability.GetLevel(NPC.GetAbility(enemy, ability)) > 0 and Ability.GetCooldownTimeLeft(NPC.GetAbility(enemy, ability)) < 1 and not Ability.IsHidden(NPC.GetAbility(enemy, ability)) then
+						if dangerousRangeTable[ability] > (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() then
+							searchAbility = ability
+							break
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if searchAbility ~= nil and #enemyTable >= Menu.GetValue(fooAllInOne.optionDefensiveItemsBKBEnemies) then
+		return true
+	end
+
+	return false
+
+end
+
+function fooAllInOne.shouldCastSatanic(myHero, enemy)
+
+	if not myHero then return end
+	if not enemy then return false end
+	if Entity.GetHealth(myHero) > Entity.GetMaxHealth(myHero) * 0.3 then return false end
+	if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
+
+	if enemy then
+		if NPC.IsAttacking(myHero) and Entity.GetHealth(enemy) >= Entity.GetMaxHealth(enemy) * 0.25 then
+			return true
+		end
+	end
+
+	return false
+
+end
+
+	
 
 -- hero functions
 function fooAllInOne.axeCombo(myHero, enemy)
@@ -4784,11 +5182,32 @@ function fooAllInOne.QoPCombo(myHero, enemy)
 	fooAllInOne.GenericMainAttack(myHero, "Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil)
 	end
 
-	if aghanims or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
-		if NPC.IsEntityInRange(myHero, enemy, 1000) then
-			if sonicWave and Ability.IsCastable(sonicWave, myMana) then
-				if Entity.GetHealth(enemy) <= Ability.GetLevelSpecialValueFor(sonicWave, "damage_scepter") then
-					Ability.CastPosition(sonicWave, (Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(600)))
+	if Menu.GetValue(fooAllInOne.optionHeroQoPAutoUlt) > 0 then
+		if sonicWave and Ability.IsCastable(sonicWave, myMana) then
+			for _, hero in ipairs(Entity.GetHeroesInRadius(myHero, 1000, Enum.TeamType.TEAM_ENEMY)) do
+				local target = fooAllInOne.targetChecker(hero)
+				if target then
+					local sonicDamage
+					if aghanims or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
+						sonicDamage = Ability.GetLevelSpecialValueFor(sonicWave, "damage_scepter")
+					else
+						sonicDamage = Ability.GetLevelSpecialValueFor(sonicWave, "damage")
+					end
+					if Menu.GetValue(fooAllInOne.optionHeroQoPAutoUlt) == 1 then
+						if aghanims or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
+							if Entity.GetHealth(enemy) <= sonicDamage then
+								Ability.CastPosition(sonicWave, (Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(target) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(600)))
+								break
+								return
+							end
+						end
+					elseif Menu.GetValue(fooAllInOne.optionHeroQoPAutoUlt) == 2 then
+						if Entity.GetHealth(enemy) <= sonicDamage then
+							Ability.CastPosition(sonicWave, (Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(target) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(600)))
+							break
+							return
+						end
+					end
 				end
 			end
 		end
@@ -5103,7 +5522,7 @@ function fooAllInOne.ArcWardenCombo(myHero, enemy)
 						return
 					end
 				
-					if fooAllInOne.SleepReady(0.2) and flux and Ability.IsCastable(flux, myMana) and #NPC.GetHeroesInRadius(enemy, 225, Enum.TeamType.TEAM_FRIEND) < 1 and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+					if Menu.IsEnabled(fooAllInOne.optionHeroArcWardenFlux) and fooAllInOne.SleepReady(0.2) and flux and Ability.IsCastable(flux, myMana) and #NPC.GetHeroesInRadius(enemy, 225, Enum.TeamType.TEAM_FRIEND) < 1 and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 						Ability.CastTarget(flux, enemy)
 						fooAllInOne.lastTick = os.clock()
 						fooAllInOne.noItemCastFor(0.3)
@@ -5116,7 +5535,7 @@ function fooAllInOne.ArcWardenCombo(myHero, enemy)
 						fooAllInOne.noItemCastFor(0.3)
 						return
 					end
-					if fooAllInOne.SleepReady(0.2) and sparkWraith and Ability.IsCastable(sparkWraith, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+					if Menu.IsEnabled(fooAllInOne.optionHeroArcWardenSpark) and fooAllInOne.SleepReady(0.2) and sparkWraith and Ability.IsCastable(sparkWraith, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 						local sparkPrediction = 2.3 + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
 						Ability.CastPosition(sparkWraith, fooAllInOne.castPrediction(myHero, enemy, sparkPrediction))
 						fooAllInOne.lastTick = os.clock()
@@ -5263,7 +5682,13 @@ function fooAllInOne.ArcWardenFight(myHero, enemy, tempestDoubleEntity, arcWarde
 			fooAllInOne.Debugger(GameRules.GetGameTime(), tempestDoubleEntity, "attack", "DOTA_UNIT_ORDER_ATTACK_TARGET")
 			return
 		end
-			
+
+		if  NPC.IsLinkensProtected(enemy) and (os.clock() - fooAllInOne.ControlledUnitCastTime) > fooAllInOne.CastAnimationDelay(flux) and flux and Ability.IsCastable(flux, wardenMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET, enemy, Vector(0,0,0), flux, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, tempestDoubleEntity)
+			fooAllInOne.ControlledUnitCastTime = os.clock()
+			fooAllInOne.Debugger(GameRules.GetGameTime(), tempestDoubleEntity, "flux", "DOTA_UNIT_ORDER_CAST_TARGET")
+			return
+		end			
 		if (os.clock() - fooAllInOne.ControlledUnitCastTime) > fooAllInOne.GetAvgLatency() and diffusalBlade and Ability.IsReady(diffusalBlade) and Item.GetCurrentCharges(diffusalBlade) >= 1 and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET, enemy, Vector(0,0,0), diffusalBlade, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, tempestDoubleEntity)
 			fooAllInOne.ControlledUnitCastTime = os.clock()
@@ -5280,7 +5705,7 @@ function fooAllInOne.ArcWardenFight(myHero, enemy, tempestDoubleEntity, arcWarde
 			fooAllInOne.Debugger(GameRules.GetGameTime(), tempestDoubleEntity, "bkb", "DOTA_UNIT_ORDER_CAST_NO_TARGET")
 		end		
 	
-		if (os.clock() - fooAllInOne.ControlledUnitCastTime) > fooAllInOne.CastAnimationDelay(flux) and flux and Ability.IsCastable(flux, wardenMana) and #NPC.GetHeroesInRadius(enemy, 225, Enum.TeamType.TEAM_FRIEND) < 1 and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroArcWardenFlux) and (os.clock() - fooAllInOne.ControlledUnitCastTime) > fooAllInOne.CastAnimationDelay(flux) and flux and Ability.IsCastable(flux, wardenMana) and #NPC.GetHeroesInRadius(enemy, 225, Enum.TeamType.TEAM_FRIEND) < 1 and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET, enemy, Vector(0,0,0), flux, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, tempestDoubleEntity)
 			fooAllInOne.ControlledUnitCastTime = os.clock()
 			fooAllInOne.Debugger(GameRules.GetGameTime(), tempestDoubleEntity, "flux", "DOTA_UNIT_ORDER_CAST_TARGET")
@@ -5292,7 +5717,7 @@ function fooAllInOne.ArcWardenFight(myHero, enemy, tempestDoubleEntity, arcWarde
 			fooAllInOne.Debugger(GameRules.GetGameTime(), tempestDoubleEntity, "magneticField", "DOTA_UNIT_ORDER_CAST_POSITION")
 			return
 		end
-		if (os.clock() - fooAllInOne.ControlledUnitCastTime) > fooAllInOne.CastAnimationDelay(sparkWraith) and sparkWraith and Ability.IsCastable(sparkWraith, wardenMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+		if Menu.IsEnabled(fooAllInOne.optionHeroArcWardenSpark) and (os.clock() - fooAllInOne.ControlledUnitCastTime) > fooAllInOne.CastAnimationDelay(sparkWraith) and sparkWraith and Ability.IsCastable(sparkWraith, wardenMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 			local sparkPrediction = 2.3 + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
 			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION, target, fooAllInOne.castPrediction(tempestDoubleEntity, enemy, sparkPrediction), sparkWraith, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, tempestDoubleEntity)
 			fooAllInOne.ControlledUnitCastTime = os.clock()
@@ -5411,10 +5836,27 @@ function fooAllInOne.ArcWardenDoubleCombo(myHero, tempestDoubleEntity, enemy, ar
 		end
 	end
 
+	local mjollnir = NPC.GetItem(tempestDoubleEntity, "item_mjollnir", true)
+
 	if (os.clock() - fooAllInOne.ControlledUnitCastTime) > fooAllInOne.GetAvgLatency() and necronomicon and Ability.IsCastable(necronomicon, wardenMana) then
 		Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, target, Vector(0,0,0), necronomicon, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, tempestDoubleEntity)
 		fooAllInOne.ControlledUnitCastTime = os.clock()
 		fooAllInOne.Debugger(GameRules.GetGameTime(), tempestDoubleEntity, "necronomicon", "DOTA_UNIT_ORDER_CAST_NO_TARGET")
+	end
+	if NPC.HasModifier(tempestDoubleEntity, "modifier_kill") then
+		local tempestDieTime = Modifier.GetDieTime(NPC.GetModifier(tempestDoubleEntity, "modifier_kill"))
+		if tempestDieTime - GameRules.GetGameTime() < 2.5 then
+			if mjollnir and Ability.IsCastable(mjollnir, wardenMana) then
+				for _, allyCreep in ipairs(Entity.GetUnitsInRadius(tempestDoubleEntity, 825, Enum.TeamType.TEAM_FRIEND)) do
+					if allyCreep and Entity.IsAlive(allyCreep) and NPC.IsLaneCreep(allyCreep) and not NPC.IsRanged(allyCreep) and Entity.GetHealth(allyCreep) > Entity.GetMaxHealth(allyCreep) * 0.6 then
+						if (os.clock() - fooAllInOne.ControlledUnitCastTime) > fooAllInOne.GetAvgLatency() then
+							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET, allyCreep, Vector(0,0,0), mjollnir, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, tempestDoubleEntity)
+							fooAllInOne.ControlledUnitCastTime = os.clock()
+						end
+					end
+				end
+			end
+		end
 	end
 
 	local targetHero
@@ -5445,7 +5887,7 @@ function fooAllInOne.ArcWardenDoubleCombo(myHero, tempestDoubleEntity, enemy, ar
 		if #NPC.GetHeroesInRadius(tempestDoubleEntity, 1499, Enum.TeamType.TEAM_ENEMY) < 1 then
 			for i = 1, NPCs.Count() do 
 			local creeps = NPCs.Get(i)
-				if creeps and not Entity.IsSameTeam(myHero, creeps) then
+				if creeps and Entity.IsNPC(creeps) and not Entity.IsSameTeam(myHero, creeps) then
 					if NPC.IsEntityInRange(tempestDoubleEntity, creeps, 1499) then
 						if Entity.IsAlive(creeps) and not Entity.IsDormant(creeps) and NPC.IsKillable(creeps) and not NPC.IsWaitingToSpawn(creeps) then
 							if Entity.GetHealth(creeps) < enemyCreepHealth then
@@ -5475,7 +5917,9 @@ function fooAllInOne.ArcWardenDoubleCombo(myHero, tempestDoubleEntity, enemy, ar
 	
 	if targetHero then
 		fooAllInOne.ArcWardenFight(myHero, targetHero, tempestDoubleEntity, arcWardenAttackRange)
-		fooAllInOne.itemUsageSmartOrder(tempestDoubleEntity, targetHero, true)
+		if not NPC.IsLinkensProtected(targetHero) then
+			fooAllInOne.itemUsageSmartOrder(tempestDoubleEntity, targetHero, true)
+		end
 	end
 
 	if targetCreep then
@@ -5496,6 +5940,7 @@ function fooAllInOne.ArcWardenDoubleCombo(myHero, tempestDoubleEntity, enemy, ar
 				return
 			end
 		end
+	
 		for _, necro in ipairs(fooAllInOne.GetNecronomiconEntityTable(myHero, tempestDoubleEntity)) do
 			fooAllInOne.NecronomiconController(necro, nil, fooAllInOne.GenericLanePusher(tempestDoubleEntity))
 		end
@@ -5540,6 +5985,8 @@ function fooAllInOne.ArcWardenTPPush(myHero, tempestDoubleEntity, arcWardenAttac
 		end
 	end
 
+	local mjollnir = NPC.GetItem(tempestDoubleEntity, "item_mjollnir", true)
+
 	if (os.clock() - fooAllInOne.ControlledUnitCastTime) > fooAllInOne.GetAvgLatency() and necronomicon and Ability.IsCastable(necronomicon, wardenMana) then
 		Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, target, Vector(0,0,0), necronomicon, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, tempestDoubleEntity)
 		fooAllInOne.ControlledUnitCastTime = os.clock()
@@ -5549,6 +5996,21 @@ function fooAllInOne.ArcWardenTPPush(myHero, tempestDoubleEntity, arcWardenAttac
 		Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, target, Vector(0,0,0), mantaStyle, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, tempestDoubleEntity)
 		fooAllInOne.ControlledUnitCastTime = os.clock()
 		fooAllInOne.Debugger(GameRules.GetGameTime(), tempestDoubleEntity, "mantaStyle", "DOTA_UNIT_ORDER_CAST_NO_TARGET")
+	end
+	if NPC.HasModifier(tempestDoubleEntity, "modifier_kill") then
+		local tempestDieTime = Modifier.GetDieTime(NPC.GetModifier(tempestDoubleEntity, "modifier_kill"))
+		if tempestDieTime - GameRules.GetGameTime() < 2.5 then
+			if mjollnir and Ability.IsCastable(mjollnir, wardenMana) then
+				for _, allyCreep in ipairs(Entity.GetUnitsInRadius(tempestDoubleEntity, 825, Enum.TeamType.TEAM_FRIEND)) do
+					if allyCreep and Entity.IsAlive(allyCreep) and NPC.IsLaneCreep(allyCreep) and not NPC.IsRanged(allyCreep) and Entity.GetHealth(allyCreep) > Entity.GetMaxHealth(allyCreep) * 0.6 then
+						if (os.clock() - fooAllInOne.ControlledUnitCastTime) > fooAllInOne.GetAvgLatency() then
+							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET, allyCreep, Vector(0,0,0), mjollnir, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, tempestDoubleEntity)
+							fooAllInOne.ControlledUnitCastTime = os.clock()
+						end
+					end
+				end
+			end
+		end
 	end
 
 	local targetHero
@@ -5568,7 +6030,7 @@ function fooAllInOne.ArcWardenTPPush(myHero, tempestDoubleEntity, arcWardenAttac
 	if #NPC.GetHeroesInRadius(tempestDoubleEntity, 799, Enum.TeamType.TEAM_ENEMY) < 1 then
 		for i = 1, NPCs.Count() do 
 		local creeps = NPCs.Get(i)
-			if creeps and not Entity.IsSameTeam(myHero, creeps) then
+			if creeps and Entity.IsNPC(creeps) and not Entity.IsSameTeam(myHero, creeps) then
 				if NPC.IsEntityInRange(tempestDoubleEntity, creeps, 799) then
 					if Entity.IsAlive(creeps) and not Entity.IsDormant(creeps) and NPC.IsKillable(creeps) and not NPC.IsWaitingToSpawn(creeps) then
 						if Entity.GetHealth(creeps) < enemyCreepHealth then
@@ -5592,7 +6054,9 @@ function fooAllInOne.ArcWardenTPPush(myHero, tempestDoubleEntity, arcWardenAttac
 	
 	if targetHero then
 		fooAllInOne.ArcWardenFight(myHero, targetHero, tempestDoubleEntity, arcWardenAttackRange)
-		fooAllInOne.itemUsageSmartOrder(tempestDoubleEntity, targetHero, true)
+		if not NPC.IsLinkensProtected(targetHero) then
+			fooAllInOne.itemUsageSmartOrder(tempestDoubleEntity, targetHero, true)
+		end
 	end
 
 	if targetCreep then
@@ -6317,6 +6781,10 @@ function fooAllInOne.InvokerCombo(myHero, enemy)
 		end
 	end
 	
+	if Input.IsKeyDownOnce(Config.ReadString("", "Ghost Walk Key0", defaultValue)) then
+		fooAllInOne.invokerCaptureGhostwalkActivation = os.clock()
+	end
+	
 	if next(fooAllInOne.PreInvokeSkills) ~= nil then
 		fooAllInOne.InvokerPreInvoke(myHero, myMana, invoke)
 	end
@@ -6330,6 +6798,20 @@ function fooAllInOne.InvokerCombo(myHero, enemy)
 
 	if Menu.IsEnabled(fooAllInOne.optionKillStealInvokerTPpartice) then
 		fooAllInOne.EnemyHPTracker(myHero)
+	end
+
+	if fooAllInOne.getInvokerSettings == nil then
+		fooAllInOne.getInvokerSettings = Menu.GetValue(fooAllInOne.optionHeroInvokerDisableBuildInGetOption)
+	end
+
+	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerDisableBuildIn) then
+		if fooAllInOne.getInvokerSettings > 0 then
+			if Menu.IsKeyDown(fooAllInOne.optionComboKey) then
+    				Menu.SetValue(fooAllInOne.optionHeroInvokerDisableBuildInGetOption, 0)
+			else
+				Menu.SetValue(fooAllInOne.optionHeroInvokerDisableBuildInGetOption, 1)
+			end
+		end
 	end
 
 	if Menu.IsKeyDown(fooAllInOne.optionComboKey) and not Menu.IsKeyDown(fooAllInOne.optionHeroInvokerAltKey) then
@@ -6541,6 +7023,14 @@ function fooAllInOne.InvokerComboTornadoEmpIcewall(myHero, myMana, enemy, tornad
 			rangeChecker = 1000
 		end
 
+	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerTornadoItems) then
+		fooAllInOne.itemUsage(myHero, enemy)
+	else
+		if not Ability.IsReady(tornado) then
+			fooAllInOne.itemUsage(myHero, enemy)
+		end
+	end
+
 	if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(emp), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
 		if not NPC.IsEntityInRange(myHero, enemy, 1000) then
 			if blink and Ability.IsReady(blink) then
@@ -6589,10 +7079,12 @@ function fooAllInOne.InvokerComboTornadoEmpIcewall(myHero, myMana, enemy, tornad
 								local tornadoPrediction = Ability.GetCastPoint(tornado) + (Entity.GetAbsOrigin(enemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2)
 								Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, enemy, tornadoPrediction))
 								fooAllInOne.lastTick = os.clock()
+								fooAllInOne.noItemCastFor((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000 + 0.5)
 								return
 							else
 								Ability.CastPosition(tornado, Input.GetWorldCursorPos())
 								fooAllInOne.lastTick = os.clock()
+								fooAllInOne.noItemCastFor((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000 + 0.5)
 								return
 							end
 						end
@@ -6679,8 +7171,6 @@ function fooAllInOne.InvokerComboTornadoEmpIcewall(myHero, myMana, enemy, tornad
 		end
 	end
 
-	fooAllInOne.itemUsage(myHero, enemy)
-
 	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerSwitch) then
 		if not Ability.IsReady(tornado) and not Ability.IsReady(emp) and (not Ability.IsReady(coldSnap) or not Ability.IsReady(iceWall)) then
 			fooAllInOne.InvokerComboSelector = 11
@@ -6699,6 +7189,14 @@ function fooAllInOne.InvokerComboTornadoMeteorBlast(myHero, myMana, enemy, torna
 
 	if Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) > -1 and Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) < 0.25 then return end
 	if NPC.HasModifier(myHero, "modifier_invoker_ghost_walk_self") then return end
+
+	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerTornadoItems) then
+		fooAllInOne.itemUsage(myHero, enemy)
+	else
+		if not Ability.IsReady(tornado) then
+			fooAllInOne.itemUsage(myHero, enemy)
+		end
+	end	
 
 	if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(chaosMeteor), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
 		if not NPC.IsEntityInRange(myHero, enemy, 950) then
@@ -6833,8 +7331,6 @@ function fooAllInOne.InvokerComboTornadoMeteorBlast(myHero, myMana, enemy, torna
 		end
 	end
 
-	fooAllInOne.itemUsage(myHero, enemy)
-
 	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerSwitch) then
 		if not Ability.IsReady(tornado) and not Ability.IsReady(chaosMeteor) and not Ability.IsReady(deafeningBlast) then
 			fooAllInOne.InvokerComboSelector = 11
@@ -6941,6 +7437,14 @@ function fooAllInOne.InvokerComboAghaTornadoEmpMeteorBlast(myHero, myMana, enemy
 	if not aghanims and not NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then return end
 	if Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) > -1 and Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) < 0.25 then return end
 	if NPC.HasModifier(myHero, "modifier_invoker_ghost_walk_self") then return end
+
+	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerTornadoItems) then
+		fooAllInOne.itemUsage(myHero, enemy)
+	else
+		if not Ability.IsReady(tornado) then
+			fooAllInOne.itemUsage(myHero, enemy)
+		end
+	end
 
 	if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(emp), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
 		if not NPC.IsEntityInRange(myHero, enemy, 1000) then
@@ -7063,8 +7567,6 @@ function fooAllInOne.InvokerComboAghaTornadoEmpMeteorBlast(myHero, myMana, enemy
 		end
 	end
 
-	fooAllInOne.itemUsage(myHero, enemy)
-
 	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerSwitch) then
 		if not Ability.IsReady(tornado) and not Ability.IsReady(emp) and not Ability.IsReady(chaosMeteor) and not Ability.IsReady(deafeningBlast) then
 			fooAllInOne.InvokerComboSelector = 11
@@ -7085,6 +7587,14 @@ function fooAllInOne.InvokerComboAghaTornadoSunstrikeMeteorBlast(myHero, myMana,
 	if not aghanims and not NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then return end
 	if Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) > -1 and Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) < 0.25 then return end
 	if NPC.HasModifier(myHero, "modifier_invoker_ghost_walk_self") then return end
+
+	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerTornadoItems) then
+		fooAllInOne.itemUsage(myHero, enemy)
+	else
+		if not Ability.IsReady(tornado) then
+			fooAllInOne.itemUsage(myHero, enemy)
+		end
+	end
 
 	if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(sunStrike), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
 		if not NPC.IsEntityInRange(myHero, enemy, 1000) then
@@ -7201,8 +7711,6 @@ function fooAllInOne.InvokerComboAghaTornadoSunstrikeMeteorBlast(myHero, myMana,
 		end
 	end
 
-	fooAllInOne.itemUsage(myHero, enemy)
-
 	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerSwitch) then
 		if not Ability.IsReady(tornado) and not Ability.IsReady(sunStrike) and not Ability.IsReady(chaosMeteor) and not Ability.IsReady(deafeningBlast) then
 			fooAllInOne.InvokerComboSelector = 11
@@ -7223,6 +7731,14 @@ function fooAllInOne.InvokerComboRefresherAghaTornadoSunstrikeMeteorBlast(myHero
 	if not refresher then return end
 	if Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) > -1 and Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) < 0.25 then return end
 	if NPC.HasModifier(myHero, "modifier_invoker_ghost_walk_self") then return end
+
+	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerTornadoItems) then
+		fooAllInOne.itemUsage(myHero, enemy)
+	else
+		if not Ability.IsReady(tornado) or not Ability.IsReady(refresher) then
+			fooAllInOne.itemUsage(myHero, enemy)
+		end
+	end
 
 	if Ability.IsReady(refresher) then
 		if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(sunStrike), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
@@ -7350,8 +7866,6 @@ function fooAllInOne.InvokerComboRefresherAghaTornadoSunstrikeMeteorBlast(myHero
 		end
 	end
 
-	fooAllInOne.itemUsage(myHero, enemy)
-
 	if not Ability.IsReady(refresher) and Ability.SecondsSinceLastUse(refresher) > 0 and Ability.SecondsSinceLastUse(refresher) < 3 then
 		if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
 			Ability.CastPosition(chaosMeteor, Entity.GetAbsOrigin(enemy))
@@ -7400,6 +7914,14 @@ function fooAllInOne.InvokerComboRefresherAghaTornadoEmpMeteorBlast(myHero, myMa
 	if not refresher then return end
 	if Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) > -1 and Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) < 0.25 then return end
 	if NPC.HasModifier(myHero, "modifier_invoker_ghost_walk_self") then return end
+
+	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerTornadoItems) then
+		fooAllInOne.itemUsage(myHero, enemy)
+	else
+		if not Ability.IsReady(tornado) or not Ability.IsReady(refresher) then
+			fooAllInOne.itemUsage(myHero, enemy)
+		end
+	end
 
 	if Ability.IsReady(refresher) then
 		if fooAllInOne.InvokerInvokedChecker(myHero, Ability.GetName(emp), Ability.GetName(tornado)) and invoke and Ability.IsReady(invoke) then
@@ -7532,8 +8054,6 @@ function fooAllInOne.InvokerComboRefresherAghaTornadoEmpMeteorBlast(myHero, myMa
 			end
 		end
 	end
-
-	fooAllInOne.itemUsage(myHero, enemy)
 
 	if not Ability.IsReady(refresher) and Ability.SecondsSinceLastUse(refresher) > 0 and Ability.SecondsSinceLastUse(refresher) < 3 then
 		if fooAllInOne.SleepReady(0.05) and chaosMeteor and Ability.IsCastable(chaosMeteor, myMana) then
@@ -7915,7 +8435,7 @@ function fooAllInOne.InvokerSkillProcessingSunstrike(myHero, myMana, enemy)
 
 	local delay
 	if fooAllInOne.InvokerLastCastedSkill == nil then
-		if next(fooAllInOne.invokerSunstrikeKSdisabledTargetProcess(myHero, enemy)) ~= {0,0} then
+		if fooAllInOne.invokerSunstrikeKSdisabledTargetProcess(myHero, enemy)[1] > 0 then
 			local timing = fooAllInOne.invokerSunstrikeKSdisabledTargetProcess(myHero, enemy)[1]
 			delay = timing
 		else
@@ -8116,12 +8636,16 @@ function fooAllInOne.InvokerComboCustomMode(myHero, myMana, enemy, blink, invoke
 			end
 		end
 
-	if skill then
-		if Ability.GetName(skill) == "invoker_tornado" then
-			fooAllInOne.noItemCastFor(((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + 0.5)
-		else
+	if skill and Ability.GetName(skill) == "invoker_tornado" then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerTornadoItems) then
 			fooAllInOne.itemUsage(myHero, enemy)
+		else
+			if not Ability.IsReady(skill) then
+				fooAllInOne.itemUsage(myHero, enemy)
+			end
 		end
+	else
+		fooAllInOne.itemUsage(myHero, enemy)
 	end
 
 	if not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
@@ -8143,10 +8667,18 @@ function fooAllInOne.InvokerComboCustomMode(myHero, myMana, enemy, blink, invoke
 				if GameRules.GetGameTime() > targetingDelay then
 					if Ability.IsCastable(skill, myMana) then
 						if skillProcessing[Ability.GetName(skill)][1] == "position" then
-							Ability.CastPosition(skill, targetingTarget)
-							fooAllInOne.InvokerLastCastedSkillTime = GameRules.GetGameTime()
-							fooAllInOne.InvokerLastCastedSkill = skill
-							return
+							if Ability.GetName(skill) == "invoker_tornado" then
+								Ability.CastPosition(skill, targetingTarget)
+								fooAllInOne.noItemCastFor(((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + 0.5)
+								fooAllInOne.InvokerLastCastedSkillTime = GameRules.GetGameTime()
+								fooAllInOne.InvokerLastCastedSkill = skill
+								return
+							else
+								Ability.CastPosition(skill, targetingTarget)
+								fooAllInOne.InvokerLastCastedSkillTime = GameRules.GetGameTime()
+								fooAllInOne.InvokerLastCastedSkill = skill
+								return
+							end
 						end
 						if skillProcessing[Ability.GetName(skill)][1] == "target" then
 							if not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
@@ -8439,12 +8971,16 @@ function fooAllInOne.InvokerComboDynamicMode(myHero, myMana, enemy, blink, invok
 			end
 		end
 
-	if skill then
-		if Ability.GetName(skill) == "invoker_tornado" then
-			fooAllInOne.noItemCastFor(((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + 0.5)
-		else
+	if skill and Ability.GetName(skill) == "invoker_tornado" then
+		if Menu.IsEnabled(fooAllInOne.optionHeroInvokerTornadoItems) then
 			fooAllInOne.itemUsage(myHero, enemy)
+		else
+			if not Ability.IsReady(skill) then
+				fooAllInOne.itemUsage(myHero, enemy)
+			end
 		end
+	else
+		fooAllInOne.itemUsage(myHero, enemy)
 	end
 
 	if not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
@@ -8470,10 +9006,18 @@ function fooAllInOne.InvokerComboDynamicMode(myHero, myMana, enemy, blink, invok
 				if GameRules.GetGameTime() > targetingDelay then
 					if Ability.IsCastable(skill, myMana) then
 						if skillProcessing[Ability.GetName(skill)][1] == "position" then
-							Ability.CastPosition(skill, targetingTarget)
-							fooAllInOne.InvokerLastCastedSkillTime = GameRules.GetGameTime()
-							fooAllInOne.InvokerLastCastedSkill = skill
-							return
+							if Ability.GetName(skill) == "invoker_tornado" then
+								Ability.CastPosition(skill, targetingTarget)
+								fooAllInOne.noItemCastFor(((Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length2D() / 1000) + 0.5)
+								fooAllInOne.InvokerLastCastedSkillTime = GameRules.GetGameTime()
+								fooAllInOne.InvokerLastCastedSkill = skill
+								return
+							else
+								Ability.CastPosition(skill, targetingTarget)
+								fooAllInOne.InvokerLastCastedSkillTime = GameRules.GetGameTime()
+								fooAllInOne.InvokerLastCastedSkill = skill
+								return
+							end
 						end
 						if skillProcessing[Ability.GetName(skill)][1] == "target" then
 							if not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
@@ -8561,6 +9105,8 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 
 	if not myHero then return end
 
+	local deafeningBlast = NPC.GetAbility(myHero, "invoker_deafening_blast")
+
 	if Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) > -1 and Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) < 0.25 then return end
 	if NPC.HasModifier(myHero, "modifier_invoker_ghost_walk_self") then return end
 	if NPC.HasModifier(myHero, "modifier_teleporting") then return end
@@ -8569,9 +9115,9 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 
 	if Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 0)) < 1 or Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1)) < 1 or Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 2)) < 1 then return end
 
-	if not coldSnap or not tornado then return end
-	if not Ability.IsReady(coldSnap) and not Ability.IsReady(tornado) then return end
-	if not fooAllInOne.InvokerIsAbilityInvoked(myHero, coldSnap) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, tornado) and not Ability.IsCastable(invoke, myMana) then return end
+	if not coldSnap or not tornado or not deafeningBlast then return end
+	if not Ability.IsReady(coldSnap) and not Ability.IsReady(tornado) and not Ability.IsReady(deafeningBlast) then return end
+	if not fooAllInOne.InvokerIsAbilityInvoked(myHero, coldSnap) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, tornado) and not fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) and not Ability.IsCastable(invoke, myMana) then return end
 
 	local channellingTable = {
 		npc_dota_hero_bane = { "bane_fiends_grip", { 5, 5, 5 } },
@@ -8590,7 +9136,7 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 	local cancelEnemies = NPC.GetHeroesInRadius(myHero, 1950, Enum.TeamType.TEAM_ENEMY)
 	for _, cancelEnemy in ipairs(cancelEnemies) do
 		if cancelEnemy and not NPC.IsDormant(cancelEnemy) and not NPC.IsIllusion(cancelEnemy) and Entity.IsAlive(cancelEnemy) then
-			if NPC.IsChannellingAbility(cancelEnemy) or NPC.HasModifier(cancelEnemy, "modifier_teleporting") then
+			if NPC.IsChannellingAbility(cancelEnemy) or NPC.HasModifier(cancelEnemy, "modifier_teleporting") or NPC.HasModifier(cancelEnemy, "modifier_spirit_breaker_charge_of_darkness") then
 				local skillSelector
 				if not NPC.IsLinkensProtected(cancelEnemy) then
 					if fooAllInOne.InvokerIsAbilityInvoked(myHero, coldSnap) then
@@ -8602,17 +9148,53 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 									if NPC.IsEntityInRange(myHero, cancelEnemy, (400 + Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1)) * 400)) then
 										skillSelector = tornado
 									else
+										if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+											if Ability.IsCastable(deafeningBlast, myMana) then
+												skillSelector = deafeningBlast
+											else
+												skillSelector = nil
+											end
+										else
+											skillSelector = nil
+										end
+									end
+								else
+									if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+										if Ability.IsCastable(deafeningBlast, myMana) then
+											skillSelector = deafeningBlast
+										else
+											skillSelector = nil
+										end
+									else
+										skillSelector = nil
+									end
+								end
+							end
+						else
+							if NPC.IsEntityInRange(myHero, cancelEnemy, (400 + Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1)) * 400)) then
+								if Ability.IsCastable(tornado, myMana) then
+									skillSelector = tornado
+								else
+									if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+										if Ability.IsCastable(deafeningBlast, myMana) then
+											skillSelector = deafeningBlast
+										else
+											skillSelector = nil
+										end
+									else
+										skillSelector = nil
+									end
+								end
+							else
+								if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+									if Ability.IsCastable(deafeningBlast, myMana) then
+										skillSelector = deafeningBlast
+									else
 										skillSelector = nil
 									end
 								else
 									skillSelector = nil
 								end
-							end
-						else
-							if NPC.IsEntityInRange(myHero, cancelEnemy, (400 + Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1)) * 400)) then
-								skillSelector = tornado
-							else
-								skillSelector = nil
 							end
 						end
 					else
@@ -8624,14 +9206,30 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 									if NPC.IsEntityInRange(myHero, cancelEnemy, 999) then
 										skillSelector = coldSnap
 									else
-										skillSelector = nil
+										if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+											if Ability.IsCastable(deafeningBlast, myMana) then
+												skillSelector = deafeningBlast
+											else
+												skillSelector = nil
+											end
+										else
+											skillSelector = nil
+										end
 									end
 								end
 							else
 								if NPC.IsEntityInRange(myHero, cancelEnemy, 999) then
 									skillSelector = coldSnap
 								else
-									skillSelector = nil
+									if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+										if Ability.IsCastable(deafeningBlast, myMana) then
+											skillSelector = deafeningBlast
+										else
+											skillSelector = nil
+										end
+									else
+										skillSelector = nil
+									end
 								end
 							end
 						else
@@ -8643,14 +9241,44 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 										if NPC.IsEntityInRange(myHero, cancelEnemy, (400 + Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1)) * 400)) then
 											skillSelector = tornado
 										else
-											skillSelector = nil
+											if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+												if Ability.IsCastable(deafeningBlast, myMana) then
+													skillSelector = deafeningBlast
+												else
+													skillSelector = nil
+												end
+											else
+												skillSelector = nil
+											end
 										end
 									else
-										skillSelector = nil
+										if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+											if Ability.IsCastable(deafeningBlast, myMana) then
+												skillSelector = deafeningBlast
+											else
+												skillSelector = nil
+											end
+										else
+											skillSelector = nil
+										end
 									end
 								end
 							else
-								skillSelector = tornado
+								if Ability.IsCastable(tornado, myMana) then
+									if NPC.IsEntityInRange(myHero, cancelEnemy, (400 + Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1)) * 400)) then
+										skillSelector = tornado
+									else
+										if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+											if Ability.IsCastable(deafeningBlast, myMana) then
+												skillSelector = deafeningBlast
+											else
+												skillSelector = nil
+											end
+										else
+											skillSelector = nil
+										end
+									end
+								end
 							end
 						end	
 					end
@@ -8659,10 +9287,26 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 						if NPC.IsEntityInRange(myHero, cancelEnemy, (400 + Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1)) * 400)) then
 							skillSelector = tornado
 						else
-							skillSelector = nil
+							if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+								if Ability.IsCastable(deafeningBlast, myMana) then
+									skillSelector = deafeningBlast
+								else
+									skillSelector = nil
+								end
+							else
+								skillSelector = nil
+							end
 						end
 					else
-						skillSelector = nil
+						if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+							if Ability.IsCastable(deafeningBlast, myMana) then
+								skillSelector = deafeningBlast
+							else
+								skillSelector = nil
+							end
+						else
+							skillSelector = nil
+						end
 					end
 				end
 				if skillSelector == nil then
@@ -8670,13 +9314,16 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 					return
 				end
 				if not NPC.HasState(cancelEnemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
-					if skillSelector == coldSnap then
+					if skillSelector == coldSnap and Ability.IsReady(coldSnap) then
 						if NPC.GetUnitName(cancelEnemy) ~= nil then
 							for i, v in pairs(channellingTable) do
-								if (NPC.GetUnitName(cancelEnemy) == i and Ability.IsChannelling(NPC.GetAbility(cancelEnemy, v[1]))) or NPC.HasModifier(cancelEnemy, "modifier_teleporting") then
+								if (NPC.GetUnitName(cancelEnemy) == i and Ability.IsChannelling(NPC.GetAbility(cancelEnemy, v[1]))) or NPC.HasModifier(cancelEnemy, "modifier_teleporting") or NPC.HasModifier(cancelEnemy, "modifier_spirit_breaker_charge_of_darkness") then
 									if not fooAllInOne.InvokerIsAbilityInvoked(myHero, coldSnap) then
 										if invoke and Ability.IsCastable(invoke, myMana) then
 											fooAllInOne.invokerInvokeAbility(myHero, coldSnap)
+											Ability.CastTarget(coldSnap, cancelEnemy, true)
+											fooAllInOne.invokerChannellingKillstealTimer = os.clock()
+											break
 											return
 										end
 									else
@@ -8690,7 +9337,7 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 								end
 							end
 						end
-					elseif skillSelector == tornado then
+					elseif skillSelector == tornado and Ability.IsReady(tornado) then
 						if NPC.IsChannellingAbility(cancelEnemy) then
 							if NPC.GetUnitName(cancelEnemy) ~= nil then
 								for i, v in pairs(channellingTable) do
@@ -8699,6 +9346,9 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 											if not fooAllInOne.InvokerIsAbilityInvoked(myHero, tornado) then
 												if invoke and Ability.IsCastable(invoke, myMana) then
 													fooAllInOne.invokerInvokeAbility(myHero, tornado)
+													Ability.CastPosition(tornado, Entity.GetAbsOrigin(cancelEnemy), true)
+													fooAllInOne.invokerChannellingKillstealTimer = os.clock()
+													break
 													return
 												end
 											else
@@ -8717,21 +9367,74 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 							end
 						end
 						if NPC.HasModifier(cancelEnemy, "modifier_teleporting") then
-							if GameRules.GetGameTime() + ((Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length2D() / 1000) < Modifier.GetDieTime(NPC.GetModifier(cancelEnemy, "modifier_teleporting")) then
+							if GameRules.GetGameTime() + ((Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length2D() / 1000) < Modifier.GetDieTime(NPC.GetModifier(cancelEnemy, "modifier_teleporting")) and Ability.IsReady(tornado) then
 								if not fooAllInOne.InvokerIsAbilityInvoked(myHero, tornado) then
 									if invoke and Ability.IsCastable(invoke, myMana) then
 										fooAllInOne.invokerInvokeAbility(myHero, tornado)
+										Ability.CastPosition(tornado, Entity.GetAbsOrigin(cancelEnemy), true)
+										fooAllInOne.invokerChannellingKillstealTimer = os.clock()
+										break
 										return
 									end
 								else
 									if Ability.IsCastable(tornado, myMana) then
 										Ability.CastPosition(tornado, Entity.GetAbsOrigin(cancelEnemy))
 										fooAllInOne.invokerChannellingKillstealTimer = os.clock()
+										break
 										return
 									end
 								end
 							else
 								return
+							end
+						end
+						if NPC.HasModifier(cancelEnemy, "modifier_spirit_breaker_charge_of_darkness") then
+							if Ability.IsReady(tornado) and NPC.IsRunning(cancelEnemy) and fooAllInOne.GetMoveSpeed(cancelEnemy) > 500 and not NPC.IsDormant(cancelEnemy) then
+								local tornadoPrediction = Ability.GetCastPoint(tornado) + (Entity.GetAbsOrigin(cancelEnemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1000) * 1.25 + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2) + 0.75 + NPC.GetTimeToFace(myHero, cancelEnemy)
+								if not fooAllInOne.InvokerIsAbilityInvoked(myHero, tornado) then
+									if invoke and Ability.IsCastable(invoke, myMana) then
+										fooAllInOne.invokerInvokeAbility(myHero, tornado)
+										Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, cancelEnemy, tornadoPrediction), true)
+										fooAllInOne.invokerChannellingKillstealTimer = os.clock()
+										break
+										return
+									end
+								else
+									if Ability.IsCastable(tornado, myMana) then
+										Ability.CastPosition(tornado, fooAllInOne.castLinearPrediction(myHero, cancelEnemy, tornadoPrediction))
+										fooAllInOne.invokerChannellingKillstealTimer = os.clock()
+										break
+										return
+									end
+								end
+							end
+						end
+					elseif skillSelector == deafeningBlast and Ability.IsReady(deafeningBlast) then
+						if deafeningBlast and Ability.IsCastable(deafeningBlast, myMana) then
+							if NPC.IsEntityInRange(myHero, cancelEnemy, 975) then
+								if NPC.HasModifier(cancelEnemy, "modifier_spirit_breaker_charge_of_darkness") then
+									local deafeningBlastPrediction = Ability.GetCastPoint(deafeningBlast) + (Entity.GetAbsOrigin(cancelEnemy):__sub(Entity.GetAbsOrigin(myHero)):Length2D() / 1100) + (NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) * 2) + NPC.GetTimeToFace(myHero, cancelEnemy) + 1
+									if NPC.IsRunning(cancelEnemy) and fooAllInOne.GetMoveSpeed(cancelEnemy) > 500 and not NPC.IsDormant(cancelEnemy) then
+										if not fooAllInOne.InvokerIsAbilityInvoked(myHero, deafeningBlast) then
+											if invoke and Ability.IsCastable(invoke, myMana) then
+												fooAllInOne.invokerInvokeAbility(myHero, deafeningBlast)
+												Ability.CastPosition(deafeningBlast, fooAllInOne.castLinearPrediction(myHero, cancelEnemy, deafeningBlastPrediction), true)
+												fooAllInOne.invokerChannellingKillstealTimer = os.clock()
+												break
+												return
+											end
+										else
+											if Ability.IsCastable(deafeningBlast, myMana) then
+												if NPC.IsPositionInRange(myHero, fooAllInOne.castLinearPrediction(myHero, cancelEnemy, deafeningBlastPrediction), 975, 0) then
+													Ability.CastPosition(deafeningBlast, fooAllInOne.castLinearPrediction(myHero, cancelEnemy, deafeningBlastPrediction))
+													fooAllInOne.invokerChannellingKillstealTimer = os.clock()
+													break
+													return
+												end
+											end
+										end
+									end
+								end
 							end
 						end
 					end
@@ -8740,7 +9443,7 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 		end
 	end
 
-	if next(cancelEnemies) == nil then
+	if fooAllInOne.TPParticleUnit ~= nil and NPC.IsDormant(fooAllInOne.TPParticleUnit) then
 		if fooAllInOne.TPParticleTime > 0 and fooAllInOne.TPParticlePosition ~= Vector() then
 			if GameRules.GetGameTime() + ((Entity.GetAbsOrigin(myHero) - fooAllInOne.TPParticlePosition):Length2D() / 1000) < fooAllInOne.TPParticleTime + 2.5 then
 				if NPC.IsPositionInRange(myHero, fooAllInOne.TPParticlePosition, (400 + Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1)) * 400), 0) then
@@ -8748,11 +9451,16 @@ function fooAllInOne.InvokerCancelChannelingAbilities(myHero, myMana, enemy, inv
 						if not fooAllInOne.InvokerIsAbilityInvoked(myHero, tornado) then
 							if invoke and Ability.IsCastable(invoke, myMana) then
 								fooAllInOne.invokerInvokeAbility(myHero, tornado)
+								Ability.CastPosition(tornado, Entity.GetAbsOrigin(myHero) + (fooAllInOne.TPParticlePosition - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(250), true)
+								fooAllInOne.invokerChannellingKillstealTimer = os.clock()
+								fooAllInOne.TPParticleIndex = nil
+								fooAllInOne.TPParticleTime = 0
+								fooAllInOne.TPParticlePosition = Vector()
 								return
 							end
 						else
 							if Ability.IsCastable(tornado, myMana) then
-								Ability.CastPosition(tornado, fooAllInOne.TPParticlePosition)
+								Ability.CastPosition(tornado, Entity.GetAbsOrigin(myHero) + (fooAllInOne.TPParticlePosition - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(250))
 								fooAllInOne.invokerChannellingKillstealTimer = os.clock()
 								fooAllInOne.TPParticleIndex = nil
 								fooAllInOne.TPParticleTime = 0
@@ -8871,6 +9579,7 @@ end
 function fooAllInOne.invokerProcessInstancesWhileComboing(myHero)
 
 	if not myHero then return end
+	if os.clock() - fooAllInOne.invokerCaptureGhostwalkActivation < 1.5 then return end
 	if NPC.IsChannellingAbility(myHero) then return end
 	if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) or NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return end
 
@@ -8915,6 +9624,7 @@ function fooAllInOne.invokerProcessInstances(myHero, order)
 
 	if not myHero then return end
 	if not order then return end
+	if os.clock() - fooAllInOne.invokerCaptureGhostwalkActivation < 1.5 then return end
 	if os.clock() - fooAllInOne.InvokerCaptureManualInstances < 2.5 then return end
 	if next(fooAllInOne.PreInvokeSkills) ~= nil then return end
 
@@ -8930,9 +9640,6 @@ function fooAllInOne.invokerProcessInstances(myHero, order)
 	if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) or NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return end
 
 	if os.clock() - fooAllInOne.InvokerLastChangedInstance < Menu.GetValue(fooAllInOne.optionHeroInvokerInstanceDelay) * 0.25 then return end
-
-	if Menu.IsKeyDownOnce(fooAllInOne.optionComboKey) then return end
-	if Menu.IsKeyDown(fooAllInOne.optionComboKey) then return end
 
 	local instanceTable = {}
 	local modifiers = NPC.GetModifiers(myHero)
@@ -8975,8 +9682,7 @@ function fooAllInOne.invokerChangeInstances(myHero, instance)
 	if not myHero then return end
 	if not instance then return end
 
-	if Menu.IsKeyDownOnce(fooAllInOne.optionHeroInvokerGhostKey) then return end
-	if Menu.IsKeyDown(fooAllInOne.optionHeroInvokerGhostKey) then return end
+	if os.clock() - fooAllInOne.invokerCaptureGhostwalkActivation < 1.5 then return end
 	
 	if Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) > -1 and Ability.SecondsSinceLastUse(NPC.GetAbility(myHero, "invoker_ghost_walk")) < 1 then return end
 	if NPC.HasModifier(myHero, "modifier_invoker_ghost_walk_self") then return end
@@ -9063,7 +9769,8 @@ function fooAllInOne.invokerSunstrikeKSdisabledTargetProcess(myHero, enemy)
 		"modifier_eul_cyclone",
 		"modifier_obsidian_destroyer_astral_imprisonment_prison",
 		"modifier_shadow_demon_disruption",
-		"modifier_teleporting"
+		"modifier_teleporting",
+		"modifier_invoker_tornado"
 			}
 	
 	local searchMod
@@ -9161,6 +9868,14 @@ function fooAllInOne.invokerSunstrikeKSdisabledTargetProcess(myHero, enemy)
 			elseif Modifier.GetName(searchMod) == "modifier_shadow_demon_disruption" then
 				if Modifier.GetDieTime(searchMod) - curTime >= 1.5 then
 					timing = Modifier.GetDieTime(searchMod) - 1.7 + 0.1
+					HPtreshold = sunStrikeDMG - 10
+				else
+					timing = 0
+					HPtreshold = 0
+				end
+			elseif Modifier.GetName(searchMod) == "modifier_invoker_tornado" then
+				if Modifier.GetDieTime(searchMod) - curTime >= 1.5 then
+					timing = Modifier.GetDieTime(searchMod) - 1.7 + 0.05
 					HPtreshold = sunStrikeDMG - 10
 				else
 					timing = 0
@@ -10030,6 +10745,122 @@ function fooAllInOne.InvokerDraw(myHero)
 
 end
 
+function fooAllInOne.invokerDisplayInit()
+	fooAllInOne.invokerDisplayBoxSize = Menu.GetValue(fooAllInOne.invokerDisplaySizeOption)
+	fooAllInOne.invokerDisplayInnerBoxSize = fooAllInOne.invokerDisplayBoxSize - 2
+
+	fooAllInOne.invokerDisplayFont = Renderer.LoadFont("Tahoma", math.floor(fooAllInOne.invokerDisplayInnerBoxSize * 0.643), Enum.FontWeight.BOLD)
+end
+
+function fooAllInOne.invokerDisplayDrawDisplay(myHero)
+
+	if not Menu.IsEnabled(fooAllInOne.invokerDisplayOption) then return end
+
+	if fooAllInOne.invokerDisplayNeedsInit then
+        	fooAllInOne.invokerDisplayInit()
+        	fooAllInOne.invokerDisplayNeedsInit = false
+    	end
+
+	local w, h = Renderer.GetScreenSize()
+	x = math.floor(w/2);
+	y = math.floor(h/5*3);
+	y = y+Menu.GetValue(fooAllInOne.invokerDisplayY)
+	x = x+Menu.GetValue(fooAllInOne.invokerDisplayX)
+
+	local abilities = {}
+
+	for i = 3, 15 do
+        	local ability = NPC.GetAbilityByIndex(myHero, i)
+		local name = Ability.GetName(ability)
+        	if ability ~= nil and Entity.IsAbility(ability) and not Ability.IsAttributes(ability) and name~="invoker_invoke" and name ~= "invoker_empty1" and name~= "invoker_empty2"then
+            		if Ability.GetCooldownTimeLeft(ability)==0 then
+               			table.insert(abilities, 1, ability)
+            		else 
+                		table.insert(abilities, #abilities+1, ability)
+            		end 
+        	end
+    	end
+
+    	if Menu.IsEnabled(fooAllInOne.invokerDisplaySortAbilitiesOption) then
+        	table.sort(abilities, function(a, b) return Ability.GetName(a) < Ability.GetName(b) end)
+    	end
+
+    	local startX = x - math.floor(((#abilities) / 2) * fooAllInOne.invokerDisplayBoxSize)
+
+    	Renderer.SetDrawColor(0, 0, 0, 150)
+    	Renderer.DrawFilledRect(startX + 1, y - 1, (fooAllInOne.invokerDisplayBoxSize * #abilities) + 2, fooAllInOne.invokerDisplayBoxSize + 2)
+
+   	for i, ability in ipairs(abilities) do
+        	fooAllInOne.invokerDisplayDrawAbilitySquare(myHero, ability, startX, y, i - 1)
+    	end
+
+
+    	Renderer.SetDrawColor(0, 0, 0, 255)
+    	Renderer.DrawOutlineRect(startX + 1, y - 1, (fooAllInOne.invokerDisplayBoxSize * #abilities) + 2, fooAllInOne.invokerDisplayBoxSize + 2)
+
+end
+
+function fooAllInOne.invokerDisplayDrawAbilitySquare(myHero, ability, x, y, index)
+
+    	local abilityName = Ability.GetName(ability)
+    	local imageHandle = fooAllInOne.invokerDisplayCachedIcons[abilityName]
+
+   	if imageHandle == nil then
+        	imageHandle = Renderer.LoadImage(fooAllInOne.invokerDisplayspellIconPath .. abilityName .. ".png")
+        	fooAllInOne.invokerDisplayCachedIcons[abilityName] = imageHandle
+    	end
+
+    	local realX = x + (index * fooAllInOne.invokerDisplayBoxSize) + 2
+
+    	local castable = Ability.IsCastable(ability, NPC.GetMana(myHero), true)
+
+    	local imageColor = { 255, 255, 255 }
+    	local outlineColor = { 0, 255 , 0 }
+
+    	if not castable then
+        	if Ability.GetLevel(ability) == 0 then
+            		imageColor = { 125, 125, 125 }
+            		outlineColor = { 255, 0, 0 }
+        	elseif Ability.GetManaCost(ability) > NPC.GetMana(myHero) then
+            		imageColor = { 150, 150, 255 }
+            		outlineColor = { 0, 0, 255 }
+        	else
+            		imageColor = { 255, 150, 150 }
+            		outlineColor = { 255, 0, 0 }
+        	end
+    	end
+
+    	local hoveringOver = Input.IsCursorInRect(realX, y, fooAllInOne.invokerDisplayBoxSize, fooAllInOne.invokerDisplayBoxSize)
+
+    	local boxSize = fooAllInOne.invokerDisplayBoxSize
+
+    	if hoveringOver then
+        	boxSize = math.floor(boxSize * 1.25)
+    	end
+
+    	Renderer.SetDrawColor(imageColor[1], imageColor[2], imageColor[3], 255)
+    	Renderer.DrawImage(imageHandle, realX, y, fooAllInOne.invokerDisplayBoxSize, fooAllInOne.invokerDisplayBoxSize)
+
+    	Renderer.SetDrawColor(outlineColor[1], outlineColor[2], outlineColor[3], 255)
+    	Renderer.DrawOutlineRect(realX, y, fooAllInOne.invokerDisplayBoxSize, fooAllInOne.invokerDisplayBoxSize)
+
+    	local cdLength = Ability.GetCooldownLength(ability)
+
+    	if not Ability.IsReady(ability) and cdLength > 0.0 then
+        	local cooldownRatio = Ability.GetCooldown(ability) / cdLength
+        	local cooldownSize = math.floor(fooAllInOne.invokerDisplayBoxSize * cooldownRatio)
+
+        	Renderer.SetDrawColor(255, 255, 255, 50)
+        	Renderer.DrawFilledRect(realX + 1, y + (fooAllInOne.invokerDisplayInnerBoxSize - cooldownSize) + 1, fooAllInOne.invokerDisplayInnerBoxSize, cooldownSize)
+
+        	Renderer.SetDrawColor(255, 255, 255)
+        	Renderer.DrawText(fooAllInOne.invokerDisplayFont, realX + 1, y, math.floor(Ability.GetCooldown(ability)), 0)
+    	elseif hoveringOver and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+        	fooAllInOne.invokerInvokeAbility(myHero, ability)
+    	end
+
+end
+
 function fooAllInOne.invokerTargetIndicator(myHero)
 
 	if not myHero then return end
@@ -10092,7 +10923,7 @@ function fooAllInOne.AutoNukeKillSteal(myHero)
 									skillDamage = Ability.GetLevelSpecialValueFor(NPC.GetAbility(myHero, skillName), specialAttribute)
 								end
 							end
-							if Entity.GetHealth(stealEnemy) <= (((1 - NPC.GetMagicalArmorValue(stealEnemy)) * skillDamage) + (skillDamage * (Hero.GetIntellectTotal(myHero) / 14 / 100))) then
+							if Entity.GetHealth(stealEnemy) + NPC.GetHealthRegen(stealEnemy) <= (((1 - NPC.GetMagicalArmorValue(stealEnemy)) * skillDamage) + (skillDamage * (Hero.GetIntellectTotal(myHero) / 14 / 100))) then
 								if NPC.GetAbility(myHero, skillName) and Ability.IsCastable(NPC.GetAbility(myHero, skillName), myMana) then
 									if targetMode == "target" and not NPC.IsLinkensProtected(stealEnemy) then
 										Ability.CastTarget(NPC.GetAbility(myHero, skillName), stealEnemy)
@@ -10223,6 +11054,36 @@ function fooAllInOne.AutoNukeKillSteal(myHero)
 											fooAllInOne.lastCastTime2 = os.clock()
 											return
 										end
+									end
+								end
+							end
+						end
+					end
+				end
+				if skillType == "pure" and not Ability.IsUltimate(NPC.GetAbility(myHero, skillName)) then
+					if Entity.GetHealth(stealEnemy) > 0 then
+						if NPC.IsEntityInRange(myHero, stealEnemy, Ability.GetCastRange(NPC.GetAbility(myHero, skillName))) then
+							local skillDamage = Ability.GetDamage(NPC.GetAbility(myHero, skillName), 0)
+							if  skillDamage < 1 then
+								if skillName == "skywrath_mage_arcane_bolt" then
+									skillDamage = Ability.GetLevelSpecialValueFor(NPC.GetAbility(myHero, skillName), specialAttribute) + (1.6 * Hero.GetIntellectTotal(myHero))
+								else
+									skillDamage = Ability.GetLevelSpecialValueFor(NPC.GetAbility(myHero, skillName), specialAttribute)
+								end
+							end
+							if Entity.GetHealth(stealEnemy) + NPC.GetHealthRegen(stealEnemy) <= skillDamage then
+								if NPC.GetAbility(myHero, skillName) and Ability.IsCastable(NPC.GetAbility(myHero, skillName), myMana) then
+									if targetMode == "target" and not NPC.IsLinkensProtected(stealEnemy) then
+										Ability.CastTarget(NPC.GetAbility(myHero, skillName), stealEnemy)
+										return
+									end
+									if targetMode == "position" then
+										Ability.CastPosition(NPC.GetAbility(myHero, skillName), Entity.GetAbsOrigin(stealEnemy))
+										return
+									end
+									if targetMode == "no target" then
+										Ability.CastNoTarget(NPC.GetAbility(myHero, skillName))
+										return
 									end
 								end
 							end
@@ -10446,5 +11307,6 @@ function fooAllInOne.Debugger(time, npc, ability, order)
 	Log.Write(tostring(time) .. " " .. tostring(NPC.GetUnitName(npc)) .. " " .. tostring(ability) .. " " .. tostring(order))
 
 end
+
 
 return fooAllInOne
