@@ -18,6 +18,7 @@ GUI.SelectedMenu = ":about"
 GUI.TempSelectedMenu = ""
 GUI.SelectedCategory = 0
 GUI.SelectedHero = ""
+GUI.TempSelectedHero = ""
 GUI.SelectedLanguage = nil
 GUI.SelectedMenuPage = 0
 GUI.CurrentKey = ""
@@ -34,8 +35,8 @@ GUI.Font.Footer = Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.Animation = 0
 GUI.GameState = -2
 GUI.Config = "GUI"
-GUI.Version = 170708
-GUI.TextVersion = 'v 17.07.08'
+GUI.Version = 170715
+GUI.TextVersion = 'v 17.07.15'
 
 GUI.GameStates = {}
 GUI.GameStates.OnGameMenu = -1
@@ -321,6 +322,19 @@ function GUI.Initialize(code, category, name, desc, author, ...)
 
 	if type(category) == "table" then
 		GUI.Items[code] = category
+		
+		if type(GUI.Items[code]["perfect_name"]) == "table" then
+			GUI.Items[code]["perfect_name"] = category["perfect_name"][GUI.SelectedLanguage]
+		end
+		
+		if type(GUI.Items[code]["perfect_desc"]) == "table" then
+			GUI.Items[code]["perfect_desc"] = category["perfect_desc"][GUI.SelectedLanguage]
+		end
+		
+		if type(GUI.Items[code]["perfect_author"]) == "table" then
+			GUI.Items[code]["perfect_author"] = category["perfect_author"][GUI.SelectedLanguage]
+		end
+		
 		GUI.Items[code]["page"] = 0
 		GUI.Items[code]["prevpage"] = {}
 		GUI.Items[code]["items"] = {}
@@ -407,6 +421,9 @@ function GUI.AddMenuItem(menucode, itemcode, name, control, ...)
 				GUI.Set(itemcode, select(1, ...))
 			end
 		end
+		if select(2, ...) ~= nil then
+			GUI.Items[menucode]["items"][order]["callback"] = select(2, ...)
+		end
 		if temp_data ~= nil and temp_data ~= "" then GUI.Set(itemcode, temp_data) end
 	elseif GUI.MenuType.Button == control then
 		if select(1, ...) ~= nil then
@@ -445,8 +462,11 @@ function GUI.AddMenuItem(menucode, itemcode, name, control, ...)
 				GUI.Set(itemcode, select(3, ...))			
 			end
 		end
-
+		if select(4, ...) ~= nil then
+			GUI.Items[menucode]["items"][order]["callback"] = select(4, ...)
+		end
 		if temp_data ~= nil and temp_data ~= "" then GUI.Set(itemcode, temp_data) end
+
 		
 	elseif GUI.MenuType.Key == control then
 		local temp_data = GUI.Get(itemcode)
@@ -709,6 +729,9 @@ function GUI.DrawGUI(leftclick, rightclick)
 		GUI.SelectedMenu = GUI.TempSelectedMenu
 		GUI.TempSelectedMenu = ""
 	end
+	
+	GUI.SelectedHero = GUI.TempSelectedHero
+	
 	
 	local temp_table = {}
 	for k,v in pairs(GUI.Items) do
@@ -994,11 +1017,11 @@ function DrawMenuItem(value, x, y, size_x, size_y, name, click, key)
 			if Input.IsCursorInRect(x + 36, y, size_x - 36, size_y) then
 				if click then 
 					if GUI.SelectedCategory == 1 and GUI.SelectedHero == "" then
-						GUI.SelectedHero = name
+						GUI.TempSelectedHero = name
 					else
 						if GUI.SelectedHero ~= "" and GUI.TextValues[GUI.SelectedLanguage]["back"] == name then
 							GUI.TempSelectedMenu = ":about"
-							GUI.SelectedHero = ""
+							GUI.TempSelectedHero = ""
 						else
 							GUI.TempSelectedMenu = key
 						end
@@ -1017,14 +1040,14 @@ function DrawMenuItem(value, x, y, size_x, size_y, name, click, key)
 	
 	if key ~= nil and (GUI.SelectedCategory ~= 1 or GUI.SelectedHero ~= "") then
 		if Input.IsCursorInRect(x, y, 36, 36) and click then
-			if  Config.ReadInt(GUI.Config, key, 0) == 1 then
-				Config.WriteInt(GUI.Config, key, 0)
+			if  GUI.IsEnabled(key) then
+				GUI.Set(key, 0)
 			else
-				Config.WriteInt(GUI.Config, key, 1)
+				GUI.Set(key, 1)
 			end
 		end
 	
-		if Config.ReadInt(GUI.Config, key, 0) == 1 then
+		if GUI.IsEnabled(key) then
 			Renderer.DrawImage(GUI.Theme.CheckActive, x + 10, y + 10, 16, 16)
 		else
 			Renderer.DrawImage(GUI.Theme.CheckInActive, x + 10, y + 10, 16, 16)
@@ -1338,7 +1361,6 @@ function DrawSlider(leftclick, x, y, value)
 	local fil = math.floor(percent * t)
 	Renderer.DrawImage(GUI.Theme.SliderFill, x, y + 50, 5 + fil, 4)
 	
-	-- local inpos = Input.IsCursorInRect(x, y + 42, 255, 20)
 	local inpos = Input.IsCursorInRect(x - 10, y + 32, 275, 40)
 	if not inpos then
 		Renderer.DrawImage(GUI.Theme.Slider, 5 + x  + (math.ceil(percent * t) - 8), y + 44, 16, 16)
@@ -1350,7 +1372,12 @@ function DrawSlider(leftclick, x, y, value)
 			if f > 100 then f = 100 end
 			if f < 1 then f = 0 end
 			local val = math.floor((full / 100) * f)
-			GUI.Set(key, val + value["min"])
+			local newval =  val + value["min"]
+			GUI.Set(key, newval)
+			if value["callback"] ~= nil then
+				value["callback"](key, newval)
+			end
+			
 			local percent = math.ceil((val / full) * 100)
 
 			Renderer.DrawImage(GUI.Theme.Slider, 5 + x + (math.ceil(percent * t) - 8), y + 44, 16, 16)
@@ -1407,8 +1434,14 @@ function DrawCheckBox(inpos, click, x, y, size, value)
 	then 
 		if GUI.Get(key) == nil or GUI.Get(key) == "0" or GUI.Get(key) == "" then
 			GUI.Set(key, 1)
+			if value["callback"] ~= nil then
+				value["callback"](key, 1)
+			end
 		else
 			GUI.Set(key, 0)
+			if value["callback"] ~= nil then
+				value["callback"](key, 0)
+			end
 		end
 	end
 	
@@ -1751,6 +1784,10 @@ function hasValue (tab, val)
     end
 
     return false
+end
+
+function slug(str)
+	return string.lower(string.gsub(string.gsub(str,"[^ A-Za-z]",""),"[ ]+","-"))
 end
 
 function Length(t)
