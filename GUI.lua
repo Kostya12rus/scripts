@@ -35,8 +35,8 @@ GUI.Font.Footer = Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.Animation = 0
 GUI.GameState = -2
 GUI.Config = "GUI"
-GUI.Version = 170715
-GUI.TextVersion = 'v 17.07.15'
+GUI.Version = 170723
+GUI.TextVersion = 'v 17.07.23'
 
 GUI.GameStates = {}
 GUI.GameStates.OnGameMenu = -1
@@ -550,6 +550,12 @@ function GUI.AddMenuItem(menucode, itemcode, name, control, ...)
 		if select(7, ...) ~= nil then
 			GUI.Items[menucode]["items"][order]["callback"] = select(7, ...)
 		end
+		if select(8, ...) ~= nil then
+			GUI.Items[menucode]["items"][order]["inrow"] = select(8, ...)
+		else
+			GUI.Items[menucode]["items"][order]["inrow"] = 12
+		end
+		
 	elseif GUI.MenuType.OrderBox == control then
 		GUI.Data[itemcode] = {}
 		local temp_data = GUI.Get(itemcode, 1)
@@ -932,9 +938,9 @@ function DrawMenuBox(k, startx, starty, workbox_x, workbox_y, limit_y, leftclick
 			
 			-- IMAGEBOX
 			if value["type"] == GUI.MenuType.ImageBox and GUI.Items[k]["page"] < drawed then
-				if xt + (32 * math.ceil(Length(value["heroes"]) / 12)) + 50 < limit_y then
+				if xt + (32 * math.ceil(Length(value["heroes"]) / value["inrow"])) + 50 < limit_y then
 					DrawImageBox(false, leftclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, value)
-					xt = xt + (32 * math.ceil(Length(value["heroes"]) / 12)) + 50
+					xt = xt + (value["size_y"] * math.ceil(Length(value["heroes"]) / value["inrow"])) + 50
 					realshow = realshow + 1
 				else donotshow = true end
 			end
@@ -1139,6 +1145,7 @@ function DrawImageBox(inpos, click, x, y, value)
 	local datawork = GUI.Data[key]
 	Renderer.SetDrawColor(255, 255, 255, 60)
 	local sortedKeys = getKeysSortedByValue(value["heroes"], function(a, b) return a < b end)
+	
 	for _, k in ipairs(sortedKeys) do
 		local tempName = k:gsub(value["replace"], "")
 		local imageHandle = value["cache"][tempName]
@@ -1181,7 +1188,7 @@ function DrawImageBox(inpos, click, x, y, value)
 			Renderer.SetDrawColor(255, 255, 255, 60)
 		end
 		
-		if count % 12 == 0 then
+		if count % value["inrow"] == 0 then
 			y = y + value["size_y"]
 			tempx = x
 		else

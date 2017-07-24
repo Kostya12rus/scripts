@@ -22,7 +22,7 @@ BTW.Locale = {
 		["russian"] = "Стил героев первыми двумя способностями"
 	},
 	["stealcloud"] = {
-		["english"] = "Auto steal by cloud",
+		["english"] = "Auto steal by Nimbus",
 		["russian"] = "Стил героев облачком"
 	},
 	["order"] = {
