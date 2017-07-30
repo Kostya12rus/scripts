@@ -81,16 +81,20 @@ function AutoBot.OnDraw()
 end
 
 function AutoBot.OnUpdate()
+	if GUI == nil then return end
 	AutoBot.Initialize()
 	if not AutoBot.Work then return end
 	AutoBot.CurrentTime = GameRules.GetGameTime()
 	if AutoBot.CurrentTime <= AutoBot.NextTime then return end
 	
-	local bot_type = ""
-	for k, v in pairs(GUI.Get(AutoBot.Identity .. "select", 1)) do
-		bot_type = v
+	local bot_type = "fountain"
+	local bot_table = GUI.Get(AutoBot.Identity .. "select", 1)
+	if bot_table ~= nil then
+		for k, v in pairs(bot_table) do
+			bot_type = v
+		end
 	end
-
+	
 	if bot_type == "fountain" then
 		Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, AutoBot.Fountain, Entity.GetOrigin(AutoBot.Fountain):__add(Vector(math.random(-500,500),math.random(-500,500),0)),
 			nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, AutoBot.Hero, true, true)
