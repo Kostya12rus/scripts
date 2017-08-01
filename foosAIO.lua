@@ -1,8 +1,8 @@
 -- foosAIO.lua
--- Version: beta.0.88.9b
+-- Version: beta.0.92.0
 -- Author: foo0oo
 -- Release Date: 2017/05/03
--- Last Update: 2017/07/25
+-- Last Update: 2017/07/31
 
 local fooAllInOne = {}
 -- Menu Items
@@ -13,9 +13,10 @@ fooAllInOne.optionDebugEnable = Menu.AddOption({ "Utility","foos AllInOne" }, "9
 fooAllInOne.optionOrbwalkEnable = Menu.AddOption({ "Utility","foos AllInOne", "8. Orbwalker" }, "Enabled {{orbwalker}}", "if enabled, you will use orbwalker module instead of regular right clicks")
 fooAllInOne.optionOrbwalkDistance = Menu.AddOption({ "Utility","foos AllInOne", "8. Orbwalker" }, "Minimum distance", "ranged heroes will not go nearer then minimum range to target - values are percentage of your attack range - recommended: 50%- 70%", 30, 80, 10)
 fooAllInOne.optionOrbwalkOffset = Menu.AddOption({ "Utility","foos AllInOne", "8. Orbwalker" }, "Orbwalker offset", "set the offset - the higher the value, the less the distance your hero will move in-between attacks - if value = 0, you go full distance possible in backswing - recommended value: 10-20 because of ping, pathing, blocked pathing etc.", 0, 50, 5)
-fooAllInOne.optionOrbwalkKiting = Menu.AddOption({ "Utility","foos AllInOne", "8. Orbwalker" }, "kiting", "if enabled, your ranged hero tries to hit and run away if enemy is to close (only if turning-running-turning is faster then attack animation)")
+fooAllInOne.optionOrbwalkKiting = Menu.AddOption({ "Utility","foos AllInOne", "8. Orbwalker" }, "kiting {{orbwalker}}", "if enabled, your ranged hero tries to hit and run away if enemy is to close (only if turning-running-turning is faster then attack animation)")
 fooAllInOne.optionWorldToMinimapOffsetX = Menu.AddOption({ "Utility","foos AllInOne", "7. WorldToMinimap" }, "X-Offset {{minimap}}", "Adjustment variable for World-to-minimap renderer", -30, 30, 1)
 fooAllInOne.optionWorldToMinimapOffsetY = Menu.AddOption({ "Utility","foos AllInOne", "7. WorldToMinimap" }, "Y-Offset {{minimap}}", "Adjustment variable for World-to-minimap renderer", -30, 30, 1)
+fooAllInOne.optionDodgeItEnable = Menu.AddOption({ "Utility","foos AllInOne", "98. <BETA> DodgeIt" }, "0. Enable {{dodgeit}}", "experimental manta dodger")
 
 	-- killsteal Menu
 fooAllInOne.optionKillStealEnable = Menu.AddOption({ "Utility","foos AllInOne", "9. Auto Kill Steal" }, "Enabled {{killsteal}}", "uses skill nukes to kill enemy (only nukes, no disable abilities)")
@@ -48,7 +49,8 @@ fooAllInOne.optionItemMedallion = Menu.AddOption({ "Utility","foos AllInOne", "2
 fooAllInOne.optionItemCrest = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage", "Items" }, "Use Item Solar Crest", "cast order - highest number will be cast first", 0, 10, 1)
 
 	-- Linkens Menu
-fooAllInOne.optionLinkensEnable = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "Enabled {{linkens}}", "Helpers helper")
+fooAllInOne.optionLinkensEnable = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "0. Enabled {{linkens}}", "Helpers helper")
+fooAllInOne.optionLinkensManual = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "1. Pop linkens when manually casting", "will also pop linkens, if you cast a targeted spell manually (not only in combo mode)")
 fooAllInOne.optionLinkensForce = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "Use Force Staff", "to break Linkens - highest number will be prioritized", 0, 6, 1)
 fooAllInOne.optionLinkensEul = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "Use Eul", "to break Linkens - highest number will be prioritized", 0, 6, 1)
 fooAllInOne.optionLinkensHalberd = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "Use Halberd", "to break Linkens - highest number will be prioritized", 0, 6, 1)
@@ -225,13 +227,13 @@ fooAllInOne.invokerDisplayX = Menu.AddOption({ "Utility","foos AllInOne", "6. He
 fooAllInOne.invokerDisplaySortAbilitiesOption = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Invoker", "8. Invoker Spell Panel" }, "Sort Abilities by Name {{invoker spell panel}}", "")
 fooAllInOne.optionHeroZuus = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "1. Zuus Combo", "basic zuus combo")
 fooAllInOne.optionHeroZuusFarmKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "2. arc farm key", Enum.ButtonCode.KEY_P)
-fooAllInOne.optionHeroZuusHarass = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "2.1 harass with arc", "if no creep can be killed with arc and enemy hero is in range, enemy will be harassed with arc")
-fooAllInOne.optionHeroZuusHarassMana = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "2.2 harass arc mana threshold", "stop harassing below threshold", 10, 90, 10)
-fooAllInOne.optionHeroZuusKillsteal = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "3. killsteal", "killstealing with bolt, arc, wrath (also combinations, eg bolt + arc)")
-fooAllInOne.optionHeroZuusUltCount = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "3.1 wrath kill count", "minimum targets killed by ult", 1, 5, 1)
-fooAllInOne.optionHeroZuusUltCountRefresher = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "3.2 refresher wrath kill count", "minimum targets killed by ult-refresher-ult combo", 1, 5, 1)
-fooAllInOne.optionHeroZuusBlink = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "4. use blink in combo {{zuus}}", "")
-fooAllInOne.optionHeroZuusRightClick = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "5. use right click attacks in combo {{zuus}}", "zuus will go in attack range")
+fooAllInOne.optionHeroZuusHarassKey = Menu.AddKeyOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "3. arc harass key", Enum.ButtonCode.KEY_O)
+fooAllInOne.optionHeroZuusHarassMana = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "3.1 harass arc mana threshold", "stop harassing below threshold", 10, 90, 10)
+fooAllInOne.optionHeroZuusKillsteal = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "4. killsteal", "killstealing with bolt, arc, wrath (also combinations, eg bolt + arc)")
+fooAllInOne.optionHeroZuusUltCount = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "4.1 wrath kill count", "minimum targets killed by ult", 1, 5, 1)
+fooAllInOne.optionHeroZuusUltCountRefresher = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "4.2 refresher wrath kill count", "minimum targets killed by ult-refresher-ult combo", 1, 5, 1)
+fooAllInOne.optionHeroZuusBlink = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "5. use blink in combo {{zuus}}", "")
+fooAllInOne.optionHeroZuusRightClick = Menu.AddOption({ "Utility","foos AllInOne", "6. Hero Scripts", "Zuus" }, "6. use right click attacks in combo {{zuus}}", "zuus will go in attack range")
 
 	-- Menu set values
 Menu.SetValueName(fooAllInOne.optionItemVeil, 0, 'OFF')
@@ -643,6 +645,7 @@ fooAllInOne.currentParticle = nil
 fooAllInOne.skywrathDMGwithoutUlt = 0
 fooAllInOne.skywrathDMGwithUlt = 0
 fooAllInOne.skywrathComboSelect = false
+fooAllInOne.dodgeTiming = 0
 
 	-- global Tables
 fooAllInOne.LinkensBreakerItemOrder = {}
@@ -654,6 +657,16 @@ fooAllInOne.InvokerKSparticleProcess = {{nil, nil, 0, nil, Vector()}}
 fooAllInOne.PreInvokeSkills = {}
 fooAllInOne.preemptiveBKB = {}
 fooAllInOne.invokerCachedIcons = {}
+fooAllInOne.dodgeItTable = {}
+fooAllInOne.dodgeItReadyTable = {}
+
+fooAllInOne.dodgeItItems = { 
+	{"item_manta", 1, "no target", 0.1}, 
+	{"item_blink", 0, "position", 0.1}, 
+	{"item_cyclone", 0, "target", 0.1},
+	{"item_lotus_orb", 1, "target", 0.1},
+	{"item_black_king_bar", 2, "no target", 0.1} 
+		}
 
 fooAllInOne.preemptiveBKBtable = {
 	"alchemist_unstable_concoction_throw",
@@ -690,6 +703,60 @@ fooAllInOne.preemptiveBKBtable = {
 	"slark_pounce",
 	"ogre_magi_fireblast",
 	"meepo_poof" }
+
+fooAllInOne.dodgeEnemySkillsTable = {
+	"antimage_mana_void",
+	"alchemist_unstable_concoction_throw",
+	"axe_berserkers_call",
+	"bane_fiends_grip",
+	"batrider_flaming_lasso",
+	"bloodseeker_rupture",
+	"centaur_hoof_stomp",
+	"chaos_knight_chaos_bolt",
+	"crystal_maiden_frostbite",
+	"death_prophet_silence",
+	"doom_bringer_doom",
+	"drow_ranger_wave_of_silence",
+	"earthshaker_fissure",
+	"earthshaker_enchant_totem",
+	"enigma_black_hole",
+	"faceless_void_chronosphere",
+	"juggernaut_omni_slash",
+	"legion_commander_duel",
+	"lich_chain_frost",
+	"lina_laguna_blade",
+	"lion_impale",
+	"lion_finger_of_death",
+	"luna_lucent_beam",
+	"magnataur_reverse_polarity",
+	"necrolyte_reapers_scythe",
+	"night_stalker_crippling_fear",
+	"nyx_assassin_impale",
+	"ogre_magi_fireblast",
+	"obsidian_destroyer_astral_imprisonment",
+	"obsidian_destroyer_sanity_eclipse",
+	"puck_waning_rift",
+	"pudge_dismember",
+	"queenofpain_sonic_wave",
+	"rubick_telekinesis",
+	"shadow_demon_disruption",
+	"shadow_shaman_shackles",
+	"silencer_global_silence",
+	"skywrath_mage_ancient_seal",
+	"slardar_slithereen_crush",
+	"sniper_assassinate",
+	"storm_spirit_electric_vortex",
+	"sven_storm_bolt",
+	"terrorblade_sunder",
+	"tidehunter_ravage",
+	"tinker_laser",
+	"vengefulspirit_magic_missile",
+	"warlock_rain_of_chaos",
+	"windrunner_shackleshot",
+	"skeleton_king_hellfire_blast",
+	"zuus_lightning_bolt",
+	"zuus_thundergods_wrath"
+		}
 
 fooAllInOne.invokerInvokeOrder = {
 	invoker_sun_strike = { 2, 2, 2 },
@@ -1404,6 +1471,22 @@ for i = 1, #fooAllInOne.preemptiveBKBtable do
 	fooAllInOne.preemptiveBKB[i] = Menu.AddOption({ "Utility","foos AllInOne", "5. Auto Use Defensive Items", "2. BKB", "3. dangerous disables" }, fooAllInOne.preemptiveBKBtable[i], "")
 end
 
+fooAllInOne.dodgeItOptionTable = {}
+for i = 1, #fooAllInOne.dodgeItItems do
+	fooAllInOne.dodgeItOptionTable[i] = Menu.AddOption({ "Utility","foos AllInOne", "98. <BETA> DodgeIt", "1. Dodge prio order" }, i .. ". " .. fooAllInOne.dodgeItItems[i][1].." ".."{{dodger}}", "", 0, #fooAllInOne.dodgeItItems, 1)
+end
+
+fooAllInOne.dodgeEnemySkillsOptionsTable = {}
+for i = 1, 20 do
+	fooAllInOne.dodgeEnemySkillsOptionsTable[fooAllInOne.dodgeEnemySkillsTable[i]] = Menu.AddOption({ "Utility","foos AllInOne", "98. <BETA> DodgeIt", "2. Enemy dodge skills", "Table 1" }, fooAllInOne.dodgeEnemySkillsTable[i].." ".."{{dodger}}", "if enabled, skill will be dodged")
+end
+for i = 21, 40 do
+	fooAllInOne.dodgeEnemySkillsOptionsTable[fooAllInOne.dodgeEnemySkillsTable[i]] = Menu.AddOption({ "Utility","foos AllInOne", "98. <BETA> DodgeIt", "2. Enemy dodge skills", "Table 2" }, fooAllInOne.dodgeEnemySkillsTable[i].." ".."{{dodger}}", "if enabled, skill will be dodged")
+end
+for i = 41, #fooAllInOne.dodgeEnemySkillsTable do
+	fooAllInOne.dodgeEnemySkillsOptionsTable[fooAllInOne.dodgeEnemySkillsTable[i]] = Menu.AddOption({ "Utility","foos AllInOne", "98. <BETA> DodgeIt", "2. Enemy dodge skills", "Table 3" }, fooAllInOne.dodgeEnemySkillsTable[i].." ".."{{dodger}}", "if enabled, skill will be dodged")
+end
+
 function fooAllInOne.ResetGlobalVariables()
 
 	fooAllInOne.lastCastTime = 0
@@ -1461,6 +1544,9 @@ function fooAllInOne.ResetGlobalVariables()
 	fooAllInOne.skywrathDMGwithoutUlt = 0
 	fooAllInOne.skywrathDMGwithUlt = 0
 	fooAllInOne.skywrathComboSelect = false
+	fooAllInOne.dodgeTiming = 0
+	fooAllInOne.dodgeItTable = {}
+	fooAllInOne.dodgeItReadyTable = {}
 	fooAllInOne.LinkensBreakerItemOrder = {}
 	fooAllInOne.ItemCastOrder = {}
 	fooAllInOne.rotationTable = {}
@@ -1590,6 +1676,11 @@ function fooAllInOne.OnUpdate()
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_zuus" then
 		fooAllInOne.ZuusCombo(myHero, enemy)
 	end
+
+	if Menu.IsEnabled(fooAllInOne.optionDodgeItEnable) then	
+		fooAllInOne.dodgerSelectItemorSkill(myHero)
+		fooAllInOne.dodger(myHero)
+	end
 	
 	if Menu.IsEnabled(fooAllInOne.optionUtilityEnable) then
 		fooAllInOne.utilityItemUsage(myHero)
@@ -1609,7 +1700,7 @@ function fooAllInOne.OnUpdate()
 	if Menu.IsEnabled(fooAllInOne.optionDefensiveItems) then
 		fooAllInOne.useDefensiveItems(myHero, enemy)
 	end
-
+Log.Write(tostring(fooAllInOne.IsHeroInvisible(myHero)))
 --fooAllInOne.KunkkaCombo(myHero, enemy)
 
 --	for i = 1, NPCs.Count() do
@@ -1625,13 +1716,13 @@ function fooAllInOne.OnUpdate()
 --	Log.Write(Modifier.GetCreationTime(modifier))
 --	end
 --	Log.Write(NPC.GetAttackRange(myHero))
-
+--
 --	for i = 1, Abilities.Count() do
 --	local abilities = Abilities.Get(i)
 --	local abilityNames = Ability.GetName(abilities)
 --	Log.Write(abilityNames)
 --	end
---fooAllInOne.dodger(myHero)
+
 
 end
 
@@ -1740,7 +1831,9 @@ function fooAllInOne.OnUnitAnimation(animation)
 	if not animation then return end
 	if not Heroes.GetLocal() then return end
 
---	fooAllInOne.dodgeProcessing(Heroes.GetLocal(), animation.unit, animation.sequenceName, animation.castpoint)
+	if Menu.IsEnabled(fooAllInOne.optionDodgeItEnable) then
+		fooAllInOne.dodgeProcessing(Heroes.GetLocal(), animation.unit, animation.activity, animation.castpoint)
+	end
 
 	if NPC.GetUnitName(Heroes.GetLocal()) ~= NPC.GetUnitName(animation.unit) then return end
 
@@ -1836,11 +1929,11 @@ function fooAllInOne.OnPrepareUnitOrders(orders)
 
 	local myHero = Heroes.GetLocal()
     		if not myHero then return true end
-
     
 	if Menu.IsEnabled(fooAllInOne.optionHeroInvokerInstanceHelper) then
 		if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then
 			fooAllInOne.invokerProcessInstances(myHero, orders.order)
+			return true
 		end
 	end
 	
@@ -1851,6 +1944,21 @@ function fooAllInOne.OnPrepareUnitOrders(orders)
 		if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET then
 			if orders.ability == quas or orders.ability == wex or orders.ability == exort then
 				fooAllInOne.InvokerCaptureManualInstances = os.clock()
+				return true
+			end
+		end
+	end
+
+	
+	if Menu.IsEnabled(fooAllInOne.optionLinkensManual) then
+		if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET then
+			if orders.target ~= nil and Entity.IsHero(orders.target) then
+				if NPC.IsLinkensProtected(orders.target) then
+					if fooAllInOne.LinkensBreakerNew(myHero) ~= nil then
+						Ability.CastTarget(NPC.GetItem(myHero, fooAllInOne.LinkensBreakerNew(myHero), true), orders.target)
+						return true
+					end
+				end
 			end
 		end
 	end
@@ -1996,6 +2104,15 @@ function fooAllInOne.OnMenuOptionChange(option, old, new)
 	if option == fooAllInOne.invokerPanelSizeOption then
 		fooAllInOne.invokerPanelInit()
     	end
+
+	if option == fooAllInOne.dodgeItOptionTable[1] or 
+		option == fooAllInOne.dodgeItOptionTable[2] or
+		option == fooAllInOne.dodgeItOptionTable[3] or
+		option == fooAllInOne.dodgeItOptionTable[4] or
+		option == fooAllInOne.dodgeItOptionTable[5] then
+		fooAllInOne.dodgeItReadyTable = {}
+	end
+
 end
 
 function fooAllInOne.targetChecker(genericEnemyEntity)
@@ -2519,6 +2636,10 @@ function fooAllInOne.GenericMainAttack(myHero, attackType, target, position)
 	
 	if not myHero then return end
 	if not target and not position then return end
+
+	if fooAllInOne.IsHeroInvisible(myHero) == true then return end
+	if fooAllInOne.isHeroChannelling(myHero) == true then return end
+	if fooAllInOne.heroCanCastItems(myHero) == false then return end
 
 	if Menu.IsEnabled(fooAllInOne.optionOrbwalkEnable) then
 		if target ~= nil then
@@ -3724,6 +3845,845 @@ function fooAllInOne.TimberGetTreesFastMoveCursor(myHero)
 
 end
 
+-- dodgeIT
+function fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange)
+
+	if not myHero then return false end
+	if not unit then return false end
+
+	local angle = Entity.GetRotation(unit)
+
+	local direction = angle:GetForward()
+    	local name = NPC.GetUnitName(unit)
+    		direction:SetZ(0)
+
+    	local origin = NPC.GetAbsOrigin(unit)
+
+	if radius == 0 then
+		radius = 100
+	end
+
+    	local pointsNum = math.floor(castrange/50) + 1
+    	for i = pointsNum,1,-1 do 
+        	direction:Normalize()
+        	direction:Scale(50*(i-1))
+        	local pos = origin + direction
+        	if NPC.IsPositionInRange(myHero, pos, radius + NPC.GetHullRadius(myHero), 0) then 
+            		return true 
+        	end
+    	end 
+    	return false
+
+end
+
+function fooAllInOne.dodgeIt(info)
+
+	local myHero = Heroes.GetLocal()
+		if not myHero then return end
+		if not Entity.IsAlive(myHero) then return end
+	
+	if not info then return end
+
+	if next(fooAllInOne.dodgeItReadyTable) == nil then return end
+
+	if not Menu.IsEnabled(fooAllInOne.dodgeEnemySkillsOptionsTable[info.spellname]) then return end
+
+	local myMana = NPC.GetMana(myHero)	
+
+	local dodgeSelector
+	local dodgeItemStyle
+	local dodgeTargeting
+	local dodgeTiming
+
+	for i, v in ipairs(fooAllInOne.dodgeItReadyTable) do
+		if info.lotus == 0 then
+			if v.itemname ~= "item_lotus_orb" then
+				if (NPC.GetUnitName(info.source) == "npc_dota_hero_lion" and info.style == 1) or NPC.GetUnitName(info.source) == "npc_dota_hero_nyx_assassin" or NPC.GetUnitName(info.source) == "npc_dota_hero_tidehunter" then
+					if v.itemname ~= "item_manta" then
+						if v.itemstyle <= info.style then
+							if NPC.HasItem(myHero, v.itemname) then
+								if Ability.IsReady(NPC.GetItem(myHero, v.itemname)) and Ability.IsCastable(NPC.GetItem(myHero, v.itemname), myMana) then
+									dodgeSelector = NPC.GetItem(myHero, v.itemname)
+									dodgeItemStyle = v.itemstyle
+									dodgeTargeting = v.itemtargeting
+									dodgeTiming = v.itemoffset
+									break
+								end
+							end
+						end
+					end
+
+				else
+					if v.itemstyle <= info.style then
+						if NPC.HasItem(myHero, v.itemname) then
+							if Ability.IsReady(NPC.GetItem(myHero, v.itemname)) and Ability.IsCastable(NPC.GetItem(myHero, v.itemname), myMana) then
+								dodgeSelector = NPC.GetItem(myHero, v.itemname)
+								dodgeItemStyle = v.itemstyle
+								dodgeTargeting = v.itemtargeting
+								dodgeTiming = v.itemoffset
+								break
+							end
+						end
+					end
+				end
+			end
+		else
+			if v.itemstyle <= info.style then
+				if NPC.HasItem(myHero, v.itemname) then
+					if Ability.IsReady(NPC.GetItem(myHero, v.itemname)) and Ability.IsCastable(NPC.GetItem(myHero, v.itemname), myMana) then
+						dodgeSelector = NPC.GetItem(myHero, v.itemname)
+						dodgeItemStyle = v.itemstyle
+						dodgeTargeting = v.itemtargeting
+						dodgeTiming = v.itemoffset
+						break
+					end
+				end
+			end
+		end	
+	end
+	
+	if dodgeSelector == nil then return end
+
+	local delay = info.delay
+		if NPC.GetUnitName(info.source) == "npc_dota_hero_lina" and ((dodgeItemStyle == 1 and Ability.GetName(dodgeSelector) ~= "item_lotus_orb") or (dodgeItemStyle == 0 and Ability.GetName(dodgeSelector) == "item_cyclone")) then
+			delay = info.delay + 0.225
+		elseif NPC.GetUnitName(info.source) == "npc_dota_hero_lion" and info.style == 2 and ((dodgeItemStyle >= 1 and Ability.GetName(dodgeSelector) ~= "item_lotus_orb") or (dodgeItemStyle == 0 and Ability.GetName(dodgeSelector) == "item_cyclone")) then
+			delay = info.delay + 0.275
+		end
+
+	if info.time + delay - dodgeTiming + 0.05 < GameRules.GetGameTime() then return end
+
+	if info.lotus == 1 and NPC.IsLinkensProtected(myHero) then return end
+	
+	table.insert(fooAllInOne.dodgeItTable, {casttime = info.time, delay = delay, unit = info.source, dodgeobject = dodgeSelector, objecttargeting = dodgeTargeting, objectoffset = dodgeTiming, castpoint = info.castpoint, spellname = info.spellname})
+
+end
+
+function fooAllInOne.dodgerSelectItemorSkill(myHero)
+
+	if not myHero then return end
+
+	if next(fooAllInOne.dodgeItReadyTable) == nil then
+
+		for i = 1, #fooAllInOne.dodgeItItems do
+			if Menu.GetValue(fooAllInOne.dodgeItOptionTable[i]) > 0 then
+				table.insert(fooAllInOne.dodgeItReadyTable, { prio = Menu.GetValue(fooAllInOne.dodgeItOptionTable[i]), itemname = fooAllInOne.dodgeItItems[i][1], itemstyle = fooAllInOne.dodgeItItems[i][2], itemtargeting = fooAllInOne.dodgeItItems[i][3], itemoffset = fooAllInOne.dodgeItItems[i][4] })
+			end
+		end
+	end
+
+	table.sort(fooAllInOne.dodgeItReadyTable, function(a, b)
+       		return a.prio < b.prio
+    	end)
+
+end
+
+function fooAllInOne.dodger(myHero)
+
+	if not myHero then return end
+
+	local myMana = NPC.GetMana(myHero)
+
+	if next(fooAllInOne.dodgeItTable) == nil then
+		for i = 1, Heroes.Count() do
+			local enemy = Heroes.Get(i)
+			if enemy and Entity.IsHero(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and NPC.GetUnitName(enemy) == "npc_dota_hero_axe" and not NPC.IsIllusion(enemy) then
+				if Entity.IsAlive(enemy) then
+					local axe_call = NPC.GetAbility(enemy, "axe_berserkers_call")
+					local call_range = 300
+					if axe_call and Ability.IsInAbilityPhase(axe_call) and NPC.IsEntityInRange(myHero, enemy, call_range) then
+						fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = Ability.GetCastPoint(axe_call); style = 1; source = enemy, lotus = 0, castpoint = 0.4, spellname = "axe_berserkers_call"})
+						break
+						return
+					end
+				end
+			end
+		end
+	end
+
+	if next(fooAllInOne.dodgeItTable) == nil then
+		if NPC.GetUnitName(myHero) == "npc_dota_hero_alchemist" then
+			if NPC.HasModifier(myHero, "modifier_alchemist_unstable_concoction") then
+				if Modifier.GetCreationTime(NPC.GetModifier(myHero, "modifier_alchemist_unstable_concoction")) + 5.5 - GameRules.GetGameTime() < 0.15 then
+					fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = 0.15; style = 1; source = myHero, lotus = 0, castpoint = 0, spellname = "alchemist_unstable_concoction"})
+					return
+				end
+			end
+		end
+	end
+
+	if next(fooAllInOne.dodgeItTable) == nil then return end
+
+	local curTime = GameRules.GetGameTime()
+
+	if not fooAllInOne.heroCanCastItems(myHero) then
+--		fooAllInOne.dodgeItTable = {}
+		return
+	end
+
+	if os.clock() - fooAllInOne.dodgeTiming < 0.5 then return end
+
+	local dodgeInfo = fooAllInOne.dodgeItTable[1]
+		local casttime = dodgeInfo.casttime
+		local delay = dodgeInfo.delay
+		local unit = dodgeInfo.unit
+		local castpoint = dodgeInfo.castpoint
+		local spellname = dodgeInfo.spellname
+		local dodgeobject = dodgeInfo.dodgeobject
+		local objecttargeting = dodgeInfo.objecttargeting
+		local objectoffset = dodgeInfo.objectoffset
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_sniper" then
+		if curTime >= casttime + delay - objectoffset - (NetChannel.GetAvgLatency(Enum.Flow.FLOW_INCOMING) + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING)) then
+			if NPC.HasModifier(myHero, "modifier_sniper_assassinate") then
+				if objecttargeting == "no target" then
+					Ability.CastNoTarget(dodgeobject)
+					fooAllInOne.dodgeTiming = os.clock()
+					fooAllInOne.dodgeItTable = {}
+					return
+				elseif objecttargeting == "position" then
+					local blinkPos = Entity.GetAbsOrigin(myHero) + Entity.GetRotation(myHero):GetForward():Normalized():Scaled(1199)
+					Ability.CastPosition(dodgeobject, blinkPos)
+					fooAllInOne.dodgeTiming = os.clock()
+					fooAllInOne.dodgeItTable = {}
+					return
+				elseif objecttargeting == "target" then
+					Ability.CastTarget(dodgeobject, myHero)
+					fooAllInOne.dodgeTiming = os.clock()
+					fooAllInOne.dodgeItTable = {}
+					return
+				end
+			end
+		end
+	else	
+		if unit and not Entity.IsDormant(unit) then
+			if curTime >= casttime + castpoint - objectoffset - (NetChannel.GetAvgLatency(Enum.Flow.FLOW_INCOMING) + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING)) then
+				if not Ability.IsInAbilityPhase(NPC.GetAbility(unit, spellname)) and castpoint > 0 then
+					if delay > castpoint then
+						if Ability.SecondsSinceLastUse(NPC.GetAbility(unit, spellname)) == -1 then
+							fooAllInOne.dodgeItTable = {}
+							return
+						else
+							if curTime >= casttime + delay - objectoffset - (NetChannel.GetAvgLatency(Enum.Flow.FLOW_INCOMING) + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING)) then
+								if objecttargeting == "no target" then
+									Ability.CastNoTarget(dodgeobject)
+									fooAllInOne.dodgeTiming = os.clock()
+									fooAllInOne.dodgeItTable = {}
+									return
+								elseif objecttargeting == "position" then
+									local blinkPos = Entity.GetAbsOrigin(myHero) + Entity.GetRotation(myHero):GetForward():Normalized():Scaled(1199)
+									Ability.CastPosition(dodgeobject, blinkPos)
+									fooAllInOne.dodgeTiming = os.clock()
+									fooAllInOne.dodgeItTable = {}
+									return
+								elseif objecttargeting == "target" then
+									Ability.CastTarget(dodgeobject, myHero)
+									fooAllInOne.dodgeTiming = os.clock()
+									fooAllInOne.dodgeItTable = {}
+									return
+								end
+							end
+						end
+					else
+						fooAllInOne.dodgeItTable = {}
+						return
+					end
+				else
+					if curTime >= casttime + delay - objectoffset - (NetChannel.GetAvgLatency(Enum.Flow.FLOW_INCOMING) + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING)) then
+						if objecttargeting == "no target" then
+							Ability.CastNoTarget(dodgeobject)
+							fooAllInOne.dodgeTiming = os.clock()
+							fooAllInOne.dodgeItTable = {}
+							return
+						elseif objecttargeting == "position" then
+							local blinkPos = Entity.GetAbsOrigin(myHero) + Entity.GetRotation(myHero):GetForward():Normalized():Scaled(1199)
+							Ability.CastPosition(dodgeobject, blinkPos)
+							fooAllInOne.dodgeTiming = os.clock()
+							fooAllInOne.dodgeItTable = {}
+							return
+						elseif objecttargeting == "target" then
+							Ability.CastTarget(dodgeobject, myHero)
+							fooAllInOne.dodgeTiming = os.clock()
+							fooAllInOne.dodgeItTable = {}
+							return
+						end
+					end
+				end
+			end
+		else
+			if curTime >= casttime + delay - objectoffset - (NetChannel.GetAvgLatency(Enum.Flow.FLOW_INCOMING) + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING)) then
+				if objecttargeting == "no target" then
+					Ability.CastNoTarget(dodgeobject)
+					fooAllInOne.dodgeTiming = os.clock()
+					fooAllInOne.dodgeItTable = {}
+					return
+				elseif objecttargeting == "position" then
+					local blinkPos = Entity.GetAbsOrigin(myHero) + Entity.GetRotation(myHero):GetForward():Normalized():Scaled(1199)
+					Ability.CastPosition(dodgeobject, blinkPos)
+					fooAllInOne.dodgeTiming = os.clock()
+					fooAllInOne.dodgeItTable = {}
+					return
+				elseif objecttargeting == "target" then
+					Ability.CastTarget(dodgeobject, myHero)
+					fooAllInOne.dodgeTiming = os.clock()
+					fooAllInOne.dodgeItTable = {}
+					return
+				end
+			end
+		end
+	end
+
+end
+
+function fooAllInOne.dodgeProcessing(myHero, unit, activity, castpoint)
+
+	if not myHero then return end
+	if Entity.IsSameTeam(myHero, unit) then return end
+
+	local distance = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(unit)):Length2D() - 25
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_antimage" then
+		local radius = 500
+		local castrange = 600
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "antimage_mana_void"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_alchemist" then
+		local radius = 0
+		local castrange = 775
+		local impactTime = distance / 900
+		if activity == Enum.GameActivity.ACT_DOTA_ALCHEMIST_CONCOCTION_THROW and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+impactTime; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "alchemist_unstable_concoction_throw"})
+			end
+		end		
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_bane" then
+		local radius = 0
+		local castrange = 800
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "bane_fiends_grip"})
+			end
+		end		
+	end	
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_batrider" then
+		local radius = 0
+		local castrange = 200
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "batrider_flaming_lasso"})
+			end
+		end
+	end	
+
+--	if NPC.GetUnitName(unit) == "npc_dota_hero_beastmaster" then
+--		local radius = 
+--		local castrange = 
+--		if sequenceName == "cast4_primal_roar_anim" and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+--			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+--				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 0, castpoint = castpoint, spellname = })
+--			end
+--		end
+--	end	
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_bloodseeker" then
+		local radius = 0
+		local castrange = 1000
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "bloodseeker_rupture"})
+			end
+		end
+	end	
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_centaur" then
+		local radius = 315
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius) then
+			fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 0, castpoint = castpoint, spellname = "centaur_hoof_stomp"})
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_chaos_knight" then
+		local radius = 0
+		local castrange = 500
+		local impactTime = distance / 1000 - 0.15
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+impactTime; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "chaos_knight_chaos_bolt"})
+			end
+		end	
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_crystal_maiden" then
+		local radius = 0
+		local castrange = 650
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_2 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "crystal_maiden_frostbite"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_death_prophet" then
+		local radius = 425
+		local castrange = 1000
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_2 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, 425, 1000) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "death_prophet_silence"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_doom_bringer" then
+		local radius = 0
+		local castrange = 550
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_6 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "doom_bringer_doom"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_drow_ranger" then
+		local radius = 900
+		local castrange = 250
+		local impactTime = distance / 2000
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_2 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+impactTime; style = 2; source = unit, lotus = 0, castpoint = castpoint, spellname = "drow_ranger_wave_of_silence"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_earthshaker" then
+		local radius1 = 225
+		local castrange = 1400
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius1+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius1, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 0, castpoint = castpoint, spellname = "earthshaker_fissure"})
+			end
+		end
+
+		local radius2 = 350
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_2 and NPC.IsEntityInRange(myHero, unit, radius2) then
+			fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 0, castpoint = castpoint, spellname = "earthshaker_enchant_totem"})
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_enigma" then
+		local radius = 420
+		local castrange = 275
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 0; source = unit, lotus = 0, castpoint = castpoint, spellname = "enigma_black_hole"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_faceless_void" then
+		local radius = 425
+		local castrange = 600
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 0; source = unit, lotus = 0, castpoint = castpoint, spellname = "faceless_void_chronosphere"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_juggernaut" then
+		local radius = 425
+		local castrange = 350
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "juggernaut_omni_slash"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_legion_commander" then
+		local radius = 0
+		local castrange = 300
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 0, castpoint = castpoint, spellname = "legion_commander_duel"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_lich" then
+		local radius = 0
+		local castrange = 1000
+		local impactTime = distance / 850
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint + impactTime; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "lich_chain_frost"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_lina" then
+		local radius = 0
+		local castrange = 725
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "lina_laguna_blade"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_lion" then
+		local radius1 = 125
+		local castrange1 = 725
+		local impactTime = distance / 1600 - 0.1
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius1+castrange1) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius1, castrange1) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+impactTime; style = 1; source = unit, lotus = 0, castpoint = castpoint, spellname = "lion_impale"})
+			end
+		end
+
+		local radius2 = 0
+		local castrange2 = 900
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius2+castrange2) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius2, castrange2) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "lion_finger_of_death"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_luna" then
+		local radius = 0
+		local castrange = 800
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "luna_lucent_beam"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_magnataur" then
+		local radius = 0
+		local castrange = 460
+		local instant_radius = 150 + 50
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			local delay = castpoint
+			if distance <= instant_radius then delay = 0 end
+			fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 0, castpoint = castpoint, spellname = "magnataur_reverse_polarity"})
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_necrolyte" then
+		local radius = 0
+		local castrange = 650
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "necrolyte_reapers_scythe"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_night_stalker" then
+		local radius = 0
+		local castrange = 650
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_2 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+0.075; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "night_stalker_crippling_fear"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_nyx_assassin" then
+		local radius = 125
+		local castrange = 700
+		local impactTime = distance / 1600 + 0.1
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 0; source = unit, lotus = 0, castpoint = castpoint, spellname = "nyx_assassin_impale"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_ogre_magi" then
+		local radius = 0
+		local castrange = 600
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "ogre_magi_fireblast"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_obsidian_destroyer" then
+		local radius1 = 0
+		local castrange1 = 450
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_2 and NPC.IsEntityInRange(myHero, unit, radius1+castrange1) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius1, castrange1) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "obsidian_destroyer_astral_imprisonment"})
+			end
+		end
+
+		local radius2 = 575
+		local castrange2 = 700
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius2+castrange2) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius2, castrange2) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 0, castpoint = castpoint, spellname = "obsidian_destroyer_sanity_eclipse"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_puck" then
+		local radius = 450
+		local castrange = 0
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_2 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 0, castpoint = castpoint, spellname = "puck_waning_rift"})
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_pudge" then
+		local radius = 0
+		local castrange = 250
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "pudge_dismember"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_queenofpain" then
+		local radius = 450
+		local castrange = 900
+		local impactTime = distance / 900 - 0.25
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+impactTime; style = 0; source = unit, lotus = 0, castpoint = castpoint, spellname = "queenofpain_sonic_wave"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_rubick" then
+		local radius = 0
+		local castrange = 700
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "rubick_telekinesis"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_shadow_demon" then
+		local radius = 0
+		local castrange = 700
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "shadow_demon_disruption"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_shadow_shaman" then
+		local radius = 0
+		local castrange = 500
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_3 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "shadow_shaman_shackles"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_silencer" then
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 then
+			fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 0, castpoint = castpoint, spellname = "silencer_global_silence"})
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_skywrath_mage" then
+		local radius = 0
+		local castrange = 750
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_3 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "skywrath_mage_ancient_seal"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_slardar" then
+		local radius = 350
+		local castrange = 0
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_2 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 0, castpoint = castpoint, spellname = "slardar_slithereen_crush"})
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_sniper" then
+		local radius = 0
+		local castrange = 3000
+		local impactTime = distance / 2500 - 0.05
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then	
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+impactTime; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "sniper_assassinate"})
+			end
+		end
+	end
+		
+
+--	if NPC.GetUnitName(unit) == "npc_dota_hero_spirit_breaker" then
+--		local radius = 0
+--		local castrange = 850
+--	--	if sequenceName == "ultimate_anim" and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+--		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+--			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+--				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "spirit_breaker_nether_strike"})
+--			end
+--		end
+--	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_storm_spirit" then
+		local radius = 0
+		local castrange = 350
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_2 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "storm_spirit_electric_vortex"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_sven" then
+		local radius = 0
+		local castrange = 600
+		local impactTime = distance / 1000 - 0.1
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+impactTime; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "sven_storm_bolt"})
+			end
+		end
+	end
+
+--	if NPC.GetUnitName(unit) == "npc_dota_hero_techies" then
+--		local radius = 
+--		local castrange = 
+--		if sequenceName == "cast_blast_off" and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+--			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+--				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 0, castpoint = castpoint, spellname = })
+--			end
+--		end
+--	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_terrorblade" then
+		local radius = 0
+		local castrange = 600
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 1, castpoint = castpoint, spellname = "terrorblade_sunder"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_tidehunter" then
+		local radius = 0
+		local castrange = 1100
+		local impactTime = distance / 775 - 0.25
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			local adjust = impactTime
+			if distance <= 250 then adjust = 0 end
+			fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint + adjust; style = 2; source = unit, lotus = 0, castpoint = castpoint, spellname = "tidehunter_ravage"})
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_tinker" then
+		local radius = 0
+		local castrange = 900
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+0.1; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "tinker_laser"})
+			end
+		end
+	end
+
+--	if NPC.GetUnitName(unit) == "npc_dota_hero_treant" then
+--		local radius = 0
+--		local castrange = 850
+--		if sequenceName == "cast5_Overgrowth_anim" and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+--			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+--				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 0, castpoint = castpoint, spellname = })
+--			end
+--		end
+--	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_vengefulspirit" then
+		local radius = 0
+		local castrange = 500
+		local impactTime = distance / 1250 - 0.1
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+impactTime; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "vengefulspirit_magic_missile"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_warlock" then
+		local radius = 600
+		local castrange = 1200
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+0.5; style = 1; source = unit, lotus = 0, castpoint = castpoint, spellname = "warlock_rain_of_chaos"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_windrunner" then
+		local radius = 0
+		local castrange = 800
+		local impactTime = distance / 1650 - 0.1
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+impactTime; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "windrunner_shackleshot"})
+			end
+		end
+	end
+
+--	if NPC.GetUnitName(unit) == "npc_dota_hero_winter_wyvern" then
+--		local radius = 500
+--		local castrange = 800
+--		if sequenceName == "cast04_winters_curse_flying_low_anim" and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+--			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+--				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 0, castpoint = castpoint, spellname = })
+--			end
+--		end
+--	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_skeleton_king" then
+		local radius = 0
+		local castrange = 525
+		local impactTime = distance / 1000 - 0.2
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_1 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint+impactTime; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "skeleton_king_hellfire_blast"})
+			end
+		end
+	end
+
+	if NPC.GetUnitName(unit) == "npc_dota_hero_zuus" then
+		local radius = 375
+		local castrange = 900
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_2 and NPC.IsEntityInRange(myHero, unit, radius+castrange) then
+			if fooAllInOne.dodgeIsTargetMe(myHero, unit, radius, castrange) then
+				fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 2; source = unit, lotus = 1, castpoint = castpoint, spellname = "zuus_lightning_bolt"})
+			end
+		end
+
+		if activity == Enum.GameActivity.ACT_DOTA_CAST_ABILITY_5 then
+			fooAllInOne.dodgeIt({time = GameRules.GetGameTime(); delay = castpoint; style = 1; source = unit, lotus = 0, castpoint = castpoint, spellname = "zuus_thundergods_wrath"})
+		end
+	end
+
+end
+
 -- item usage functions
 function fooAllInOne.itemUsage(myHero, enemy)
 
@@ -3884,7 +4844,9 @@ function fooAllInOne.itemUsageNoOrder(myHero, enemy)
 
 			if fooAllInOne.ItemSleepReady(0.05) and dagon and NPC.IsEntityInRange(myHero, enemy, Ability.GetCastRange(dagon) + NPC.GetCastRangeBonus(myHero)) and Ability.IsCastable(dagon, myMana) and Menu.GetValue(fooAllInOne.optionItemDagon) > 0 then
 				if eBlade then
-					if NPC.HasModifier(enemy, "modifier_item_ethereal_blade_ethereal") then
+					if Ability.SecondsSinceLastUse(eBlade) > -1 and Ability.SecondsSinceLastUse(eBlade) < ((Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length2D() / 1200) then
+						return
+					else
 						Ability.CastTarget(dagon, enemy)
 						fooAllInOne.lastItemCast = os.clock()
 						return
@@ -3979,9 +4941,10 @@ function fooAllInOne.itemUsageOrder(myHero, enemy)
 				end
 			end
 
-			if NPC.HasModifier(myHero, "item_ethereal_blade") then
+			if NPC.HasModifier(myHero, "modifier_item_ethereal_blade") and Ability.SecondsSinceLastUse(NPC.GetItem(myHero, "item_ethereal_blade", true)) > -1 and
+				Ability.SecondsSinceLastUse(NPC.GetItem(myHero, "item_ethereal_blade", true)) < ((Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length2D() / 1200) then
 				if v[2] == "item_dagon" or v[2] == "item_dagon_2" or v[2] == "item_dagon_3" or v[2] == "item_dagon_4" 
-					or v[2] == "item_dagon_5" and not NPC.HasModifier(enemy, "modifier_item_ethereal_blade_ethereal") then
+					or v[2] == "item_dagon_5" then
 					skipItem = v[1]
 				end
 			end
@@ -4158,9 +5121,10 @@ function fooAllInOne.itemUsageSmartOrder(myHero, enemy, activation)
 				end
 			end
 
-			if NPC.HasModifier(myHero, "item_ethereal_blade") then
+			if NPC.HasModifier(myHero, "modifier_item_ethereal_blade") and Ability.SecondsSinceLastUse(NPC.GetItem(myHero, "item_ethereal_blade", true)) > -1 and
+				Ability.SecondsSinceLastUse(NPC.GetItem(myHero, "item_ethereal_blade", true)) < ((Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length2D() / 1200) then
 				if v[2] == "item_dagon" or v[2] == "item_dagon_2" or v[2] == "item_dagon_3" or v[2] == "item_dagon_4" 
-					or v[2] == "item_dagon_5" and not NPC.HasModifier(enemy, "modifier_item_ethereal_blade_ethereal") then
+					or v[2] == "item_dagon_5" then
 					skipItem = v[1]
 				end
 			end
@@ -4693,6 +5657,17 @@ function fooAllInOne.IsHeroInvisible(myHero)
 		end
 	end
 
+	if NPC.HasItem(myHero, "item_invis_sword", true) then
+		if Ability.SecondsSinceLastUse(NPC.GetItem(myHero, "item_invis_sword", true)) > -1 and Ability.SecondsSinceLastUse(NPC.GetItem(myHero, "item_invis_sword", true)) < 1 then 
+			return true
+		end
+	end
+	if NPC.HasItem(myHero, "item_silver_edge", true) then
+		if Ability.SecondsSinceLastUse(NPC.GetItem(myHero, "	item_silver_edge", true)) > -1 and Ability.SecondsSinceLastUse(NPC.GetItem(myHero, "item_silver_edge", true)) < 1 then 
+			return true
+		end
+	end
+
 	return false
 		
 end
@@ -5057,13 +6032,14 @@ function fooAllInOne.skywrathCombo(myHero, enemy)
 				Ability.CastPosition(blink, (Entity.GetAbsOrigin(enemy) + (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Normalized():Scaled(500)))
 				return
 			end
-		else
-			if fooAllInOne.skywrathComboSelect == true then
-				fooAllInOne.skywrathComboWithoutUlt(myHero, myMana, enemy, ancientSeal, arcaneBolt, concussiveShot)
-			else
-				fooAllInOne.skywrathComboWithoutUlt(myHero, myMana, enemy, ancientSeal, arcaneBolt, concussiveShot, mysticFlare)
-			end
 		end
+
+		if fooAllInOne.skywrathComboSelect == true then
+			fooAllInOne.skywrathComboWithoutUlt(myHero, myMana, enemy, ancientSeal, arcaneBolt, concussiveShot)
+		else
+			fooAllInOne.skywrathComboWithUlt(myHero, myMana, enemy, ancientSeal, arcaneBolt, concussiveShot, mysticFlare)
+		end
+
 	fooAllInOne.GenericMainAttack(myHero, "Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil)
 	end
 
@@ -5074,26 +6050,27 @@ function fooAllInOne.skywrathComboWithoutUlt(myHero, myMana, enemy, ancientSeal,
 	if not myHero then return end
 	if not enemy then return end
 
-	if ancientSeal and Ability.IsCastable(ancientSeal, myMana) then
-		Ability.CastTarget(ancientSeal, enemy)
+	if concussiveShot and Ability.IsCastable(concussiveShot, myMana) and NPC.IsEntityInRange(myHero, enemy, 1550) then
+		Ability.CastNoTarget(concussiveShot)
 		fooAllInOne.lastTick = os.clock()
 		return
 	end
 
-	if fooAllInOne.SleepReady(Ability.GetCastPoint(ancientSeal)) and arcaneBolt and Ability.IsCastable(arcaneBolt, myMana) then
+	if fooAllInOne.SleepReady(Ability.GetCastPoint(concussiveShot)) and arcaneBolt and Ability.IsCastable(arcaneBolt, myMana) and NPC.IsEntityInRange(myHero, enemy, 850) then
 		Ability.CastTarget(arcaneBolt, enemy)
 		fooAllInOne.lastTick = os.clock()
 		return
 	end
 
-	if fooAllInOne.SleepReady(Ability.GetCastPoint(arcaneBolt)) and concussiveShot and Ability.IsCastable(concussiveShot, myMana) then
-		Ability.CastNoTarget(concussiveShot)
+	if fooAllInOne.SleepReady(Ability.GetCastPoint(arcaneBolt)) and ancientSeal and Ability.IsCastable(ancientSeal, myMana) and NPC.IsEntityInRange(myHero, enemy, 685) then
+		Ability.CastTarget(ancientSeal, enemy)
+		fooAllInOne.lastTick = os.clock()
 		return
 	end
 
 end
 
-function fooAllInOne.skywrathComboWithoutUlt(myHero, myMana, enemy, ancientSeal, arcaneBolt, concussiveShot, mysticFlare)
+function fooAllInOne.skywrathComboWithUlt(myHero, myMana, enemy, ancientSeal, arcaneBolt, concussiveShot, mysticFlare)
 
 	if not myHero then return end
 	if not enemy then return end
@@ -5103,20 +6080,21 @@ function fooAllInOne.skywrathComboWithoutUlt(myHero, myMana, enemy, ancientSeal,
 			aghanimsBuffed = true
 		end
 
-	if ancientSeal and Ability.IsCastable(ancientSeal, myMana) then
-		Ability.CastTarget(ancientSeal, enemy)
+	if concussiveShot and Ability.IsCastable(concussiveShot, myMana) and NPC.IsEntityInRange(myHero, enemy, 1550) then
+		Ability.CastNoTarget(concussiveShot)
 		fooAllInOne.lastTick = os.clock()
 		return
 	end
 
-	if fooAllInOne.SleepReady(Ability.GetCastPoint(ancientSeal)) and arcaneBolt and Ability.IsCastable(arcaneBolt, myMana) then
+	if fooAllInOne.SleepReady(Ability.GetCastPoint(concussiveShot)) and arcaneBolt and Ability.IsCastable(arcaneBolt, myMana) and NPC.IsEntityInRange(myHero, enemy, 850) then
 		Ability.CastTarget(arcaneBolt, enemy)
 		fooAllInOne.lastTick = os.clock()
 		return
 	end
 
-	if fooAllInOne.SleepReady(Ability.GetCastPoint(arcaneBolt)) and concussiveShot and Ability.IsCastable(concussiveShot, myMana) then
-		Ability.CastNoTarget(concussiveShot)
+	if fooAllInOne.SleepReady(Ability.GetCastPoint(arcaneBolt)) and ancientSeal and Ability.IsCastable(ancientSeal, myMana) and NPC.IsEntityInRange(myHero, enemy, 685) then
+		Ability.CastTarget(ancientSeal, enemy)
+		fooAllInOne.lastTick = os.clock()
 		return
 	end
 
@@ -6508,6 +7486,10 @@ function fooAllInOne.QoPCombo(myHero, enemy)
 
 	fooAllInOne.itemUsage(myHero, enemy)
 
+	if Menu.GetValue(fooAllInOne.optionHeroQoPAutoUlt) > 0 then
+		fooAllInOne.QoPComboUltKS(myHero, sonicWave, aghanims, myMana)
+	end
+
 	if Menu.IsKeyDown(fooAllInOne.optionComboKey) and Entity.GetHealth(enemy) > 0 and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and fooAllInOne.heroCanCastSpells(myHero) == true then
 		if not NPC.IsEntityInRange(myHero, enemy, 425) then
 			if Menu.IsEnabled(fooAllInOne.optionHeroQoPblink) then
@@ -6516,65 +7498,65 @@ function fooAllInOne.QoPCombo(myHero, enemy)
 					fooAllInOne.lastTick = os.clock()
 					return
 				end
-				if not qopBlink or (qopBlink and not Ability.IsReady(qopBlink)) then
-					if fooAllInOne.SleepReady(0.5) then
-						Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET, enemy, Entity.GetAbsOrigin(enemy), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, npc, queue, showEffects)
-						fooAllInOne.lastTick = os.clock()
-						return
-					end
-				end
-			else
-				if fooAllInOne.SleepReady(0.5) then
-					Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET, enemy, Vector(), ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, npc, queue, showEffects)
+			end		
+		else
+			if NPC.IsEntityInRange(myHero, enemy, Ability.GetCastRange(shadowStrike) + NPC.GetCastRangeBonus(myHero)) then
+				if fooAllInOne.SleepReady(0.1) and shadowStrike and Ability.IsCastable(shadowStrike, myMana) then
+					Ability.CastTarget(shadowStrike, enemy)
 					fooAllInOne.lastTick = os.clock()
 					return
 				end
-			end		
-		else
+			end
 			if fooAllInOne.SleepReady(0.1) and screamOfPain and Ability.IsCastable(screamOfPain, myMana) then
 				Ability.CastNoTarget(screamOfPain)
-				return
-			end
-			if fooAllInOne.SleepReady(0.1) and shadowStrike and Ability.IsCastable(shadowStrike, myMana) then
-				Ability.CastTarget(shadowStrike, enemy)
-				fooAllInOne.lastTick = os.clock()
 				return
 			end
 		end
 	fooAllInOne.GenericMainAttack(myHero, "Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil)
 	end
 
+end
 
-	if Menu.GetValue(fooAllInOne.optionHeroQoPAutoUlt) > 0 and fooAllInOne.isHeroChannelling(myHero) == false and fooAllInOne.IsHeroInvisible(myHero) == false then
-		if sonicWave and Ability.IsCastable(sonicWave, myMana) then
-			for _, hero in ipairs(Entity.GetHeroesInRadius(myHero, 1000, Enum.TeamType.TEAM_ENEMY)) do
-				local target = fooAllInOne.targetChecker(hero)
-				if target then
-					local sonicDamage
-					if aghanims or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
-						sonicDamage = Ability.GetLevelSpecialValueFor(sonicWave, "damage_scepter")
-					else
-						sonicDamage = Ability.GetLevelSpecialValueFor(sonicWave, "damage")
+function fooAllInOne.QoPComboUltKS(myHero, sonicWave, aghanims, myMana)
+
+	if not myHero then return end
+
+	if not sonicWave then return end
+		if not Ability.IsCastable(sonicWave, myMana) then return end
+
+	if Menu.GetValue(fooAllInOne.optionHeroQoPAutoUlt) == 0	then return end
+
+	if fooAllInOne.isHeroChannelling(myHero) == true then return end 
+	if fooAllInOne.IsHeroInvisible(myHero) == true then return end
+	if fooAllInOne.heroCanCastSpells(myHero) == false then return end
+
+	for _, hero in ipairs(Entity.GetHeroesInRadius(myHero, 1000, Enum.TeamType.TEAM_ENEMY)) do
+		local target = fooAllInOne.targetChecker(hero)
+		if target then
+			local sonicDamage
+			if aghanims or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
+				sonicDamage = Ability.GetLevelSpecialValueFor(sonicWave, "damage_scepter")
+			else
+				sonicDamage = Ability.GetLevelSpecialValueFor(sonicWave, "damage")
+			end
+			if Menu.GetValue(fooAllInOne.optionHeroQoPAutoUlt) == 1 then
+				if aghanims or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
+					if Entity.GetHealth(target) <= sonicDamage then
+						Ability.CastPosition(sonicWave, (Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(target) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(600)))
+						break
+						return
 					end
-					if Menu.GetValue(fooAllInOne.optionHeroQoPAutoUlt) == 1 then
-						if aghanims or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
-							if Entity.GetHealth(enemy) <= sonicDamage then
-								Ability.CastPosition(sonicWave, (Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(target) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(600)))
-								break
-								return
-							end
-						end
-					elseif Menu.GetValue(fooAllInOne.optionHeroQoPAutoUlt) == 2 then
-						if Entity.GetHealth(enemy) <= sonicDamage then
-							Ability.CastPosition(sonicWave, (Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(target) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(600)))
-							break
-							return
-						end
-					end
+				end
+			elseif Menu.GetValue(fooAllInOne.optionHeroQoPAutoUlt) == 2 then
+				if Entity.GetHealth(target) <= sonicDamage then
+					Ability.CastPosition(sonicWave, (Entity.GetAbsOrigin(myHero) + (Entity.GetAbsOrigin(target) - Entity.GetAbsOrigin(myHero)):Normalized():Scaled(600)))
+					break
+					return
 				end
 			end
 		end
 	end
+
 end
 
 function fooAllInOne.SvenCombo(myHero, enemy)
@@ -7993,6 +8975,7 @@ function fooAllInOne.ZuusCombo(myHero, enemy)
  	local bolt = NPC.GetAbilityByIndex(myHero, 1)
  	local static = NPC.GetAbilityByIndex(myHero, 2)
  	local wrath = NPC.GetAbilityByIndex(myHero, 4)
+	local nimbus = NPC.GetAbilityByIndex(myHero, 3)
 
 	local lens = NPC.GetItem(myHero, "item_aether_lens", true)
 	local refresher = NPC.GetItem(myHero, "item_refresher", true)
@@ -8044,14 +9027,18 @@ function fooAllInOne.ZuusCombo(myHero, enemy)
 		fooAllInOne.ZuusArcFarm(myHero, myMana, arc, arcDamage, arcCastRange, staticDamage)
 	end
 
-	if Menu.IsKeyDown(fooAllInOne.optionHeroZuusFarmKey) then
+	if Menu.IsKeyDown(fooAllInOne.optionHeroZuusHarassKey) then
+		fooAllInOne.ZuusArcHarass(myHero, myMana, arc, arcCastRange)
+	end
+
+	if Menu.IsKeyDown(fooAllInOne.optionHeroZuusFarmKey) or Menu.IsKeyDown(fooAllInOne.optionHeroZuusHarassKey) then
 		Engine.ExecuteCommand("dota_range_display " .. tostring(arcCastRange))
 	else
 		Engine.ExecuteCommand("dota_range_display 0")
 	end
 
 	if Menu.IsEnabled(fooAllInOne.optionHeroZuusKillsteal) then
-		fooAllInOne.ZuusFullKillSteal(myHero, myMana, arc, bolt, static, wrath, arcCastRange, boltCastRange, staticCastRange, arcDamage, boltDamage, staticDamage, wrathDamage, refresher)
+		fooAllInOne.ZuusFullKillSteal(myHero, myMana, arc, bolt, static, wrath, arcCastRange, boltCastRange, staticCastRange, arcDamage, boltDamage, staticDamage, wrathDamage, refresher, nimbus)
 	end
 	
 	if enemy and NPC.IsEntityInRange(myHero, enemy, 2000) then	
@@ -8100,6 +9087,40 @@ function fooAllInOne.ZuusCombo(myHero, enemy)
 
 end
 
+function fooAllInOne.ZuusArcHarass(myHero, myMana, arc, arcCastRange)
+
+	if not myHero then return end
+
+	if fooAllInOne.heroCanCastSpells(myHero) == false then return end
+	if fooAllInOne.isHeroChannelling(myHero) == true then return end 
+	if fooAllInOne.IsHeroInvisible(myHero) == true then return end
+
+	if not arc then return end
+		if not Ability.IsCastable(arc, myMana) then return end
+
+	local targetHero
+	local minHP = 99999
+
+	if (myMana / NPC.GetMaxMana(myHero)) >= (Menu.GetValue(fooAllInOne.optionHeroZuusHarassMana) / 100) then
+		for _, hero in ipairs(NPC.GetHeroesInRadius(myHero, arcCastRange - 25, Enum.TeamType.TEAM_ENEMY)) do
+			if hero and Entity.IsHero(hero) and not Entity.IsDormant(hero) and not NPC.IsIllusion(hero) then
+				if Entity.IsAlive(hero) then
+					if Entity.GetHealth(hero) < minHP then
+						targetHero = hero
+						minHP = Entity.GetHealth(hero)
+					end
+				end
+			end
+		end
+	end
+
+	if targetHero then
+		Ability.CastTarget(arc, targetHero)
+        	return
+	end
+
+end
+
 function fooAllInOne.ZuusArcFarm(myHero, myMana, arc, arcDamage, arcCastRange, staticDamage)
 
 	if not myHero then return end
@@ -8120,28 +9141,13 @@ function fooAllInOne.ZuusArcFarm(myHero, myMana, arc, arcDamage, arcCastRange, s
 					break
         				return
 				end
-				if Menu.IsEnabled(fooAllInOne.optionHeroZuusHarass) then
-					if (NPC.GetMana(myHero) / NPC.GetMaxMana(myHero)) >= (Menu.GetValue(fooAllInOne.optionHeroZuusHarassMana) / 100) then
-						if Entity.GetHealth(npc) > ((arcDamage + (Entity.GetHealth(npc) * (staticDamage / 100))) * NPC.GetMagicalArmorDamageMultiplier(npc)) * 2.5 then
-							for _, hero in ipairs(NPC.GetHeroesInRadius(myHero, arcCastRange - 25, Enum.TeamType.TEAM_ENEMY)) do
-								if hero and Entity.IsHero(hero) and not Entity.IsDormant(hero) and not NPC.IsIllusion(hero) then
-									if Entity.IsAlive(hero) then
-										Ability.CastTarget(arc, hero)
-										break
-        									return
-									end
-								end
-							end
-						end
-					end
-				end
 			end
       		end		
 	end
 
 end
 
-function fooAllInOne.ZuusFullKillSteal(myHero, myMana, arc, bolt, static, wrath, arcCastRange, boltCastRange, staticCastRange, arcDamage, boltDamage, staticDamage, wrathDamage, refresher)
+function fooAllInOne.ZuusFullKillSteal(myHero, myMana, arc, bolt, static, wrath, arcCastRange, boltCastRange, staticCastRange, arcDamage, boltDamage, staticDamage, wrathDamage, refresher, nimbus)
 
 	if not myHero then return end
 	
@@ -8154,7 +9160,7 @@ function fooAllInOne.ZuusFullKillSteal(myHero, myMana, arc, bolt, static, wrath,
 		if enemies ~= nil and Entity.IsHero(enemies) and not Entity.IsSameTeam(myHero, enemies) then
 			local enemy = fooAllInOne.targetChecker(enemies)
 			if enemy then
-				if Ability.GetLevel(static) > 0 and NPC.IsEntityInRange(myHero, enemy, staticCastRange, 0) then
+				if Ability.GetLevel(static) > 0 and NPC.IsEntityInRange(myHero, enemy, staticCastRange-25, 0) then
           				boltDamage  = boltDamage + (Entity.GetHealth(enemy) * (staticDamage / 100))
           				arcDamage = arcDamage + (Entity.GetHealth(enemy) * (staticDamage / 100))
         			end
@@ -8173,11 +9179,19 @@ function fooAllInOne.ZuusFullKillSteal(myHero, myMana, arc, bolt, static, wrath,
             						return
 						end
 					end
+					if nimbus and not Ability.IsHidden(nimbus) and Ability.IsCastable(nimbus, myMana) then
+						if not NPC.IsPositionInRange(myHero, Entity.GetAbsOrigin(enemy), arcCastRange, 0) then
+							if Entity.GetHealth(enemy) <= boltDamage then
+								Ability.CastPosition(nimbus, Entity.GetAbsOrigin(enemy))
+								return
+							end
+						end
+					end
 					if not NPC.IsLinkensProtected(enemy) and Entity.GetHealth(enemy) <= arcDamage and arc and Ability.IsCastable(arc, myMana) and NPC.IsPositionInRange(myHero, Entity.GetAbsOrigin(enemy), arcCastRange, 0) then
             					Ability.CastTarget(arc, enemy) 
             					return 
          				end
-        				if Entity.GetHealth(enemy) <= boltDamage and bolt and Ability.IsCastable(bolt, myMana) and NPC.IsPositionInRange(myHero, Entity.GetAbsOrigin(enemy), boltCastRange, 0) then
+        				if not NPC.IsLinkensProtected(enemy) and Entity.GetHealth(enemy) <= boltDamage and bolt and Ability.IsCastable(bolt, myMana) and NPC.IsPositionInRange(myHero, Entity.GetAbsOrigin(enemy), boltCastRange, 0) then
             					Ability.CastTarget(bolt, enemy) 
            	 				return
           				end
@@ -8202,23 +9216,35 @@ function fooAllInOne.ZuusWrathCount(myHero, myMana, wrath, wrathDamage, static, 
 
 	local count = 0
 	local countRefresher = 0
-	for i = 1, Heroes.Count() do
+	for i = 1, Heroes.Count(), 1 do
 	local enemies = Heroes.Get(i)
 		if enemies ~= nil and Entity.IsHero(enemies) and not Entity.IsSameTeam(myHero, enemies) then
 			local enemy = fooAllInOne.targetChecker(enemies)
 			if enemy then
 				if not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
-					if Ability.GetLevel(static) > 0 and NPC.IsEntityInRange(myHero, enemy, staticCastRange, 0) then
-          					wrathDamage  = wrathDamage + (Entity.GetHealth(enemy) * (staticDamage / 100))
-        				end
+				--	if Ability.GetLevel(static) > 0 and NPC.IsEntityInRange(myHero, enemy, staticCastRange, 0) then
+          			--		wrathDamage  = wrathDamage + (Entity.GetHealth(enemy) * (staticDamage / 100))
+        			--	end
 					if not doubleUlt then
-						if Entity.GetHealth(enemy) <= wrathDamage then
-							count = count + 1
+						if Ability.GetLevel(static) > 0 and NPC.IsEntityInRange(myHero, enemy, staticCastRange-25, 0) then
+							if Entity.GetHealth(enemy) <= (wrathDamage + (Entity.GetHealth(enemy) * (staticDamage / 100))) then
+								count = count + 1
+							end
+						else
+							if Entity.GetHealth(enemy) <= wrathDamage then
+								count = count + 1
+							end
 						end
 					else
-						if Entity.GetHealth(enemy) <= wrathDamage*2 then
-							countRefresher = countRefresher + 1
-						end
+						if Ability.GetLevel(static) > 0 and NPC.IsEntityInRange(myHero, enemy, staticCastRange-25, 0) then
+							if Entity.GetHealth(enemy) <= (wrathDamage + (Entity.GetHealth(enemy) * (staticDamage / 100))) * 2 then
+								countRefresher = countRefresher + 1
+							end
+						else
+							if Entity.GetHealth(enemy) <= wrathDamage * 2 then
+								countRefresher = countRefresher + 1
+							end
+						end	
 					end
 				end
 			end
@@ -8231,7 +9257,7 @@ function fooAllInOne.ZuusWrathCount(myHero, myMana, wrath, wrathDamage, static, 
 		end
 	end
 
-	if countRefresher > 0 and doubleUlt == true then
+	if countRefresher > 0 and doubleUlt == true and myMana > (Ability.GetManaCost(wrath) * 2 + 375) then
 		if countRefresher >= Menu.GetValue(fooAllInOne.optionHeroZuusUltCountRefresher) then
 			return true
 		end
@@ -8250,6 +9276,8 @@ function fooAllInOne.ProphetHelper(myHero, enemy)
 		fooAllInOne.TogglerTime = os.clock()
 	end
 
+	fooAllInOne.itemUsage(myHero, enemy)
+	
 	local treantEntities = {}
 	if fooAllInOne.Toggler then
 		for i = 1, NPCs.Count() do 
@@ -13522,3 +14550,4 @@ function fooAllInOne.Debugger(time, npc, ability, order)
 end
 
 return fooAllInOne
+
