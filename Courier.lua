@@ -1,10 +1,10 @@
 local Courier = {}
 
-Courier.IsEnabled = Menu.AddOption( {"Utility", "Courier"}, "Enabled","")
-Courier.SendKey = Menu.AddKeyOption({ "Utility","Courier"}, "Force send key (change sending state)", Enum.ButtonCode.KEY_F)
-Courier.SafeRange = Menu.AddOption( {"Utility", "Courier"}, "Safe range","", 100, 1500, 100)
-Courier.SafeDelivery = Menu.AddOption( {"Utility", "Courier"}, "Safe delivery","")
-Courier.SkipSafe = Menu.AddOption( {"Utility", "Courier"}, "Skip safe check if force sending","")
+Courier.IsEnabled = Menu.AddOption( {"Utility", "Courier1"}, "Enabled","")
+Courier.SendKey = Menu.AddKeyOption({ "Utility","Courier1"}, "Force send key (change sending state)", Enum.ButtonCode.KEY_F)
+Courier.SafeRange = Menu.AddOption( {"Utility", "Courier1"}, "Safe range","", 100, 1500, 100)
+Courier.SafeDelivery = Menu.AddOption( {"Utility", "Courier1"}, "Safe delivery","")
+Courier.SkipSafe = Menu.AddOption( {"Utility", "Courier1"}, "Skip safe check if force sending","")
 
 Courier.Player = nil
 Courier.Hero = nil
