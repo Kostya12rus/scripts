@@ -1,8 +1,8 @@
 local courierReuse = {}
 
-courierReuse.OptionEnabled = Menu.AddOption({"Utility", "Courier2"}, "Enabled","on/off")
-courierReuse.optionKey = Menu.AddKeyOption({ "Utility","Courier2"}, "Key to reuse", Enum.ButtonCode.KEY_T)
-courierReuse.optionNoFeed = Menu.AddOption({"Utility", "Courier2"}, "Anti Feed","on/off")
+courierReuse.OptionEnabled = Menu.AddOption({"Utility", "Courier"}, "Enabled","on/off")
+courierReuse.optionKey = Menu.AddKeyOption({ "Utility","Courier"}, "Key to reuse", Enum.ButtonCode.KEY_T)
+courierReuse.optionNoFeed = Menu.AddOption({"Utility", "Courier"}, "Anti Feed","on/off")
 
 courierReuse.items = {}
 courierReuse.items["item_aegis"] = "Aegis of the Immortal"
