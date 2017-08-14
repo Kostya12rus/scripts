@@ -12,7 +12,7 @@ function rofl.OnDraw()
 	if not myHero or not Menu.IsEnabled(rofl.optionEnable) then return end
 	
 	if GameRules.GetGameState() == 5 or GameRules.GetGameState() == 4 then
-		Renderer.DrawText(rofl.font, 500, 50,"Включен ", 1)
+		Renderer.DrawText(rofl.font, 500, 50,"Включен", 1)
 		for i = 0, #rtime, 1 do
 			if Second == rtime[i] then
 				Engine.ExecuteCommand("say /laugh")
