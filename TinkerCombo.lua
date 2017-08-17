@@ -82,6 +82,7 @@ function Tinker.OnDraw()
     if not Menu.IsEnabled(Tinker.calculator) then return true end
 	
     local myHero = Heroes.GetLocal()
+    if not myHero then return end
     if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
 	local totaldmg = 0
 	local xfactor = 1;

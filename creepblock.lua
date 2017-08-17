@@ -1,8 +1,11 @@
 local Blocker = {}
+Blocker.inited = false
 
 local creep_melee_collision_size = 16
 local creep_ranged_collision_size =  8
 local key = Menu.AddKeyOption({"Utility"}, "[Bot] CreepBlock", Enum.ButtonCode.KEY_SPACE)
+-- local enemyHeroBlock = Menu.AddOption({ "Utility", "[Bot] HeroBlock" }, "Enabled", "Block enemy hero with summoned units.")
+-- local skipRangedCreep = Menu.AddOption({ "Utility", "[Bot] Skip ranged creep" }, "Enabled", "Bot will try to skip ranged creep.")
 local font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 
 local DOTA_TEAM_GOODGUYS = 2
@@ -21,7 +24,18 @@ local less_stopping = false
 
 local Fountain = nil
 
+function Blocker.Init()
+    local hero = Heroes.GetLocal()
+    if hero == nil then return end
+    if not Entity.IsAlive(hero) then return end
+    Blocker.inited = true
+end
+
 function Blocker.OnDraw()
+
+    if not Engine.IsInGame() then Blocker.Reset() end
+    Blocker.Init()
+    if not Blocker.inited then return end
 
     if not Menu.IsKeyDown(key) then
         return false
@@ -128,7 +142,7 @@ end
 function Blocker.GetPredictedPosition(npc, delay)
     local pos = Entity.GetAbsOrigin(npc)
     if not NPC.IsRunning(npc) or not delay then return pos end
-    local totalLatency = (NetChannel.GetAvgLatency(Enum.Flow.FLOW_INCOMING) + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING)) * 2
+    local totalLatency = (NetChannel.GetAvgLatency(Enum.Flow.FLOW_INCOMING) + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING)) -- * 2 -- this may fix bot is not stopping at high ping
     delay = delay + totalLatency
 
     local dir = Entity.GetRotation(npc):GetForward():Normalized()
@@ -159,6 +173,13 @@ function Blocker.DrawCircle(UnitPos, radius)
             x1,y1 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
         end
     end
+end
+
+function Blocker.Reset()
+    Fountain = nil
+    top_towers = {}
+    mid_towers = {}
+    bottom_towers = {}
 end
 
 function Blocker.getFountain(Hero)
