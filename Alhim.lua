@@ -2,11 +2,11 @@
 -- Version: 0.07
 -- Updated: 20.03.2017
 local alchemist = {}
-alchemist.optionEnable = Menu.AddOption		({"Hero Specific","Alchemist"},		"1. Enabled", 			"")
-alchemist.soul = Menu.AddOption				({"Hero Specific","Alchemist"},		"2. Use Item Soul Ring","Использовать Soul Ring в боте")
-alchemist.autopick = Menu.AddOption			({"Hero Specific","Alchemist"}, 	"3. AutoPick", 			"Автоматический пик Алхимика")
-alchemist.autobuy = Menu.AddOption			({"Hero Specific","Alchemist"}, 	"4. AutoBuy", 			"Автоматически закупаться")
-alchemist.optionKey = Menu.AddKeyOption		({"Hero Specific","Alchemist"},		"5. Combo Key",Enum.ButtonCode.KEY_D)
+alchemist.optionEnable = Menu.AddOption		({"Kostya12rus","Alchemist"},		"1. Enabled", 			"")
+alchemist.soul = Menu.AddOption				({"Kostya12rus","Alchemist"},		"2. Use Item Soul Ring","Использовать Soul Ring в боте")
+alchemist.autopick = Menu.AddOption			({"Kostya12rus","Alchemist"}, 	"3. AutoPick", 			"Автоматический пик Алхимика")
+alchemist.autobuy = Menu.AddOption			({"Kostya12rus","Alchemist"}, 	"4. AutoBuy", 			"Автоматически закупаться")
+alchemist.optionKey = Menu.AddKeyOption		({"Kostya12rus","Alchemist"},		"5. Combo Key",Enum.ButtonCode.KEY_D)
 alchemist.font = Renderer.LoadFont			("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 
 local myHero = Heroes.GetLocal()

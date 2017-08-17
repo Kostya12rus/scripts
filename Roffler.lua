@@ -1,5 +1,6 @@
 local rofl = {}
-rofl.optionEnable = Menu.AddOption({"Utility","RoflActivate"}, "Rofl", "")
+rofl.optionEnable = Menu.AddOption({"Kostya12rus","Rofl"}, "RoflActivate", "")
+rofl.EnableImg = Menu.AddOption({"Kostya12rus","Rofl"}, "DrawImg", "")
 rofl.font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 function rofl.OnDraw()
     local myHero = Heroes.GetLocal()
@@ -12,7 +13,14 @@ function rofl.OnDraw()
 	if not myHero or not Menu.IsEnabled(rofl.optionEnable) then return end
 	
 	if GameRules.GetGameState() == 5 or GameRules.GetGameState() == 4 then
-		Renderer.DrawText(rofl.font, 500, 50,"Включен", 1)
+		if Menu.IsEnabled(rofl.EnableImg) then
+			local w, h = Renderer.GetScreenSize()
+			local x1 = 2560/500
+			local y1 = 1080/0
+			local x2 = w/x1
+			local y2 = h/y1
+			Renderer.DrawText(rofl.font, x2, y2,"Включен", 1)
+		end
 		for i = 0, #rtime, 1 do
 			if Second == rtime[i] then
 				Engine.ExecuteCommand("say /laugh")
