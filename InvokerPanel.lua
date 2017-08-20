@@ -186,8 +186,8 @@ function invokerDisplay.OnDraw()
     if not Menu.IsEnabled(invokerDisplay.option) then return end
 
     local myHero = Heroes.GetLocal()
-    if not myHero then return end
     if NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
+    if not myHero then return end
 
     if invokerDisplay.needsInit then
         invokerDisplay.InitDisplay()
