@@ -1,14 +1,12 @@
 local JunglFarm = {}
 JunglFarm.optionEnable = Menu.AddOption({"Kostya12rus","JunglFarm"}, "Activate", "")
 JunglFarm.autopick = Menu.AddOption({"Kostya12rus","JunglFarm"}, "AutoPick", "")
+JunglFarm.Draw = Menu.AddOption({"Kostya12rus","JunglFarm"}, "DrawInGame?", "")
 JunglFarm.optionKey = Menu.AddKeyOption({"Kostya12rus","JunglFarm"},"TestKey",Enum.ButtonCode.KEY_D)
 JunglFarm.font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 JunglFarm.fontNps = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
 local coints
 local ucanmove
-local npsVisb
-local spotneed
-local CreepTable = {}
 function JunglFarm.OnDraw()
 	if not Menu.IsEnabled(JunglFarm.optionEnable) then return end
 	if Menu.IsEnabled(JunglFarm.autopick) then
@@ -20,13 +18,15 @@ function JunglFarm.OnDraw()
     local myHero = Heroes.GetLocal()
 	if not myHero then return end
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_sand_king" then return end
-	local mouse = Input.GetWorldCursorPos()
-	local mouseX = math.floor(mouse:GetX())
-	local mouseY = math.floor(mouse:GetY())
-	local mouseZ = math.floor(mouse:GetZ())
-	Renderer.DrawText(JunglFarm.font, 10, 290,mouseX .. " " .. mouseY .. " " .. mouseZ , 1)
-	
-	
+	if Menu.IsEnabled(JunglFarm.Draw) then
+		local mouse = Input.GetWorldCursorPos()
+		local mouseX = math.floor(mouse:GetX())
+		local mouseY = math.floor(mouse:GetY())
+		local mouseZ = math.floor(mouse:GetZ())
+		Renderer.DrawText(JunglFarm.font, 10, 290,mouseX .. " " .. mouseY .. " " .. mouseZ , 1)
+		JunglFarm.DrawCircle(myPos, 1000, 2)
+		JunglFarm.DrawCircle(myPos, 525, 2)
+	end
 	local lvlskill2 = Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1))
     local skil2 = NPC.GetAbilityByIndex(myHero, 1)
 	local GameTime = GameRules.GetGameTime()
@@ -35,7 +35,6 @@ function JunglFarm.OnDraw()
 	local Minute = math.floor(RealTime/60)
 	local Second = math.floor(RealTime-(Minute*60))
 	local CointNPC = 0
-	local CointNPC2 = 0
 	for i = 1, NPCs.Count() do
 		local unitNA = NPCs.Get(i)
 		if Entity.IsAlive(unitNA) then
@@ -44,36 +43,36 @@ function JunglFarm.OnDraw()
 			local Health = Entity.GetHealth(unitNA)
 			local MaxHealth = Entity.GetMaxHealth(unitNA)
 			local HealthProc = Health/MaxHealth*100
-			
 			local x1, y1 , worldVis= Renderer.WorldToScreen(UnitPos)
-			if worldVis and NPC.IsNeutral(unitNA) and NPC.IsPositionInRange(unitNA, myPos, 700, 0) and not NPC.IsWaitingToSpawn(unitNA) then
-				JunglFarm.DrawCircle(UnitPos, 100, 5)
+			
+			if worldVis and NPC.IsNeutral(unitNA) and NPC.IsPositionInRange(unitNA, myPos, 1000, 0) and not NPC.IsWaitingToSpawn(unitNA) then
+				if Menu.IsEnabled(JunglFarm.Draw) then
+					Renderer.DrawText(JunglFarm.fontNps, x1, y1, (Health/MaxHealth*100), 1)
+					JunglFarm.DrawCircle(UnitPos, 100, 5)
+				end
 				if NPC.GetUnitName(unitNA) then
-					Renderer.DrawText(JunglFarm.fontNps, x1, y1, (Health/MaxHealth*100), 1) --:__tostring()
-					npsVisb = true
 					CointNPC = CointNPC + 1
 				end	
 			else
-				npsVisb = false
 			end
 		end
 	end	
-	
-
-	
 	local team = false
     my_team = Entity.GetTeamNum(myHero)
     if my_team ~= DOTA_TEAM_BADGUYS then
 		spot = {Vector(-2089,-2833,256),Vector(-1802,-4071,141),Vector(-793,-3263,256),Vector(654,-4439,384),Vector(3334,-4575,256),Vector(4652,-4210,256)} 
+		spot[8] = Vector(-7139,-6618,520)
 	else	
 		spot = {Vector(88,5016,384),Vector(1113,3549,384),Vector(-496,3558,256),Vector(-1671,4026,256),Vector(-3018,5134,384),Vector(-4410,3841,256)}  
+		spot[8] = Vector(7021,6450,520)
 	end
-	for i = 1, #spot do
-		JunglFarm.DrawCircle(spot[i], 20, 30)
+	if Menu.IsEnabled(JunglFarm.Draw) then
+		for i = 1, #spot do
+			if i ~= 7 then
+				JunglFarm.DrawCircle(spot[i], 20, 30)
+			end
+		end
 	end
-	
-	
-
 	if not Entity.IsAlive(myHero) then
 		coints = 2
 		ucanmove = true
@@ -93,12 +92,11 @@ function JunglFarm.OnDraw()
 			if coints == nil or coints == 0 then
 				coints = 2
 			end
-			if coints > 6 or coints < 0 then
+			if coints > 6 or coints < 0 and coints ~= 8 then
 				coints = 2
 			end
-			local distanc = myPos:Distance(spot[coints])
-			local distance = distanc:Length2D()
-			if distance <= 2 then
+			local distance = myPos:Distance(spot[coints]):Length2D()
+			if distance <= 20 then
 				if CointNPC ~= 0 then
 					ucanmove = false
 					if lvlskill2 ~= 0 and Ability.IsReady(skil2) and not Ability.IsChannelling(skil2) then
@@ -111,67 +109,60 @@ function JunglFarm.OnDraw()
 					end
 					ucanmove = true
 				end
-				
-				
-				
-				-- if lvlskill2 >= 1 and Ability.IsReady(skil2) and not Ability.IsChannelling(skil2) and CointNPC ~= 0 then
-					-- Ability.CastNoTarget(skil2)
-					-- timecast = GameTime + 5 
-					-- if coints == 7 then
-						-- coints = 2
-					-- else
-						-- coints = coints + 1
-						-- AddCoints = false
-					-- end
-				-- end
-				-- if CointNPC < 1 then
-					-- ucanmove = true
-					-- if AddCoints and not ucanmove then
-						-- coints = coints + 1
-						-- AddCoints = false
-					-- else
-						-- AddCoints = true
-					-- end
-				-- else
-					-- ucanmove = false
-				-- end
+			end
+			if ucanmove and (NPC.GetMana(myHero) < Ability.GetManaCost(skil2) or Entity.GetHealth(myHero)/Entity.GetMaxHealth(myHero)<= 0.20) then
+				coints = 8
+			end
+			if Entity.GetHealth(myHero) == Entity.GetMaxHealth(myHero) and NPC.GetMana(myHero) == NPC.GetMaxMana(myHero) and coints == 8 and NPC.HasModifier(myHero, "modifier_fountain_aura_buff") then
+				coints = 2
+				ucanmove = true
 			end
 			
-			Renderer.DrawText(JunglFarm.font, 10, 350, math.floor(GameTime) .. " " ..math.floor(timecast), 1)
-			Renderer.DrawText(JunglFarm.font, 10, 400, "coints = " .. coints, 1)
-			Renderer.DrawText(JunglFarm.font, 10, 420, "CointNPC = " .. CointNPC, 1)
-			if ucanmove then
-				Renderer.DrawText(JunglFarm.font, 10, 440, "ucanmove = true", 1)
-			else
-				Renderer.DrawText(JunglFarm.font, 10, 440, "ucanmove = false", 1)
+			if Menu.IsEnabled(JunglFarm.Draw) then
+				Renderer.DrawText(JunglFarm.font, 10, 400, "coints = " .. coints, 1)
+				Renderer.DrawText(JunglFarm.font, 10, 420, "CointNPC = " .. CointNPC, 1)
+				if ucanmove then
+					Renderer.DrawText(JunglFarm.font, 10, 440, "ucanmove = true", 1)
+				else
+					Renderer.DrawText(JunglFarm.font, 10, 440, "ucanmove = false", 1)
+				end
 			end
-			
-			
 			if ucanmove then
 				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, myHero, spot[coints], nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY)
 			end
-
 		elseif GameRules.GetGameState() == 4 then
 			coints = 1
 		end
 	end
-		
+	if Hero.GetAbilityPoints(myHero) > 0 then
+		JunglFarm.LvlUp(myHero)
+	end
 	if Menu.IsKeyDown(JunglFarm.optionKey) then
 		ucanmove = true
 	end
-	
 end
 
-function JunglFarm.Reset()
-	if coints == nil then
-		local coints = 1
-		local ucanmove = true
-		local npsVisb = false
+function JunglFarm.LvlUp(myHero)
+	local myLvl = NPC.GetCurrentLevel(myHero)
+	local lvltable = {}
+	if myLvl == 1 or myLvl == 3 or myLvl == 5 or myLvl == 7 then
+		Upgrade = 1
+		local train_ability = NPC.GetAbilityByIndex(myHero, 1)
+		Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY, myHero, Vector(0,0,0), train_ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, myHero, true, true)
+	else
+		lvltable[2] = NPC.GetAbilityByIndex(myHero, 0)
+		lvltable[3] = NPC.GetAbilityByIndex(myHero, 2)
+		lvltable[1] = NPC.GetAbilityByIndex(myHero, 3)
+		for i = 1, #lvltable do
+			if Hero.GetAbilityPoints(myHero) > 0 then
+				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY, myHero, Vector(0,0,0), lvltable[i], Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, myHero, true, true)
+			end
+		end
 	end
 end
 
-local size_x, size_y = Renderer.GetScreenSize()
 function JunglFarm.DrawCircle(UnitPos, radius, index)
+	local size_x, size_y = Renderer.GetScreenSize()
     local x1, y1 = Renderer.WorldToScreen(UnitPos)
     if x1 < size_x and x1 > 0 and y1 < size_y and y1 > 0 then
         local x4, y4, x3, y3, visible3
@@ -184,6 +175,5 @@ function JunglFarm.DrawCircle(UnitPos, radius, index)
             x1,y1 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
         end
     end
-end	
-
+end
 return JunglFarm
