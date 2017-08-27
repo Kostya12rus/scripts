@@ -64,19 +64,19 @@ Weather.Locale = {
 	}
 }
 
-
 function Weather.OnDraw()
 	if GUI == nil then return end
 	if not GUI.Exist(Weather.Identity) then
 		GUI.Initialize(Weather.Identity, GUI.Category.General, Weather.Locale["name"], Weather.Locale["desc"], "paroxysm")
 		GUI.AddMenuItem(Weather.Identity, Weather.Identity .. "select", Weather.Locale["selectbox"], GUI.MenuType.SelectBox, Weather.Locale["items"], { 0 }, 1, Weather.UpdateSelect)
 		GUI.AddMenuItem(Weather.Identity, Weather.Identity .. "random", Weather.Locale["random"], GUI.MenuType.CheckBox, 0)
-		GUI.Subscribe(Weather.Identity, GUI.GameStates.OnLobbyChoosed, NewGameStart)
 	end
 end
 
 function Weather.UpdateSelect(t)
 	if not GUI.IsEnabled(Weather.Identity) then return end
+	Weather.EnableSVCheats()
+	
 	for k, v in pairs(t) do
 		if v == 10 then 
 			v = math.random(0, 9)
@@ -85,12 +85,20 @@ function Weather.UpdateSelect(t)
 	end
 end
 
-function NewGameStart(o, n)
+function Weather.OnGameStart()
 	if not GUI.IsEnabled(Weather.Identity) then return end
+	Weather.EnableSVCheats()
+	
 	if GUI.IsEnabled(Weather.Identity .. "random") then
 		Engine.ExecuteCommand("cl_weather " .. math.random(1, 9))
 	else
 		Weather.UpdateSelect(GUI.Get(Weather.Identity .. "select", 1))
+	end
+end
+
+function Weather.EnableSVCheats()
+	if not Menu.IsEnabled(Menu.GetOption({"Misc"}, "sv_cheats Bypass")) then
+		Menu.SetValue(Menu.GetOption({"Misc"}, "sv_cheats Bypass"), 1)
 	end
 end
 

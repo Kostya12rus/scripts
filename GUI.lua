@@ -6,9 +6,10 @@ GUI.Locale =  Menu.AddOption({ "GUI"}, "Localization", "Select your primary lang
 Menu.SetValueName(GUI.Locale, 1, "English")
 Menu.SetValueName(GUI.Locale, 2, "Russian")
 Menu.SetValueName(GUI.Locale, 3, "Chinese")
-GUI.SelectedTheme =  Menu.AddOption({ "GUI"}, "Theme", "Select GUI theme", 1, 2 )
+GUI.SelectedTheme =  Menu.AddOption({ "GUI"}, "Theme", "Select GUI theme", 1, 3 )
 Menu.SetValueName(GUI.SelectedTheme, 1, "Default")
 Menu.SetValueName(GUI.SelectedTheme, 2, "Dark")
+Menu.SetValueName(GUI.SelectedTheme, 3, "Mono")
 GUI.Languages = {
 	[1] = "english",
 	[2] = "russian",
@@ -17,13 +18,10 @@ GUI.Languages = {
 GUI.SelectedMenu = ":about"
 GUI.TempSelectedMenu = ""
 GUI.SelectedCategory = 0
-GUI.SelectedHero = ""
-GUI.TempSelectedHero = ""
 GUI.SelectedLanguage = nil
 GUI.SelectedMenuPage = 0
 GUI.CurrentKey = ""
 GUI.Items = {}
-GUI.ItemsHeroes = {}
 GUI.Font = {}
 GUI.Font.Menu = Renderer.LoadFont("Arial", 17, Enum.FontWeight.BOLD)
 GUI.Font.Content = Renderer.LoadFont("Arial", 18, Enum.FontWeight.BOLD)
@@ -32,11 +30,10 @@ GUI.Font.ContentSmallBold = Renderer.LoadFont("Arial", 15, Enum.FontWeight.BOLD)
 GUI.Font.UltraSmallBold = Renderer.LoadFont("Arial", 11, Enum.FontWeight.BOLD)
 GUI.Font.Header = Renderer.LoadFont("Arial", 19, Enum.FontWeight.BOLD)
 GUI.Font.Footer = Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
-GUI.Animation = 0
 GUI.GameState = -2
 GUI.Config = "GUI"
-GUI.Version = 170723
-GUI.TextVersion = 'v 17.07.23'
+GUI.Version = 170826
+GUI.TextVersion = 'v 17.08.26'
 
 GUI.GameStates = {}
 GUI.GameStates.OnGameMenu = -1
@@ -70,9 +67,6 @@ GUI.DEBUG.Variables = {}
 
 GUI.Actions = {}
 GUI.Actions.MoveHeader = false
-
-GUI.LeftClick = false
-GUI.RightClick = false
 
 GUI.Theme = {}
 GUI.Theme.Background = nil
@@ -116,25 +110,17 @@ GUI.Theme.Menu = nil
 GUI.Settings = {}
 GUI.Settings.PosX = -1
 GUI.Settings.PosY = -1
+GUI.Storage = {}
 
 GUI.Data = {}
 GUI.CallBackKey = {}
 GUI.Subscriptions = {}
-
 GUI.HeroesIconPath = "resource/flash3/images/heroes/"
-GUI.HeroesIcons = {}
 
 GUI.Category = {}
 GUI.Category.General = 0
 GUI.Category.Heroes = 1
 GUI.Category.Items = 2
-
-GUI.NotifyType = {}
-GUI.NotifyType.Text = 0
-GUI.NotifyType.ImageText = 1
-GUI.NotifyType.ImageTextImage = 2
-GUI.Notices = {}
-
 GUI.CategoryName = {
 	["english"] = {
 		[0] = "General",
@@ -152,12 +138,15 @@ GUI.CategoryName = {
 		[2] = "对象"
 	}
 }
+GUI.ActiveCategories = { [0] = false, [1] = false, [2] = false }
 
 GUI.TextValues = {
 	["english"] = {
 		["changelog"] = "",
 		["version_s"] = "This script requires GUI version ",
 		["version_e"] = " or higher",
+		["page"] = "Page ",
+		["of"] = " of ",
 		["back"] = "Back",
 		["by"] = " by "
 	},
@@ -165,6 +154,8 @@ GUI.TextValues = {
 		["changelog"] = "",
 		["version_s"] = "Данный скрипт требует GUI версии ",
 		["version_e"] = " или выше",
+		["page"] = "Страница ",
+		["of"] = " из ",
 		["back"] = "Назад",
 		["by"] = " от "
 	},
@@ -172,16 +163,63 @@ GUI.TextValues = {
 		["changelog"] = "",
 		["version_s"] = "這個腳本需要一個 GUI ",
 		["version_e"] = "或更高版本",
+		["page"] = "頁 ",
+		["of"] = " 從 ",
 		["back"] = "前",
 		["by"] = " 从 "
 	}
 }
+
+GUI.ThemeColors = {}
+GUI.ThemeColors["Default"] = {
+	Accent = "fff",
+	Version = "fff",
+	HeaderInActive = "fff",
+	HeaderActive = "fff",
+	Navigation = "7f8fa4",
+	Author = "7f8fa4",
+	MenuDelimeter = "313d4f"
+}
+GUI.ThemeColors["Dark"] = {
+	Accent = "fff",
+	Version = "fff",
+	HeaderInActive = "fff",
+	HeaderActive = "fff",
+	Navigation = "7f8fa4",
+	Author = "7f8fa4",
+	MenuDelimeter = "313d4f"
+}
+GUI.ThemeColors["Mono"] = {
+	Accent = "fff",
+	Version = "fff",
+	HeaderInActive = "fff",
+	HeaderActive = "fff",
+	Navigation = "879999",
+	Author = "879999",
+	MenuDelimeter = "1f2024"
+}
+GUI.Colors = {}
+
+GUI.NotifyType = {}
+GUI.NotifyType.Text = 0
+GUI.NotifyType.ImageText = 1
+GUI.NotifyType.ImageTextImage = 2
+GUI.Notices = {}
+
+function GUI.Write(text)
+	Log.Write("[" .. os.date("%X") .. "]\tGUI\t->\t" .. text)
+end
 
 function GUI.OnDraw()
 	if not Menu.IsEnabled(GUI.Enabled) then return end
 	if GUI.SelectedLanguage == nil then 
 		GUI.SelectedLanguage = GUI.Languages[Menu.GetValue(GUI.Locale)]
 		ApplyTheme()
+		
+		GUI.Write(GUI.TextVersion)
+		GUI.Write(GUI.GetThemeName())
+		GUI.Write(GUI.SelectedLanguage)
+		GUI.Write("¯\\_(ツ)_/¯")
 	end
 	
 	if Menu.IsKeyDownOnce(GUI.Key) then
@@ -205,13 +243,14 @@ function GUI.OnDraw()
 	
 	local leftclick = false
 	local rightclick = false
-	
+
 	if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then leftclick = true end
 	if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_RIGHT) then rightclick = true end
 
 
 	if GUI.IsEnabled("gui:show") then 
-		GUI.DrawGUI(leftclick, rightclick)
+		GUI.Colors = GUI.ThemeColors[GUI.GetThemeName()]
+		GUI.Draw(leftclick, rightclick)
 	end
 	local w, h = Renderer.GetScreenSize()
 	DrawNotices(w, h, leftclick)
@@ -255,7 +294,6 @@ function GUI.OnDraw()
 		
 		Renderer.SetDrawColor(hex2rgb("#fff"))
 	end
-	
 end
 
 function GUI.OnMenuOptionChange(option, oldValue, newValue)
@@ -308,6 +346,7 @@ function GUI.Exist(code)
 end
 
 function GUI.MenuExist(code, item)
+	if GUI.Items[code] == nil then return false end
 	local t = GUI.Items[code]["items"]
 	
 	for k,v in pairs(t) do
@@ -319,69 +358,74 @@ end
 
 function GUI.Initialize(code, category, name, desc, author, ...)
 	if GUI.SelectedLanguage == nil then return end
-
+	local GUI_Object = {}
+	GUI.Write(code)
 	if type(category) == "table" then
-		GUI.Items[code] = category
+		GUI_Object = category
 		
-		if type(GUI.Items[code]["perfect_name"]) == "table" then
-			GUI.Items[code]["perfect_name"] = category["perfect_name"][GUI.SelectedLanguage]
+		if type(GUI_Object["perfect_name"]) == "table" then
+			GUI_Object["perfect_name"] = category["perfect_name"][GUI.SelectedLanguage]
 		end
 		
-		if type(GUI.Items[code]["perfect_desc"]) == "table" then
-			GUI.Items[code]["perfect_desc"] = category["perfect_desc"][GUI.SelectedLanguage]
+		if type(GUI_Object["perfect_desc"]) == "table" then
+			GUI_Object["perfect_desc"] = category["perfect_desc"][GUI.SelectedLanguage]
 		end
 		
-		if type(GUI.Items[code]["perfect_author"]) == "table" then
-			GUI.Items[code]["perfect_author"] = category["perfect_author"][GUI.SelectedLanguage]
+		if type(GUI_Object["perfect_author"]) == "table" then
+			GUI_Object["perfect_author"] = category["perfect_author"][GUI.SelectedLanguage]
 		end
-		
-		GUI.Items[code]["page"] = 0
-		GUI.Items[code]["prevpage"] = {}
-		GUI.Items[code]["items"] = {}
-		if GUI.Items[code]["hero"] ~= nil then
-			if GUI.ItemsHeroes[GUI.Items[code]["hero"]] == nil then
-				GUI.ItemsHeroes[GUI.Items[code]["hero"]] = {}
+	else
+		if type(name) == "table" then
+			if name[GUI.SelectedLanguage] == nil then
+				GUI_Object["perfect_name"] = name["english"]
+			else
+				GUI_Object["perfect_name"] = name[GUI.SelectedLanguage]
 			end
-		end
-		GUI.Data[code] = 0
-		return
-	else
-		GUI.Items[code] = {}
-	end
-	
-	if type(name) == "table" then
-		if name[GUI.SelectedLanguage] == nil then
-			GUI.Items[code]["perfect_name"] = name["english"]
 		else
-			GUI.Items[code]["perfect_name"] = name[GUI.SelectedLanguage]
+			GUI_Object["perfect_name"] = name
 		end
-	else
-		GUI.Items[code]["perfect_name"] = name
+		
+		if type(desc) == "table" then
+			if desc[GUI.SelectedLanguage] == nil then
+				GUI_Object["perfect_desc"] = desc["english"]
+			else
+				GUI_Object["perfect_desc"] = desc[GUI.SelectedLanguage]
+			end
+		else
+			GUI_Object["perfect_desc"] = desc
+		end
+	
+		if select(1, ...) ~= nil then
+			GUI_Object["hero"] = GUI.HeroesList[select(1, ...)]
+		end
+		GUI_Object["perfect_author"] = author
+		GUI_Object["perfect_version"] = 0
+		GUI_Object["category"] = category		
 	end
+		
+	if GUI_Object["category"] ~= nil then GUI.ActiveCategories[GUI_Object["category"]] = true end
+	GUI_Object["page"] = 0
+	GUI_Object["prevpage"] = {}
+	GUI_Object["items"] = {}
+	
+	if GUI_Object["hero"] ~= nil then
 
-	if type(desc) == "table" then
-		if desc[GUI.SelectedLanguage] == nil then
-			GUI.Items[code]["perfect_desc"] = desc["english"]
-		else
-			GUI.Items[code]["perfect_desc"] = desc[GUI.SelectedLanguage]
+		local identity = "gui_" .. slug(GUI_Object["hero"])
+		if GUI.Items[identity] == nil then
+			local GUI_HObject = {}
+			GUI_HObject["perfect_name"] = GUI_Object["hero"]
+			GUI_HObject["perfect_desc"] = ''
+			GUI_HObject["perfect_author"] = ''
+			GUI_HObject["iscat"] = true
+			GUI_HObject["category"] = GUI.Category.Heroes
+			GUI.Items[identity] = GUI_HObject
 		end
-	else
-		GUI.Items[code]["perfect_desc"] = desc
+		
+		GUI_Object = removeKey(GUI_Object, "category")
+		GUI_Object["cat"] = identity
 	end
 	
-	GUI.Items[code]["perfect_author"] = author
-	GUI.Items[code]["page"] = 0
-	GUI.Items[code]["category"] = category
-	GUI.Items[code]["prevpage"] = {}
-	GUI.Items[code]["perfect_version"] = 0
-	GUI.Items[code]["items"] = {}
-	if select(1, ...) ~= nil then
-		GUI.Items[code]["hero"] = GUI.HeroesList[select(1, ...)]
-		if GUI.ItemsHeroes[GUI.HeroesList[select(1, ...)]] == nil then
-			GUI.ItemsHeroes[GUI.HeroesList[select(1, ...)]] = {}
-		end
-		GUI.ItemsHeroes[GUI.HeroesList[select(1, ...)]][code] = name
-	end
+	GUI.Items[code] = GUI_Object
 	GUI.Data[code] = 0
 end
 
@@ -630,7 +674,7 @@ end
 local offsetPosX = 0
 local offsetPosY = 0
 
-function GUI.DrawGUI(leftclick, rightclick)
+function GUI.Draw(leftclick, rightclick)
 	local work_h = 974
 	local work_y = 614
 	local workbox_x = 241
@@ -664,61 +708,43 @@ function GUI.DrawGUI(leftclick, rightclick)
 	Renderer.SetDrawColor(hex2rgb("#fff"))
 	Renderer.DrawImage(GUI.Theme.Background, startx, starty, work_h, work_y)
 
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.Version))
 	Renderer.DrawText(GUI.Font.ContentSmallBold, startx + work_h - 80, starty + 17, GUI.TextVersion, false)
-	
+	Renderer.SetDrawColor(hex2rgb("#fff"))
+
 	-- Draw Menu Items
 	local nextposition = starty + workbox_y
 	local nextlocx = startx
 	
-	local items_count = {}
-	items_count[0] = 0
-	items_count[1] = 0
-	items_count[2] = 0
-	for k,v in pairs(GUI.Items) do
-		if v["category"] == 0 then
-			items_count[0] = items_count[0] + 1
-		end
-		
-		if v["category"] == 1 and GUI.SelectedHero == "" then
-			items_count[1] = items_count[1] + 1
-		end
-		
-		if v["category"] == 1 and GUI.SelectedHero ~= "" and v["hero"] == GUI.SelectedHero then
-			items_count[1] = items_count[1] + 1
-		end
-		
-		if v["category"] == 2 then
-			items_count[2] = items_count[2] + 1
-		end
-	end
-	
 	for k,v in pairs(GUI.CategoryName[GUI.SelectedLanguage]) do
-		if items_count[k] > 0 then
+		if GUI.ActiveCategories[k] then
+			local color = GUI.Colors.HeaderInActive
+		
 			if	(GUI.SelectedCategory == k) 
 			then 
 				Renderer.DrawImage(GUI.Theme.MenuCatActive, nextlocx + 6, starty + 5, 100, 38)
+				color = GUI.Colors.HeaderActive
 			elseif	Input.IsCursorInRect(nextlocx + 6, starty + 6, 100, 38)
 			then
 				if leftclick then 
 					GUI.SelectedCategory = k
 					GUI.SelectedMenu = ":about"
-					GUI.SelectedHero = ""
 					GUI.SelectedMenuPage = 0
 				end
 				Renderer.SetDrawColor(255,255,255,120)
 				Renderer.DrawImage(GUI.Theme.MenuCatActive, nextlocx + 6, starty + 5, 100, 38)
 				Renderer.SetDrawColor(255,255,255,255)
+				color = GUI.Colors.HeaderActive
 			end
-			if k == 2 and GUI.SelectedLanguage == "russian" then
-				Renderer.DrawText(GUI.Font.Header, nextlocx + 15, starty + 15, v, false)
-			else
-				Renderer.DrawText(GUI.Font.Header, nextlocx + 30, starty + 15, v, false)
-			end
+			
+			Renderer.SetDrawColor(hex2rgb(color))
+			Renderer.DrawTextCenteredX(GUI.Font.Header, nextlocx + 56, starty + 15, v, false)
+			Renderer.SetDrawColor(hex2rgb("#fff"))
 			nextlocx = nextlocx + 100
 		end
 	end
+	
 	nextlocx = nextlocx + 6
-	Renderer.SetDrawColor(hex2rgb("#fff"))
 	
 	if leftclick then 
 		if GUI.Actions.MoveHeader then
@@ -735,59 +761,52 @@ function GUI.DrawGUI(leftclick, rightclick)
 		GUI.SelectedMenu = GUI.TempSelectedMenu
 		GUI.TempSelectedMenu = ""
 	end
-	
-	GUI.SelectedHero = GUI.TempSelectedHero
-	
-	
-	local temp_table = {}
-	for k,v in pairs(GUI.Items) do
-		if GUI.SelectedCategory == 0 and v["category"] == 0 then
-			table.insert(temp_table, k)
-		end
 		
-		if GUI.SelectedCategory == 1 and v["category"] == 1 and GUI.SelectedHero == "" and not hasValue(temp_table, v["hero"]) then
-			table.insert(temp_table, v["hero"] )
-		end
-		
-		if GUI.SelectedCategory == 1 and v["category"] == 1 and GUI.SelectedHero ~= "" and v["hero"] == GUI.SelectedHero then
-			table.insert(temp_table, k)
-		end
-		
-		if GUI.SelectedCategory == 2 and v["category"] == 2 then
-			table.insert(temp_table, k)
-		end
-	end
-	table.sort(temp_table)
-
-	if GUI.SelectedCategory == 1 and GUI.SelectedHero ~= "" then
-		DrawMenuItem(nil, startx + 6, nextposition, menusize_x, menusize_y, GUI.TextValues[GUI.SelectedLanguage]["back"], leftclick)
-		nextposition = nextposition + menusize_y
-	end
-	
+	local temp_table = GUI.Items
 	local showonpage = 13
 	local c = GUI.SelectedMenuPage
 	local i = 0
-	local totalpage = math.ceil(Length(temp_table) / showonpage)
-	for _, k in pairs(temp_table) do 
-		if i >= (c * showonpage) and i < ((c + 1) * showonpage) then 
-			local MenuName = ""
-			if GUI.SelectedCategory == 1 and GUI.SelectedHero == "" then
-				MenuName = k
+
+	if GUI.Items[GUI.SelectedMenu] ~= nil and (GUI.Items[GUI.SelectedMenu]["iscat"] or GUI.Items[GUI.SelectedMenu]["cat"] ~= nil ) then
+		local back_to = ":about"
+		if GUI.Items[GUI.SelectedMenu]["cat"] ~= nil then
+			if GUI.Items[GUI.SelectedMenu]["iscat"] then back_to = GUI.Items[GUI.SelectedMenu]["cat"]
 			else
-				if GUI.Items[k] == nil then return end
-				MenuName = GUI.Items[k]["perfect_name"]
+				if GUI.Items[GUI.Items[GUI.SelectedMenu]["cat"]]["cat"] ~= nil then
+					back_to = GUI.Items[GUI.Items[GUI.SelectedMenu]["cat"]]["cat"]
+				end
 			end
-		
-			DrawMenuItem(GUI.Items[k], startx + 6, nextposition, menusize_x, menusize_y, MenuName, leftclick, k)
-			nextposition = nextposition + menusize_y
 		end
-		i = i + 1
+		
+		DrawMenuItem(back_to, startx + 6, nextposition, menusize_x, menusize_y, GUI.TextValues[GUI.SelectedLanguage]["back"], leftclick, "gui_back")
+		nextposition = nextposition + menusize_y
+	end
+
+	local temp_val = 0
+	for k, v in spairs(temp_table, function(t,a,b) return string.lower(t[a]["perfect_name"]) < string.lower(t[b]["perfect_name"]) end) do 
+		if 
+			(
+				(v["cat"] ~= nil and (GUI.SelectedMenu == v["cat"] or (k == GUI.SelectedMenu and v["iscat"] == nil) ) )
+				or ( GUI.Items[GUI.SelectedMenu] ~= nil and GUI.Items[GUI.SelectedMenu]["cat"] ~= nil and GUI.Items[GUI.SelectedMenu]["cat"] == v["cat"] and GUI.Items[GUI.SelectedMenu]["iscat"] == nil  )
+				or ( (GUI.SelectedMenu == "" or GUI.SelectedMenu == ":about" or (GUI.Items[GUI.SelectedMenu]["cat"] == nil and GUI.Items[GUI.SelectedMenu]["iscat"] == nil )) and v["category"] ~= nil and GUI.SelectedCategory == v["category"] ) -- идеально
+			)
+		then
+			temp_val = temp_val + 1
+			
+			if i >= (c * showonpage) and i < ((c + 1) * showonpage) then 
+				DrawMenuItem(v, startx + 6, nextposition, menusize_x, menusize_y, v["perfect_name"], leftclick, k)
+				i = i + 1
+				nextposition = nextposition + menusize_y
+			end
+		end
 	end
 	
+	local totalpage = math.ceil(temp_val / showonpage)
 	if totalpage > 1 then
-		Renderer.SetDrawColor(hex2rgb("#7f8fa4"))
-		Renderer.DrawTextCenteredX(GUI.Font.Footer, startx + 120, starty + 536, "Page " .. (c + 1) .. " of " .. totalpage, false)
-		
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.Navigation))
+		Renderer.DrawTextCenteredX(GUI.Font.Footer, startx + 120, starty + 536, GUI.TextValues[GUI.SelectedLanguage]["page"] .. (c + 1) .. GUI.TextValues[GUI.SelectedLanguage]["of"] .. totalpage, false)
+		Renderer.SetDrawColor(hex2rgb("#fff"))
+
 		if (c + 1) ~= 1 then
 			Renderer.SetDrawColor(255, 255, 255, 100)
 			if Input.IsCursorInRect(startx + 10, starty + 527, 36, 36) then
@@ -808,12 +827,9 @@ function GUI.DrawGUI(leftclick, rightclick)
 	end
 
 	Renderer.SetDrawColor(hex2rgb("#fff"))
-
 	
-	if GUI.SelectedMenu ~= nil and GUI.SelectedMenu ~= ":about" then
+	if GUI.SelectedMenu ~= nil and GUI.SelectedMenu ~= ":about" and GUI.Items[GUI.SelectedMenu]["iscat"] == nil then
 		DrawMenuBox(GUI.SelectedMenu, startx, starty, workbox_x, workbox_y, limit_y, leftclick, rightclick)
-	else
-		DrawText(startx + workbox_x + 20, starty + workbox_y + 13, GUI.TextValues[GUI.SelectedLanguage]["changelog"])
 	end
 	
 end
@@ -874,13 +890,8 @@ function DrawNotices(w, h, leftclick)
 end
 
 function DrawMenuBox(k, startx, starty, workbox_x, workbox_y, limit_y, leftclick, rightclick)
-	local v = ""
-	if GUI.SelectedCategory == 1 and GUI.SelectedHero == "" then
-		v = k
-	else
-		v = GUI.Items[k]["perfect_name"]
-	end	
-	
+	local v = GUI.Items[k]["perfect_name"]
+
 	if k == GUI.SelectedMenu then
 	
 		-- Draw Blocks
@@ -1002,7 +1013,7 @@ function DrawMenuBox(k, startx, starty, workbox_x, workbox_y, limit_y, leftclick
 			DrawPagination(k, leftclick, startx + workbox_x + 620, starty + workbox_y + 470, 36, 36, realshow - 1, Length(GUI.Items[k]["items"]), drawed - 1)
 		end
 		
-		Renderer.SetDrawColor(hex2rgb("#7f8fa4"))
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.Author))
 		Renderer.DrawText(GUI.Font.Menu, startx + 20, starty + 576, v .. GUI.TextValues[GUI.SelectedLanguage]["by"] .. GUI.Items[k]["perfect_author"], false)
 		Renderer.SetDrawColor(hex2rgb("#fff"))
 
@@ -1010,64 +1021,50 @@ function DrawMenuBox(k, startx, starty, workbox_x, workbox_y, limit_y, leftclick
 end
 
 function DrawMenuItem(value, x, y, size_x, size_y, name, click, key)
-	if GUI.SelectedCategory == 1 then
-		value = {}
-		value["category"] = GUI.SelectedCategory
-	end
-		
-	if name == GUI.SelectedMenu or key == GUI.SelectedMenu then
-		Renderer.DrawImage(GUI.Theme.MenuActive, x, y, size_x, size_y)
-		Renderer.DrawText(GUI.Font.Menu, x + 46, y + 10, name, false)
+	local background_image = GUI.Theme.MenuInActive
+	
+	if key == GUI.SelectedMenu then
+		background_image = GUI.Theme.MenuActive
 	else
-		if (GUI.SelectedCategory == value["category"]) then 
-			if Input.IsCursorInRect(x + 36, y, size_x - 36, size_y) then
-				if click then 
-					if GUI.SelectedCategory == 1 and GUI.SelectedHero == "" then
-						GUI.TempSelectedHero = name
-					else
-						if GUI.SelectedHero ~= "" and GUI.TextValues[GUI.SelectedLanguage]["back"] == name then
-							GUI.TempSelectedMenu = ":about"
-							GUI.TempSelectedHero = ""
-						else
-							GUI.TempSelectedMenu = key
-						end
-					end
+		if Input.IsCursorInRect(x + 36, y, size_x - 36, size_y) then
+		
+			if click then 
+				if key == "gui_back" then
+					GUI.TempSelectedMenu = value
+				else
+					GUI.TempSelectedMenu = key
 				end
-				Renderer.DrawImage(GUI.Theme.MenuOnMouse, x, y, size_x, size_y)
-				Renderer.DrawText(GUI.Font.Menu, x + 46, y + 10, name, false)
-			else
-				Renderer.DrawImage(GUI.Theme.MenuInActive, x, y, size_x, size_y)
-				Renderer.DrawText(GUI.Font.Menu, x + 46, y + 10, name, false)
 			end
+			
+			
+			background_image = GUI.Theme.MenuOnMouse
 		end
 	end
-	
+
+	Renderer.DrawImage(background_image, x, y, size_x, size_y)
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.Accent))
+	Renderer.DrawText(GUI.Font.Menu, x + 46, y + 10, name, false)
+	Renderer.SetDrawColor(hex2rgb("#fff"))
+
 	------------------------------------------------------------------------------
-	
-	if key ~= nil and (GUI.SelectedCategory ~= 1 or GUI.SelectedHero ~= "") then
-		if Input.IsCursorInRect(x, y, 36, 36) and click then
+	local menu_icon = GUI.Theme.CheckInActive
+	if key == "gui_back" then 
+		menu_icon = GUI.Theme.Back
+	else
+		if key ~= nil and value["iscat"] == nil and Input.IsCursorInRect(x, y, 36, 36) and click then	
 			if  GUI.IsEnabled(key) then
 				GUI.Set(key, 0)
 			else
 				GUI.Set(key, 1)
 			end
 		end
-	
-		if GUI.IsEnabled(key) then
-			Renderer.DrawImage(GUI.Theme.CheckActive, x + 10, y + 10, 16, 16)
-		else
-			Renderer.DrawImage(GUI.Theme.CheckInActive, x + 10, y + 10, 16, 16)
-		end
+		
+		if GUI.IsEnabled(key) then menu_icon = GUI.Theme.CheckActive end
+		if value["iscat"] ~= nil and value["iscat"] then menu_icon = GUI.Theme.Category end
 	end
 	
-	if GUI.SelectedCategory == 1 and GUI.SelectedHero == "" then
-		Renderer.DrawImage(GUI.Theme.Category, x + 10, y + 10, 16, 16)
-	end
-		if GUI.SelectedCategory == 1 and GUI.SelectedHero ~= "" and key == nil then
-		Renderer.DrawImage(GUI.Theme.Back, x + 10, y + 10, 16, 16)
-	end
-	
-	Renderer.SetDrawColor(hex2rgb("#313d4f"))
+	Renderer.DrawImage(menu_icon, x + 10, y + 10, 16, 16)
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.MenuDelimeter))
 	Renderer.DrawFilledRect(x + 36, y, 1, size_y)
 	Renderer.SetDrawColor(hex2rgb("#fff"))
 end
@@ -1439,7 +1436,7 @@ function DrawCheckBox(inpos, click, x, y, size, value)
 	if	inpos
 		and click 
 	then 
-		if GUI.Get(key) == nil or GUI.Get(key) == "0" or GUI.Get(key) == "" then
+		if not GUI.IsEnabled(key) then
 			GUI.Set(key, 1)
 			if value["callback"] ~= nil then
 				value["callback"](key, 1)
@@ -1452,7 +1449,7 @@ function DrawCheckBox(inpos, click, x, y, size, value)
 		end
 	end
 	
-	if GUI.Get(key) == nil or GUI.Get(key) == "0" or GUI.Get(key) == "" then
+	if not GUI.IsEnabled(key) then
 		if inpos then
 			Renderer.DrawImage(GUI.Theme.CheckBoxOnMouse, x, y, size, size)
 			Renderer.SetDrawColor(255, 255, 255, 240)
@@ -1474,7 +1471,6 @@ end
 
 function ApplyTheme()
 	local f = GUI.GetThemeName()
-
 	GUI.Theme.Background = Renderer.LoadImage("~/" .. f .. "/background.png")
 	GUI.Theme.MenuInActive = Renderer.LoadImage("~/" .. f .. "/menu-inactive.png")
 	GUI.Theme.MenuOnMouse = Renderer.LoadImage("~/" .. f .. "/menu-onmouse.png")
@@ -1509,12 +1505,14 @@ function ApplyTheme()
 	GUI.Theme.RadioInActive = Renderer.LoadImage("~/" .. f .. "/radio-inactive.png")
 	GUI.Theme.Close = Renderer.LoadImage("~/" .. f .. "/close.png")
 	GUI.Theme.Menu = Renderer.LoadImage("resource/flash3/images/badges/ti6_battle_pass_badge_4.png")
+	
 end
 
 function GUI.GetThemeName()
 	if Menu.GetValue(GUI.SelectedTheme) == 1 then return "Default" end
 	if Menu.GetValue(GUI.SelectedTheme) == 2 then return "Dark" end
-	
+	if Menu.GetValue(GUI.SelectedTheme) == 3 then return "Mono" end
+
 	return "Default"
 end
 
@@ -1641,27 +1639,34 @@ function GUI.Set(key, value)
 		local s = tableToString(value)
 		Config.WriteString("GUI", key, s)
 	end
+
 	GUI.Data[key] = value
+	GUI.Storage[key] = value
 end
 
 function GUI.Get(key, type)
+	if GUI.Storage[key] ~= nil then return GUI.Storage[key] end
+
     type = type or 0
 	if type == 0 then
 		local t = Config.ReadString("GUI", key, nil)
 		if	string.sub(t,1,1) == "~" 
 			and string.sub(t, -1) == "~"
 		then
+			GUI.Storage[key] = string.sub(t,2,string.len(t) - 1)
 			return string.sub(t,2,string.len(t) - 1)
 		else
+			GUI.Storage[key] = t
 			return t
 		end
 	else
+		GUI.Storage[key] = stringToTable(Config.ReadString("GUI", key, nil))
 		return stringToTable(Config.ReadString("GUI", key, nil))
 	end
 end
 
 function GUI.IsEnabled(key)
-	if GUI.Get(key) == "0" or GUI.Get(key) == "" or GUI.Get(key) == nil then return false else return true end
+	if GUI.Get(key) == "0" or GUI.Get(key) == "" or GUI.Get(key) == nil or GUI.Get(key) == 0 then return false else return true end
 end
 
 function GUI.SetTimeout(identity, callback, time)
@@ -1688,6 +1693,10 @@ end
 -----------------------------------------------------------------------------------------------------------
 function tableToString(table)
 	return "return" .. tostr(table)
+end
+
+function trim(s)
+   return s:match( "^%s*(.-)%s*$" )
 end
 
 function stringToTable(str)
@@ -1733,6 +1742,25 @@ function tostr( tbl )
   return "{" .. table.concat( result, "," ) .. "}"
 end
 -----------------------------------------------------------------------------------------------------------
+function spairs(t, order)
+    local keys = {}
+    for k in pairs(t) do keys[#keys+1] = k end
+
+    if order then
+        table.sort(keys, function(a,b) return order(t, a, b) end)
+    else
+        table.sort(keys)
+    end
+
+    local i = 0
+    return function()
+        i = i + 1
+        if keys[i] then
+            return keys[i], t[keys[i]]
+        end
+    end
+end
+
 function getKeysSortedByValue(tbl, sortFunction)
   local keys = {}
   for key in pairs(tbl) do

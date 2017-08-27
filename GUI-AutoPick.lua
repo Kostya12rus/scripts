@@ -3,29 +3,34 @@ AP.Identity = "autopick"
 AP.Locale = {
 	["name"] = {
 		["english"] = "Auto Pick",
-		["russian"] = "Авто Выбор"
+		["russian"] = "Авто Выбор",
+		["chinese"] = "自动选择"
 	},
 	["desc"] = {
 		["english"] = "You'll be the first who choose this hero.",
-		["russian"] = "Вы будете первым кто выберет данного героя."
+		["russian"] = "Вы будете первым кто выберет данного героя.",
+		["chinese"] = "你会是第一个选择这个英雄的人。"
 	},
 	["select"] = {
 		["english"] = "Select Hero",
-		["russian"] = "Выберите героя"
+		["russian"] = "Выберите героя",
+		["chinese"] = "选择英雄"
 	},
 	["write"] = {
 		["english"] = "Write message on start",
-		["russian"] = "Написать сообщение в начале"
+		["russian"] = "Написать сообщение в начале",
+		["chinese"] = "一开始写信"
 	},
 	["chat_message"] = {
 		["english"] = "Message",
-		["russian"] = "Сообщение"
+		["russian"] = "Сообщение",
+		["chinese"] = "你的消息"
 	}
 }
 
 function AP.OnDraw()
 	if GUI == nil then return end
-	
+
 	if not GUI.Exist(AP.Identity) then
 		GUI.Initialize(AP.Identity, GUI.Category.General, AP.Locale["name"], AP.Locale["desc"], "paroxysm")
 		local templist = GUI.HeroesList

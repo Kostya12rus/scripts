@@ -5,7 +5,7 @@ local creep_melee_collision_size = 16
 local creep_ranged_collision_size =  8
 local key = Menu.AddKeyOption({"Utility"}, "[Bot] CreepBlock", Enum.ButtonCode.KEY_SPACE)
 -- local enemyHeroBlock = Menu.AddOption({ "Utility", "[Bot] HeroBlock" }, "Enabled", "Block enemy hero with summoned units.")
--- local skipRangedCreep = Menu.AddOption({ "Utility", "[Bot] Skip ranged creep" }, "Enabled", "Bot will try to skip ranged creep.")
+Blocker.skipRangedCreep = Menu.AddOption({ "Utility", "[Bot] Skip ranged creep" }, "Enabled", "Bot will try to skip ranged creep.")
 local font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 
 local DOTA_TEAM_GOODGUYS = 2
@@ -72,11 +72,16 @@ function Blocker.OnDraw()
             local npc_id = Entity.GetIndex(npc)
             local creep_origin = Entity.GetAbsOrigin(npc)
 
+            local ranged = false
+            if Menu.IsEnabled(Blocker.skipRangedCreep) and NPC.IsRanged(npc) then
+                ranged = true
+            end
+
             local x, y = Renderer.WorldToScreen(creep_origin)
             Blocker.DrawCircle(creep_origin, creep_melee_collision_size)
             local moves_to = Blocker.GetPredictedPosition(npc, 0.66)
 
-            if not NPC.IsRunning(npc) then
+            if not NPC.IsRunning(npc) or ranged then
                 -- do nothing here
             else
                 local x2, y2 = Renderer.WorldToScreen(moves_to)

@@ -51,6 +51,16 @@ ItemObs.Locale = {
 		["russian"] = "Время уведомления",
 		["chinese"] = "通知栏持续时间"
 	},
+	["above"] = {
+		["english"] = "Show items above the hero",
+		["russian"] = "Показывать предметы над героем",
+		["chinese"] = "显示英雄之上的物品"
+	},
+	["aboveoffset"] = {
+		["english"] = "Offset",
+		["russian"] = "Смещением предметов",
+		["chinese"] = "对象的位移"
+	},
 	["width"] = {
 		["english"] = 240,
 		["russian"] = 300,
@@ -247,7 +257,7 @@ function ItemObs.OnDraw()
 		GUI_Object["perfect_name"] = ItemObs.Locale["name"]
 		GUI_Object["perfect_desc"] = ItemObs.Locale["desc"]
 		GUI_Object["perfect_author"] = ItemObs.Locale["author"]
-		GUI_Object["perfect_version"] = 170723
+		GUI_Object["perfect_version"] = 170826
 		GUI_Object["category"] = GUI.Category.General
 		GUI.Initialize(ItemObs.Identity, GUI_Object)
 		
@@ -255,11 +265,13 @@ function ItemObs.OnDraw()
 		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "items", ItemObs.Locale["items"], 
 			GUI.MenuType.ImageBox, Length(ItemObs.items), ItemObs.items, ItemObs.IconPath, "item_", 32, 24, nil, 21)
 		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "time", ItemObs.Locale["time"], GUI.MenuType.Slider, 3, 60, 10)
-
 		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "show", ItemObs.Locale["show"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "size", ItemObs.Locale["size"], GUI.MenuType.Slider, 16, 64, 24)
 		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "cd", ItemObs.Locale["cd"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "charges", ItemObs.Locale["charges"], GUI.MenuType.CheckBox, 0)
+		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "above", ItemObs.Locale["above"], GUI.MenuType.CheckBox, 0)
+		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "aboveoffset", ItemObs.Locale["aboveoffset"], GUI.MenuType.Slider, 25, 200, 55)
+
 			
 		if (locx == "" or locx == nil) then GUI.Set(ItemObs.Identity .. "locx", 10) locx = 10 end
 		if (locy == "" or locy == nil) then GUI.Set(ItemObs.Identity .. "locy", 150) locy = 150 end
@@ -279,9 +291,10 @@ function ItemObs.OnDraw()
 	if myHero == nil then return end
 	
 	if GUI.SelectedLanguage == nil then return end
-	
+
 	local ypos = locy
 	local size = GUI.Get(ItemObs.Identity .. "size")
+	local aboveoffset = GUI.Get(ItemObs.Identity .. "aboveoffset")
 	local defx, xpos = math.floor(size * 128 / 72)
 	local iscd = GUI.IsEnabled(ItemObs.Identity .. "cd")
 	local iscrg = GUI.IsEnabled(ItemObs.Identity .. "charges")
@@ -291,12 +304,12 @@ function ItemObs.OnDraw()
 	local title = ItemObs.Locale["bought"][GUI.SelectedLanguage]
 	local width = ItemObs.Locale["width"][GUI.SelectedLanguage]
 	local show = GUI.IsEnabled(ItemObs.Identity .. "show")
+	local above = GUI.IsEnabled(ItemObs.Identity .. "above")
 
 	for k, hero in pairs(Heroes.GetAll()) do
-		if not NPC.IsIllusion(hero) and Entity.IsHero(hero) and not Entity.IsSameTeam(myHero, hero) then
+		if hero ~= nil and not NPC.IsIllusion(hero) and Entity.IsHero(hero) and not Entity.IsSameTeam(myHero, hero) then
 			ypos = ypos + size
 			xpos = defx + locx + 5
-			local item_array = {}
 			
 			local tempHeroName = NPC.GetUnitName(hero):gsub("npc_dota_hero_", "")
 			local heroImageHandle = ItemObs.HeroIcons[tempHeroName]
@@ -305,9 +318,24 @@ function ItemObs.OnDraw()
 				ItemObs.HeroIcons[tempHeroName] = heroImageHandle
 			end
 			
+			local heroPos = Entity.GetAbsOrigin(hero)
+			local heroZ = NPC.GetHealthBarOffset(hero)
+			heroPos:SetZ(heroPos:GetZ() + heroZ)
+
+			local heroX, heroY, heroV = Renderer.WorldToScreen(heroPos)
+			heroX = heroX - math.floor((size + 8) * 3)
+			local drawHeroY = heroY - size - aboveoffset
+			local isAbove = false
+			if above and heroV and not Entity.IsDormant(hero) and Entity.IsAlive(hero) then
+				isAbove = true
+				Renderer.SetDrawColor(0, 0, 0, 200)
+				Renderer.DrawFilledRect(heroX - 2, drawHeroY - 2, math.floor((size + 8) * 6) + 4, size + 4)
+				Renderer.SetDrawColor(255, 255, 255, 255)
+			end
+
 			for i = 0, 5 do 
 				local item = NPC.GetItemByIndex(hero, i)
-				if item ~= nil then
+				if item ~= nil and Entity.IsAbility(item) then
 					local tempName = Ability.GetName(item)
 					tempName = tempName:gsub("item_", "")
 					
@@ -319,23 +347,52 @@ function ItemObs.OnDraw()
 					if isnotify then
 						ItemObs.Notify(item, notify_items, Ability.GetName(item), title, width, tts, imageHandle, heroImageHandle)
 					end
+					
 					if show then
 						Renderer.DrawImage(imageHandle, xpos, ypos, size + 8, size)
-						local cd = math.ceil(Ability.GetCooldown(item))
-						local crg = Item.GetCurrentCharges(item)
-						if (crg > 0 and iscrg) or (cd > 0 and iscd) then
-							Renderer.SetDrawColor(0, 0, 0, 200)
-							Renderer.DrawFilledRect(xpos, ypos, size + 8, size)
-							Renderer.SetDrawColor(255, 255, 255, 255)
-							local d = crg
-							if cd > 0 and iscd then d = cd end
-							Renderer.DrawTextCentered(GUI.Font.ContentBold, xpos + math.ceil((size + 8) / 2), ypos + math.ceil(size / 2), d, true)
+					end
+					
+					if isAbove then
+						Renderer.DrawImage(imageHandle, heroX, drawHeroY, size + 8, size)
+					end
+					
+					if (show and Input.IsCursorInRect(xpos, ypos, size + 8, size)) or (isAbove and Input.IsCursorInRect(heroX, drawHeroY, size + 8, size)) then
+						if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then 
+							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_PING_ABILITY, 0, Vector(), item, 0, nil)
 						end
 					end
+					
+					local cd = math.ceil(Ability.GetCooldown(item))
+					local crg = Item.GetCurrentCharges(item)
+					if (crg > 0 and iscrg) or (cd > 0 and iscd) then
+						Renderer.SetDrawColor(0, 0, 0, 200)
+						if show then
+							Renderer.DrawFilledRect(xpos, ypos, size + 8, size)
+						end
+						
+						if isAbove then
+							Renderer.DrawFilledRect(heroX, drawHeroY, size + 8, size)
+						end
+						
+						Renderer.SetDrawColor(255, 255, 255, 255)
+						local d = crg
+						if cd > 0 and iscd then d = cd end
+						
+						if show then
+							Renderer.DrawTextCentered(GUI.Font.ContentBold, xpos + math.ceil((size + 8) / 2), ypos + math.ceil(size / 2), d, true)
+						end
+						
+						if isAbove then
+							Renderer.DrawTextCentered(GUI.Font.ContentBold, heroX + math.ceil((size + 8) / 2), drawHeroY + math.ceil(size / 2), d, true)
+						end
+					end
+					
 				end
 				
 				xpos = xpos + size + 8
+				heroX = heroX + size + 8
 			end
+			
 			if show then
 				if Input.IsCursorInRect(locx, ypos, defx, size) then
 					if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then 
