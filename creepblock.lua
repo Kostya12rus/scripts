@@ -181,6 +181,7 @@ function Blocker.DrawCircle(UnitPos, radius)
 end
 
 function Blocker.Reset()
+    Blocker.inited = false
     Fountain = nil
     top_towers = {}
     mid_towers = {}

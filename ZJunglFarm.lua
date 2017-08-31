@@ -78,7 +78,6 @@ function JunglFarm.OnDraw()
 		ucanmove = true
 	else
 		if GameRules.GetGameState() == 5 then
-			
 			if Minute == 0 and Second == 30 then
 				ucanmove = true
 				coints = 2
@@ -88,7 +87,6 @@ function JunglFarm.OnDraw()
 			elseif Minute == 0 and Second == 0 then
 				ucanmove = false
 			end
-			
 			if coints == nil or coints == 0 then
 				coints = 2
 			end
@@ -117,7 +115,6 @@ function JunglFarm.OnDraw()
 				coints = 2
 				ucanmove = true
 			end
-			
 			if Menu.IsEnabled(JunglFarm.Draw) then
 				Renderer.DrawText(JunglFarm.font, 10, 400, "coints = " .. coints, 1)
 				Renderer.DrawText(JunglFarm.font, 10, 420, "CointNPC = " .. CointNPC, 1)
