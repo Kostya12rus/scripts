@@ -57,14 +57,13 @@ function JunglFarm.OnDraw()
 			end
 		end
 	end	
-	local team = false
     my_team = Entity.GetTeamNum(myHero)
-    if my_team ~= DOTA_TEAM_BADGUYS then
+    if my_team ~= 3 then
 		spot = {Vector(-2089,-2833,256),Vector(-1802,-4071,141),Vector(-793,-3263,256),Vector(654,-4439,384),Vector(3334,-4575,256),Vector(4652,-4210,256)} 
-		spot[8] = Vector(-7139,-6618,520)
+		spot[8] = Vector(-7139,-6618,520) -- fontan
 	else	
 		spot = {Vector(88,5016,384),Vector(1113,3549,384),Vector(-496,3558,256),Vector(-1671,4026,256),Vector(-3018,5134,384),Vector(-4410,3841,256)}  
-		spot[8] = Vector(7021,6450,520)
+		spot[8] = Vector(7021,6450,520) -- fontan
 	end
 	if Menu.IsEnabled(JunglFarm.Draw) then
 		for i = 1, #spot do
@@ -90,7 +89,7 @@ function JunglFarm.OnDraw()
 			if coints == nil or coints == 0 then
 				coints = 2
 			end
-			if coints > 6 or coints < 0 and coints ~= 8 then
+			if (coints > 6 or coints < 0) and coints ~= 8 then
 				coints = 2
 			end
 			local distance = myPos:Distance(spot[coints]):Length2D()
@@ -152,7 +151,9 @@ function JunglFarm.LvlUp(myHero)
 		lvltable[1] = NPC.GetAbilityByIndex(myHero, 3)
 		for i = 1, #lvltable do
 			if Hero.GetAbilityPoints(myHero) > 0 then
-				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY, myHero, Vector(0,0,0), lvltable[i], Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, myHero, true, true)
+				if myLvl <=14 then
+					Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY, myHero, Vector(0,0,0), lvltable[i], Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, myHero, true, true)
+				end
 			end
 		end
 	end

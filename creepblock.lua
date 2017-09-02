@@ -31,6 +31,7 @@ function Blocker.Init()
     Blocker.inited = true
 end
 
+
 function Blocker.OnDraw()
 
     if not Engine.IsInGame() then Blocker.Reset() end
@@ -52,9 +53,10 @@ function Blocker.OnDraw()
     local creeps = NPC.GetUnitsInRadius(myHero, radius, Enum.TeamType.TEAM_FRIEND)
     local origin = Entity.GetAbsOrigin(myHero)
 
-    best_npc = nil
-    best_position = nil
-    best_distance = 99999
+    local best_npc = nil
+    local best_position = nil
+    local best_distance = 99999
+    local best_angle = 0.0
 
     local curtime = GameRules.GetGameTime()
 
@@ -79,6 +81,11 @@ function Blocker.OnDraw()
 
             local x, y = Renderer.WorldToScreen(creep_origin)
             Blocker.DrawCircle(creep_origin, creep_melee_collision_size)
+
+            -- local angle = math.atan(y - hy, x - hx)
+            -- Renderer.SetDrawColor(0, 255, 255, 150)
+            -- Renderer.DrawText(font, x, y, angle, 1)
+
             local moves_to = Blocker.GetPredictedPosition(npc, 0.66)
 
             if not NPC.IsRunning(npc) or ranged then
@@ -94,6 +101,7 @@ function Blocker.OnDraw()
                     best_npc = npc
                     best_position = moves_to
                     best_distance = distance
+                    best_angle = angle
                 end
             end
         end
@@ -101,7 +109,7 @@ function Blocker.OnDraw()
 
     if best_position then
         local pos_to_fountain_len = (best_position - fountain_origin):Length()
-        local name = NPC.GetUnitName(best_npc)
+        -- local name = NPC.GetUnitName(best_npc)
         local collision_size = creep_melee_collision_size
 
         if curtime > sleep then
@@ -109,12 +117,18 @@ function Blocker.OnDraw()
         end
         local dist = (best_position - origin):Length()
         local speed = NPC.GetMoveSpeed(myHero)
-        if curtime > last_stop and dist >= 30 * speed / 315 and dist <= 150 * speed / 315 then
-            last_stop = curtime + 0.21 * speed / 315
+        -- if curtime > last_stop and dist >= 15 * speed / 315 and dist <= 150 * speed / 315 then
+        if curtime > last_stop and dist >= 10 and dist <= 150 then
+            last_stop = curtime + 0.25 * 315 / speed 
             if less_stopping then
-                last_stop = curtime + 0.9
+                -- last_stop = curtime + 0.9
             end
-            sleep = curtime + 0.05 -- 0.05
+            -- if speed < 315 then
+            --     sleep = curtime + 0.05
+            -- else
+            --     sleep = curtime + 0.07
+            -- end
+            sleep = curtime + 0.07 * 315 / speed
             Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_STOP, myHero, best_position, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY)
         end
     end
@@ -124,19 +138,19 @@ function Blocker.OnDraw()
     local TOWER_WARNING = 350
     for i, tower in pairs(top_towers) do
         local torigin = Entity.GetAbsOrigin(tower)
-        if (origin - torigin):Length() <= TOWER_WARNING then
+        if Entity.IsNPC(tower) and (origin - torigin):Length() <= TOWER_WARNING then
             less_stopping = true
         end
     end
     for i, tower in pairs(mid_towers) do
         local torigin = Entity.GetAbsOrigin(tower)
-        if (origin - torigin):Length() <= TOWER_WARNING then
+        if Entity.IsNPC(tower) and (origin - torigin):Length() <= TOWER_WARNING then
             less_stopping = true
         end
     end
     for i, tower in pairs(bottom_towers) do
         local torigin = Entity.GetAbsOrigin(tower)
-        if (origin - torigin):Length() <= TOWER_WARNING then
+        if Entity.IsNPC(tower) and (origin - torigin):Length() <= TOWER_WARNING then
             less_stopping = true
         end
     end
