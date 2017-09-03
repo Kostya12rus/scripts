@@ -6,8 +6,8 @@ TechiesHUD.Locale = {
 		["english"] = "TechiesHUD"
 	},
 	["desc"] = {
-		["english"] = "TechiesHUD v1.1",
-		["russian"] = "TechiesHUD v1.1"
+		["english"] = "TechiesHUD v1.2",
+		["russian"] = "TechiesHUD v1.2"
 	},
 	["optionDetonate"] = {
 		["english"] = "Auto detonate remote mines",
@@ -68,6 +68,10 @@ TechiesHUD.Locale = {
 	["panelInfo"] = {
 		["english"] = "Info panel",
 		["russian"] = "Информационная панель"
+	},
+	["drawCircleMethod"] = {
+		["english"] = "The method of drawing a circle",
+		["russian"] = "Метод рисования круга"
 	},
 	["autoPlantNumMines"] = {
 		["english"] = "Number of mines for planting",
@@ -157,6 +161,18 @@ TechiesHUD.Locale = {
 		["english"] = "For forced detonate, use Alt + Focused Detonate",
 		["russian"] = "Для обычного использования используйте клавиши Alt + Focused Detonate"
 	},
+	["minePlacer"] = {
+		["english"] = "Optimization for the mines plant",
+		["russian"] = "Оптимизация для установки мин"
+	},
+	["minePlacerLM"] = {
+		["english"] = "Find the closest place when installing the Land Mine",
+		["russian"] = "Найти ближайшее место при установке Land Mine"
+	},
+	["minePlacerST"] = {
+		["english"] = "Find the closest place when installing the Stasis Trap",
+		["russian"] = "Найти ближайшее место при установке Stasis Trap"
+	},
 	["drawingOptionSection"] = {
 		["english"] = "Everything related to drawing",
 		["russian"] = "Все что связано с рисованием"
@@ -185,6 +201,14 @@ TechiesHUD.Locale = {
 		["english"] = "Show under the enemy hero the number of remote mines needed to kill",
 		["russian"] = "Показывать под вражеским героем количество remote mines необходимых для убийства"
 	},
+	["altInfoTimeMines"] = {
+		["english"] = "Show under remote mines, list mines with time left, level and detonate button",
+		["russian"] = "Показывать под remote mines, лист мин с оставшимся временем и кнопкой взрыва"
+	},
+	["altInfoTimeMinesPanelSize"] = {
+		["english"] = "Panel size",
+		["russian"] = "Размер панели"
+	},
 	["altInfoNumLevelRemote"] = {
 		["english"] = "Show under remote mines, how many there are mines of a certain level",
 		["russian"] = "Показывать под remote mines, сколько там мин определенного уровня"
@@ -210,13 +234,28 @@ TechiesHUD.Locale = {
 			[0] = "Взорвать сколько нужно",
 			[1] = "Взорвать все"
 		}
+	},
+	["drawCircleMode"] = {
+		["english"] = {
+			[0] = "Lines",
+			[1] = "Particles"
+		},
+		["russian"] = {
+			[0] = "Линии",
+			[1] = "Частицы"
+		}
 	}
 }
+
+if not TechiesHUDParticleList then
+	TechiesHUDParticleList = {}
+end
 
 local optionTotal
 local optionUpdate
 
 local optionDetonate
+local optionDrawCircleMethod
 local optionLR
 local optionSR
 local optionRR
@@ -248,11 +287,17 @@ local optionPanelInfoGemAndSentry
 
 local optionFont1
 local optionFont2
+local optionFont3
 
 local optionAltInfoDrawing
 local optionAltInfoRemoteNumberInManaPool
 local optionAltInfoNumLevelRemote
 local optionAltInfoEnemyNumRemote
+local optionAltInfoTimeMines
+local optionAltInfoTimeMinesPanelSize
+
+local optionMinePlacerLM
+local optionMinePlacerST
 
 local size_x, size_y = Renderer.GetScreenSize()
 local mines_time = {}
@@ -290,6 +335,13 @@ function TechiesHUD.OnGameStart()
 end
 
 function TechiesHUD.OnEntityDestroy(ent)
+	if TechiesHUDParticleList[ent] then
+		Particle.Destroy(TechiesHUDParticleList[ent].particle)
+		if TechiesHUDParticleList[ent].particle2 then
+			Particle.Destroy(TechiesHUDParticleList[ent].particle2)
+		end
+		TechiesHUDParticleList[ent] = nil
+	end
 	if not optionTotal then return end
 	if not Entity.IsNPC(ent) then return end
 	if NPC.GetUnitName(ent) == "npc_dota_techies_remote_mine" then
@@ -297,23 +349,86 @@ function TechiesHUD.OnEntityDestroy(ent)
 		remote_create_time[Entity.GetIndex(ent)] = nil
 	end
 end
+function TechiesHUD.Code(x, y)
+	local xmin, ymin = 0, 0
+	local xmax, ymax = Renderer.GetScreenSize()
+	local result = ((x < xmin) and 1 or 0) << 3 |
+		((x > xmax) and 1 or 0) << 2 |
+		((y < ymin) and 1 or 0) << 1 |
+		((y > ymax) and 1 or 0)
+	return result
+end
 
-function DrawCircle(UnitPos, radius)
-	local x1, y1 = Renderer.WorldToScreen(UnitPos)
-	if x1 < size_x and x1 > 0 and y1 < size_y and y1 > 0 then
+
+function TechiesHUD.ClipLine(x1, y1, x2, y2)
+	local c1, c2 = TechiesHUD.Code(x1, y1), TechiesHUD.Code(x2, y2)
+	local dx, dy
+	local xmin, ymin = 0, 0
+	local xmax, ymax = Renderer.GetScreenSize()
+	while (c1 | c2) ~= 0 do
+		if (c1 & c2) ~= 0 then
+			return x1, y1, x2, y2
+		end
+		dx = x2 - x1
+		dy = y2 - y1
+		if c1 ~= 0 then
+			if x1 < xmin then
+				y1 = y1 + dy * (xmin - x1) / dx
+				x1 = xmin
+			elseif x1 > xmax then
+				y1 = y1 + dy * (xmax - x1) / dx
+				x1 = xmax
+			elseif y1 < ymin then
+				x1 = x1 + dx * (ymin - y1) / dy
+				y1 = ymin
+			elseif y1 > ymax then
+				x1 = x1 + dx * (ymax - y1) / dy
+				y1 = ymax
+			end
+			c1 = TechiesHUD.Code(x1, y1)
+		else
+			if x2 < xmin then
+				y2 = y2 + dy * (xmin - x2) / dx
+				x2 = xmin
+			elseif x2 > xmax then
+				y2 = y2 + dy * (xmax - x2) / dx
+				x2 = xmax
+			elseif y2 < ymin then
+				x2 = x2 + dx * (ymin - y2) / dy
+				y2 = ymin
+			elseif y2 > ymax then
+				x2 = x2 + dx * (ymax - y2) / dy
+				y2 = ymax
+			end
+			c2 = TechiesHUD.Code(x2, y2)
+		end
+	end
+	return x1, y1, x2, y2
+end
+
+function TechiesHUD.DrawCircle(UnitPos, radius)
+	local x1, y1, visible1 = Renderer.WorldToScreen(UnitPos)
+	if visible1 == 1 then
 		local x4, y4, x3, y3, visible3
 		local dergee = optionResCircle
 		for angle = 0, 360 / dergee do
 			x4 = 0 * math.cos(angle * dergee / 57.3) - radius * math.sin(angle * dergee / 57.3)
 			y4 = radius * math.cos(angle * dergee / 57.3) + 0 * math.sin(angle * dergee / 57.3)
-			x3,y3 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
-			Renderer.DrawLine(x1,y1,x3,y3)
-			x1,y1 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
+			local tmp_vec = UnitPos + Vector(x4,y4,0)
+			if PositInfo ~= nil and PositInfo.GetHeightInPoint(tmp_vec:GetX(), tmp_vec:GetY()) ~= nil then
+				tmp_vec:SetZ(PositInfo.GetHeightInPoint(tmp_vec:GetX(), tmp_vec:GetY()))
+			end
+			x3, y3, visible3 = Renderer.WorldToScreen(tmp_vec)
+			if visible1 == 1 and visible3 == 1 then
+				local tx1, ty1, tx3, ty3 = TechiesHUD.ClipLine(x1, y1, x3, y3)
+				Renderer.DrawLine(math.floor(tx1), math.floor(ty1), math.floor(tx3), math.floor(ty3))
+			end
+			x1, y1, visible1 = Renderer.WorldToScreen(tmp_vec)
 		end
 	end
 end
 
-function CheckMove(Unit, Unit2, pred_time)
+function TechiesHUD.CheckMove(Unit, Unit2, pred_time)
 	local UnitPos = Entity.GetAbsOrigin(Unit)
 	local UnitPos2 = Entity.GetAbsOrigin(Unit2)
 	local MoveSpeed = NPC.GetMoveSpeed(Unit)
@@ -378,6 +493,23 @@ function TechiesHUD.UpdateGUISettings()
 	else
 		optionFDFailSwitchMode = false
 	end
+
+	if GUI.Get(TechiesHUD.Identity .. "optionDrawCircleMethod", 1) and 1 or 0 == 1 then
+		for k, v in pairs(GUI.Get(TechiesHUD.Identity .. "optionDrawCircleMethod", 1)) do
+			if v ~= 1 then
+				for i, particle in pairs(TechiesHUDParticleList) do
+					Particle.Destroy(TechiesHUDParticleList[particle.Unit].particle)
+					if TechiesHUDParticleList[particle.Unit].particle2 then
+						Particle.Destroy(TechiesHUDParticleList[particle.Unit].particle2)
+					end
+					TechiesHUDParticleList[particle.Unit] = nil
+				end
+			end
+			optionDrawCircleMethod = v == 1
+		end
+	else
+		optionDrawCircleMethod = false
+	end
 	optionPanelInfoXL = GUI.Get(TechiesHUD.Identity .. "optionPanelInfoXL")
 	optionPanelInfoXR = GUI.Get(TechiesHUD.Identity .. "optionPanelInfoXR")
 	optionPanelInfoY = GUI.Get(TechiesHUD.Identity .. "optionPanelInfoY")
@@ -395,13 +527,26 @@ function TechiesHUD.UpdateGUISettings()
 		optionFont2 = GUI.Get(TechiesHUD.Identity .. "optionFont2")
 		TechiesHUD.HUDfont = Renderer.LoadFont("Tahoma", tonumber(optionFont2), Enum.FontWeight.EXTRABOLD)
 	end
-
+	if GUI.Get(TechiesHUD.Identity .. "optionAltInfoTimeMinesPanelSize") ~= optionFont3 then
+		optionFont3 = GUI.Get(TechiesHUD.Identity .. "optionAltInfoTimeMinesPanelSize")
+		TechiesHUD.Panelfont = Renderer.LoadFont("Tahoma", math.floor(18 * tonumber(optionFont3) / 100), Enum.FontWeight.EXTRABOLD)
+		TechiesHUD.Panelfont1 = Renderer.LoadFont("Tahoma", math.floor(18 * tonumber(optionFont3) / 100), Enum.FontWeight.NORMAL)
+	end
 	optionAltInfoDrawing = GUI.IsEnabled(TechiesHUD.Identity .. "optionAltInfoDrawing")
 	optionAltInfoRemoteNumberInManaPool = GUI.IsEnabled(TechiesHUD.Identity .. "optionAltInfoRemoteNumberInManaPool")
 	optionAltInfoNumLevelRemote = GUI.IsEnabled(TechiesHUD.Identity .. "optionAltInfoNumLevelRemote")
+	optionAltInfoTimeMines = GUI.IsEnabled(TechiesHUD.Identity .. "optionAltInfoTimeMines")
+	optionAltInfoTimeMinesPanelSize = GUI.Get(TechiesHUD.Identity .. "optionAltInfoTimeMinesPanelSize") / 100
 	optionAltInfoEnemyNumRemote = GUI.IsEnabled(TechiesHUD.Identity .. "optionAltInfoEnemyNumRemote")
+
+	optionMinePlacerLM = GUI.IsEnabled(TechiesHUD.Identity .. "optionMinePlacerLM")
+	optionMinePlacerST = GUI.IsEnabled(TechiesHUD.Identity .. "optionMinePlacerST")
 end
 
+local ClickSave = true
+local CursorOnButton = false
+local state_mines = {}
+local need_enemy = {}
 function TechiesHUD.OnDraw()
 	if GUI == nil then return end
 
@@ -425,7 +570,7 @@ function TechiesHUD.OnDraw()
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAutoPlant", TechiesHUD.Locale["autoPlant"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAutoPlantNumMines", TechiesHUD.Locale["autoPlantNumMines"], GUI.MenuType.Slider, 1, 20, 6)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAutoPlantStackRange", TechiesHUD.Locale["autoPlantStackRange"], GUI.MenuType.Slider, 0,200, 200)
-		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAutoPlantKey", TechiesHUD.Locale["autoPlantKey"], GUI.MenuType.Key, "T", SetSpot)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAutoPlantKey", TechiesHUD.Locale["autoPlantKey"], GUI.MenuType.Key, "T", TechiesHUD.SetSpot)
 
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "stackMinesSection", TechiesHUD.Locale["stackMinesSection"], GUI.MenuType.Label) -- Stack mines
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionStack", TechiesHUD.Locale["stackMines"], GUI.MenuType.CheckBox, 1)
@@ -434,6 +579,9 @@ function TechiesHUD.OnDraw()
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "FDFailSwitchSection1", TechiesHUD.Locale["FDFailSwitchSection1"], GUI.MenuType.Label) -- FD FailSwitch
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "FDFailSwitchSection2", TechiesHUD.Locale["FDFailSwitchSection2"], GUI.MenuType.Label) -- FD FailSwitch
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionFDFailSwitch", TechiesHUD.Locale["FDFailSwitch"], GUI.MenuType.CheckBox, 1)
+
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionEmpty", TechiesHUD.Locale["empty"], GUI.MenuType.Label) -- Alt info
+
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionFDFailSwitchMod", TechiesHUD.Locale["FDFailSwitchTogleMode"], GUI.MenuType.SelectBox, TechiesHUD.Locale["detonateMode"], { 0 }, 1, nil)
 
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfo", TechiesHUD.Locale["altInfo"], GUI.MenuType.Label) -- Alt info
@@ -441,11 +589,14 @@ function TechiesHUD.OnDraw()
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfoRemoteNumberInManaPool", TechiesHUD.Locale["altInfoRemoteNumberInManaPool"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfoNumLevelRemote", TechiesHUD.Locale["altInfoNumLevelRemote"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfoEnemyNumRemote", TechiesHUD.Locale["altInfoEnemyNumRemote"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfoTimeMines", TechiesHUD.Locale["altInfoTimeMines"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionAltInfoTimeMinesPanelSize", TechiesHUD.Locale["altInfoTimeMinesPanelSize"], GUI.MenuType.Slider, 50, 200, 100)
 
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionEmpty", TechiesHUD.Locale["empty"], GUI.MenuType.Label) -- Alt info
 
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "drawingOptionSection", TechiesHUD.Locale["drawingOptionSection"], GUI.MenuType.Label) -- Drawing
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionPanelInfo", TechiesHUD.Locale["panelInfo"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionDrawCircleMethod", TechiesHUD.Locale["drawCircleMethod"], GUI.MenuType.SelectBox, TechiesHUD.Locale["drawCircleMode"], { 0 }, 1, nil)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionLR", TechiesHUD.Locale["drawRadiusLR"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionSR", TechiesHUD.Locale["drawRadiusSR"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionRR", TechiesHUD.Locale["drawRadiusRR"], GUI.MenuType.CheckBox, 1) -- GUI.IsEnabled(TechiesHUD.Identity .. "optionLR")
@@ -465,6 +616,10 @@ function TechiesHUD.OnDraw()
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionPanelInfoDist", TechiesHUD.Locale["panelInfoDist"], GUI.MenuType.Slider, -200, 200, 0)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionPanelInfoGemAndSentry", TechiesHUD.Locale["panelInfoGemAndSentry"], GUI.MenuType.CheckBox, 1)
 
+		--minePlacerLM
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionMinePlacer", TechiesHUD.Locale["minePlacer"], GUI.MenuType.Label) -- Alt info
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionMinePlacerLM", TechiesHUD.Locale["minePlacerLM"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionMinePlacerST", TechiesHUD.Locale["minePlacerST"], GUI.MenuType.CheckBox, 1)
 		TechiesHUD.UpdateGUISettings()
 	end
 
@@ -500,16 +655,22 @@ function TechiesHUD.OnDraw()
 	local remote_damage = Ability.GetLevelSpecialValueFor(remote, "damage")
 
 	if Ability.IsInAbilityPhase(blast) then
-		Renderer.SetDrawColor(255, 255, 255, 255)
-		DrawCircle(cast_pos, 400)
+		if Entity.GetHealth(myHero) / Entity.GetMaxHealth(myHero) >= 0.5 then
+			Renderer.SetDrawColor(255, 255, 255, 255)
+		else
+			Renderer.SetDrawColor(255, 0, 0, 255)
+		end
+		TechiesHUD.DrawCircle(cast_pos, 400)
+		local x, y = Renderer.WorldToScreen(cast_pos)
+		Renderer.DrawTextCentered(TechiesHUD.font, x, y, math.floor(Entity.GetHealth(myHero) - Entity.GetMaxHealth(myHero) * 0.5), 0)
 	end
 
 	if optionAutoPlant then
 		for i, spot in pairs(spot_for_plant) do
 			local x, y, visible = Renderer.WorldToScreen(spot.position)
-			if visible then
+			if visible == 1 then
 				Renderer.SetDrawColor(255, 255, 255, 255)
-				DrawCircle(spot.position, 200)
+				TechiesHUD.DrawCircle(spot.position, 200)
 			end
 		end
 	end
@@ -532,13 +693,27 @@ function TechiesHUD.OnDraw()
 
 	remote_pos_draw = {}
 	mines_num = {}
+	CursorOnButton = false
 	for i = 1, NPCs.Count() do
 		local Unit = NPCs.Get(i)
 		local UnitPos = Entity.GetAbsOrigin(Unit)
 
-		if optionLR and NPC.GetModifier(Unit, "modifier_techies_land_mine") ~= nil then -- land mines range
+		if NPC.GetModifier(Unit, "modifier_techies_land_mine") ~= nil then -- land mines range
 			Renderer.SetDrawColor(255, 20, 0, 255)
-			DrawCircle(UnitPos, 400)
+			if optionLR then
+				if optionDrawCircleMethod then
+					if not TechiesHUDParticleList[Unit] then
+						local particle = {particle = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf"), Unit = Unit}
+						Particle.SetControlPoint(particle.particle, 1, Vector(255, 80, 80))
+						Particle.SetControlPoint(particle.particle, 3, Vector(9, 0, 0))
+						Particle.SetControlPoint(particle.particle, 2, Vector(425, 255, 0))
+						Particle.SetControlPoint(particle.particle	, 0, Entity.GetAbsOrigin(Unit))
+						TechiesHUDParticleList[Unit] = particle
+					end
+				else
+					TechiesHUD.DrawCircle(UnitPos, 400)
+				end
+			end
 			if GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_land_mine")) < 1.75 then
 				local x, y, visible = Renderer.WorldToScreen(UnitPos)
 				if visible then
@@ -546,7 +721,7 @@ function TechiesHUD.OnDraw()
 				end
 			else
 				local check_loop = 0
-				if next(NPC.GetUnitsInRadius(Unit, 400, Enum.TeamType.TEAM_ENEMY)) then
+				if next(Entity.GetUnitsInRadius(Unit, 400, Enum.TeamType.TEAM_ENEMY)) then
 					check_loop = 1
 					if mines_time[Entity.GetIndex(Unit)] == nil or mines_time[Entity.GetIndex(Unit)] <= 0 then
 						mines_time[Entity.GetIndex(Unit)] = GameRules.GetGameTime()
@@ -563,15 +738,36 @@ function TechiesHUD.OnDraw()
 					mines_time[Entity.GetIndex(Unit)] = 0
 				end
 			end
+		elseif NPC.GetUnitName(Unit) == "npc_dota_techies_land_mine" and not Entity.IsAlive(Unit) and TechiesHUDParticleList[Unit] then
+			Particle.Destroy(TechiesHUDParticleList[Unit].particle)
+			if TechiesHUDParticleList[Unit].particle2 then
+				Particle.Destroy(TechiesHUDParticleList[Unit].particle2)
+			end
+			TechiesHUDParticleList[Unit] = nil
 		end -- land mines range
 
-		if optionSR and NPC.GetUnitName(Unit) == "npc_dota_techies_stasis_trap" and Entity.IsAlive(Unit) then -- stasis range
-
-			Renderer.SetDrawColor(0, 0, 255, 255)
-			DrawCircle(UnitPos, 400)
+		if NPC.GetUnitName(Unit) == "npc_dota_techies_stasis_trap" and Entity.IsAlive(Unit) then -- stasis range
 			Renderer.SetDrawColor(0, 255, 255, 255)
-			DrawCircle(UnitPos, 600)
-
+			if optionSR then
+				if optionDrawCircleMethod then
+					if not TechiesHUDParticleList[Unit] then
+						local particle = {particle = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf"), Unit = Unit, particle2 = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf")}
+						Particle.SetControlPoint(particle.particle, 1, Vector(80, 100, 255))
+						Particle.SetControlPoint(particle.particle, 3, Vector(20, 0, 0))
+						Particle.SetControlPoint(particle.particle, 2, Vector(430, 255, 0))
+						Particle.SetControlPoint(particle.particle	, 0, Entity.GetAbsOrigin(Unit))
+						Particle.SetControlPoint(particle.particle2, 1, Vector(0, 255, 255))
+						Particle.SetControlPoint(particle.particle2, 3, Vector(20, 0, 0))
+						Particle.SetControlPoint(particle.particle2, 2, Vector(630, 255, 0))
+						Particle.SetControlPoint(particle.particle2	, 0, Entity.GetAbsOrigin(Unit))
+						TechiesHUDParticleList[Unit] = particle
+					end
+				else
+					TechiesHUD.DrawCircle(UnitPos, 600)
+					Renderer.SetDrawColor(0, 0, 255, 255)
+					TechiesHUD.DrawCircle(UnitPos, 400)
+				end
+			end
 			if NPC.GetModifier(Unit, "modifier_techies_stasis_trap") ~= nil
 			and GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_stasis_trap")) < 2 then
 				local x, y, visible = Renderer.WorldToScreen(UnitPos)
@@ -579,6 +775,12 @@ function TechiesHUD.OnDraw()
 					Renderer.DrawText(TechiesHUD.font, x, y, math.floor((2 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_stasis_trap")))) * 100)/100, 0)
 				end
 			end
+		elseif NPC.GetUnitName(Unit) == "npc_dota_techies_stasis_trap" and not Entity.IsAlive(Unit) and TechiesHUDParticleList[Unit] then
+			Particle.Destroy(TechiesHUDParticleList[Unit].particle)
+			if TechiesHUDParticleList[Unit].particle2 then
+				Particle.Destroy(TechiesHUDParticleList[Unit].particle2)
+			end
+			TechiesHUDParticleList[Unit] = nil
 		end -- stasis range
 
 		if NPC.GetUnitName(Unit) == "npc_dota_techies_remote_mine" and Entity.IsAlive(Unit)then -- remote range
@@ -589,43 +791,62 @@ function TechiesHUD.OnDraw()
 				end
 				if remote_pos_draw[UnitPos:GetX()][UnitPos:GetY()] ~= 1 then
 					remote_pos_draw[UnitPos:GetX()][UnitPos:GetY()] = 1
-					Renderer.SetDrawColor(0, 255, 0, 255)
-					DrawCircle(UnitPos, 425)
+					if optionDrawCircleMethod then
+						if not TechiesHUDParticleList[Unit] then
+							local particle = {particle = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf"), Unit = Unit}
+							Particle.SetControlPoint(particle.particle, 1, Vector(80, 255, 50))
+							Particle.SetControlPoint(particle.particle, 3, Vector(20, 0, 0))
+							Particle.SetControlPoint(particle.particle, 2, Vector(455, 255, 0))
+							Particle.SetControlPoint(particle.particle	, 0, Entity.GetAbsOrigin(Unit))
+							TechiesHUDParticleList[Unit] = particle
+						end
+					else
+						Renderer.SetDrawColor(0, 255, 0, 255)
+						TechiesHUD.DrawCircle(UnitPos, 425)
+					end
 				end
-				if remote_create_time[Entity.GetIndex(Unit)] == nil then
-					remote_create_time[Entity.GetIndex(Unit)] = GameRules.GetGameTime()
-				end
-				if GameRules.GetGameTime() - remote_create_time[Entity.GetIndex(Unit)] < Ability.GetCastPoint(remote) and NPC.GetModifier(Unit, "modifier_techies_remote_mine") == nil then
+			end
+			if remote_create_time[Entity.GetIndex(Unit)] == nil then
+				remote_create_time[Entity.GetIndex(Unit)] = GameRules.GetGameTime()
+			end
+			if GameRules.GetGameTime() - remote_create_time[Entity.GetIndex(Unit)] < Ability.GetCastPoint(remote) and NPC.GetModifier(Unit, "modifier_techies_remote_mine") == nil then
+				local x, y, visible = Renderer.WorldToScreen(UnitPos)
+				Renderer.SetDrawColor(255, 255, 255, 255)
+				Renderer.DrawText(TechiesHUD.font, x, y - 20, math.floor((Ability.GetCastPoint(remote) - (GameRules.GetGameTime() - remote_create_time[Entity.GetIndex(Unit)])) * 100) / 100, 0)
+			end
+			if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil and GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_remote_mine")) < 2 then
+				local x, y, visible = Renderer.WorldToScreen(UnitPos)
+				Renderer.SetDrawColor(255, 255, 255, math.floor(255 * ((2 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_remote_mine")))) / 2)))
+				Renderer.DrawText(TechiesHUD.font, x, y - 20, math.floor((2 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_remote_mine")))) * 100) / 100, 0)
+			end
+			if mines_num[i] == nil then
+				mines_num[i] = 1
+			end
+			if mines_num[i] == 1 then
+				if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil then
 					local x, y, visible = Renderer.WorldToScreen(UnitPos)
-					Renderer.SetDrawColor(255, 255, 255, 255)
-					Renderer.DrawText(TechiesHUD.font, x, y - 20, math.floor((Ability.GetCastPoint(remote) - (GameRules.GetGameTime() - remote_create_time[Entity.GetIndex(Unit)])) * 100) / 100, 0)
-				end
-				if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil and GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_remote_mine")) < 2 then
-					local x, y, visible = Renderer.WorldToScreen(UnitPos)
-					Renderer.SetDrawColor(255, 255, 255, math.floor(255 * ((2 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_remote_mine")))) / 2)))
-					Renderer.DrawText(TechiesHUD.font, x, y - 20, math.floor((2 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_remote_mine")))) * 100) / 100, 0)
-				end
-				if mines_num[i] == nil then
-					mines_num[i] = 1
-				end
-				if mines_num[i] == 1 then
-					if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil then
-						local x, y, visible = Renderer.WorldToScreen(UnitPos)
-						if visible then
-							local num_mines = 0
-							local num_mines_1_lvl = 0
-							local num_mines_2_lvl = 0
-							local num_mines_3_lvl = 0
-							for j = 1, NPCs.Count() do
-								local Unit2 = NPCs.Get(j)
-								if NPC.IsPositionInRange(Unit2, UnitPos, 200, Enum.TeamType.TEAM_FRIEND)
-								and NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil
-								then
-									if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing and optionAltInfoNumLevelRemote then
+					if visible then
+						local num_mines = 0
+						local num_mines_1_lvl = 0
+						local num_mines_2_lvl = 0
+						local num_mines_3_lvl = 0
+						local oldest_mine = {die_time = math.huge}
+						local stack_mines = {}
+
+						for j = 1, NPCs.Count() do
+							local Unit2 = NPCs.Get(j)
+							local remote_modif = NPC.GetModifier(Unit2, "modifier_techies_remote_mine")
+							if NPC.IsPositionInRange(Unit2, UnitPos, 200, Enum.TeamType.TEAM_FRIEND)
+							and remote_modif
+							then
+								if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing then
+									local obj_mine = {Unit = Unit2}
+									if optionAltInfoNumLevelRemote then
 										if mines_damage[Entity.GetIndex(Unit2)] == nil then
 											mines_damage[Entity.GetIndex(Unit2)] = remote_damage
 										end
 										local mines_level = (mines_damage[Entity.GetIndex(Unit2)] - 150) / 150
+										obj_mine.level = mines_level
 										if mines_level == 1 then
 											num_mines_1_lvl = num_mines_1_lvl + 1
 										elseif mines_level == 2 then
@@ -633,22 +854,173 @@ function TechiesHUD.OnDraw()
 										elseif mines_level == 3 then
 											num_mines_3_lvl = num_mines_3_lvl + 1
 										end
-									else
-										num_mines = num_mines + 1
 									end
-									mines_num[j] = 0
+									if optionAltInfoTimeMines then
+										local modif_die_time = Modifier.GetDieTime(remote_modif)
+										obj_mine.die_time = modif_die_time
+										if oldest_mine.die_time > modif_die_time then
+											oldest_mine = {die_time = modif_die_time, mine = Unit2}
+										end
+									end
+									table.insert(stack_mines, obj_mine)
+								else
+									num_mines = num_mines + 1
+								end
+								mines_num[j] = 0
+								if state_mines[Entity.GetIndex(Unit)] == nil then
+									state_mines[Entity.GetIndex(Unit)] = true
+								end
+								if need_enemy[Entity.GetIndex(Unit)] == nil then
+									need_enemy[Entity.GetIndex(Unit)] = 1
+								end
+								need_enemy[Entity.GetIndex(Unit2)] = need_enemy[Entity.GetIndex(Unit)]
+								state_mines[Entity.GetIndex(Unit2)] = state_mines[Entity.GetIndex(Unit)]
+								if TechiesHUDParticleList[Unit2] then
+									if not state_mines[Entity.GetIndex(Unit)] then
+										Particle.SetControlPoint(TechiesHUDParticleList[Unit2].particle, 1, Vector(20, 120, 25))
+									else
+										Particle.SetControlPoint(TechiesHUDParticleList[Unit2].particle, 1, Vector(80, 255, 50))
+									end
 								end
 							end
-							Renderer.SetDrawColor(255, 255, 255, 255)
-							if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing and optionAltInfoNumLevelRemote then
-								Renderer.DrawText(TechiesHUD.font, x, y, "1:" .. num_mines_1_lvl .. " 2:" .. num_mines_2_lvl .. " 3:" .. num_mines_3_lvl, 0)
-							else
-								Renderer.DrawText(TechiesHUD.font, x, y, num_mines, 0)
+						end
+						Renderer.SetDrawColor(255, 255, 255, 255)
+						if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing then
+							if optionAltInfoNumLevelRemote then
+								Renderer.DrawText(TechiesHUD.font, x, y - math.floor(tonumber(optionFont1) * 1), "1:" .. num_mines_1_lvl .. " 2:" .. num_mines_2_lvl .. " 3:" .. num_mines_3_lvl, 0)
 							end
+							if optionAltInfoTimeMines then
+								table.sort(stack_mines, function (a, b) return a.die_time < b.die_time end)
+								--need_enemy[Entity.GetIndex(Unit)]
+								local h = 0
+								if #stack_mines <= 3 then
+									h = 1
+								end
+								Renderer.SetDrawColor(30, 30, 30, 150)
+								Renderer.DrawFilledRect(x, y, math.floor(80 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize) * #stack_mines + h)
+								Renderer.SetDrawColor(200, 200, 200, 150)
+								Renderer.DrawOutlineRect(x, y, math.floor(80 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize) * #stack_mines + h)
+								if Input.IsCursorInRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y, math.floor(20 * optionAltInfoTimeMinesPanelSize) + 1, math.floor(16 * optionAltInfoTimeMinesPanelSize) + 1) then
+									CursorOnButton = true
+									Renderer.SetDrawColor(100, 100, 100, 250)
+									if Input.IsKeyDown(Enum.ButtonCode.MOUSE_RIGHT) then
+										if ClickSave then
+											state_mines[Entity.GetIndex(Unit)] = not state_mines[Entity.GetIndex(Unit)]
+											if not state_mines[Entity.GetIndex(Unit)] then
+												Particle.SetControlPoint(TechiesHUDParticleList[Unit].particle, 1, Vector(20, 120, 25))
+											else
+												Particle.SetControlPoint(TechiesHUDParticleList[Unit].particle, 1, Vector(80, 255, 50))
+											end
+											ClickSave = false
+										end
+									else
+										ClickSave = true
+									end
+								else
+									Renderer.SetDrawColor(30, 30, 30, 150)
+								end
+								Renderer.DrawFilledRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y, math.floor(20 * optionAltInfoTimeMinesPanelSize) + 1, math.floor(16 * optionAltInfoTimeMinesPanelSize))
+								Renderer.SetDrawColor(200, 200, 200, 150)
+								Renderer.DrawOutlineRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y, math.floor(20 * optionAltInfoTimeMinesPanelSize) + 1, math.floor(16 * optionAltInfoTimeMinesPanelSize) * 4)
+								Renderer.SetDrawColor(255, 255, 255, 255)
+								local text
+								if state_mines[Entity.GetIndex(Unit)] then
+									text = "on"
+								else
+									text = "off"
+								end
+								Renderer.DrawTextCentered(TechiesHUD.Panelfont1, x - math.floor(10 * optionAltInfoTimeMinesPanelSize), y + math.floor(8 * optionAltInfoTimeMinesPanelSize), text, 0)
+								-- num min -
+								if Input.IsCursorInRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) + 1, math.floor(20 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize) + 1) then
+									CursorOnButton = true
+									Renderer.SetDrawColor(100, 100, 100, 250)
+									if Input.IsKeyDown(Enum.ButtonCode.MOUSE_RIGHT) then
+										if ClickSave then
+											if need_enemy[Entity.GetIndex(Unit)] > 1 then
+												need_enemy[Entity.GetIndex(Unit)] = need_enemy[Entity.GetIndex(Unit)] - 1
+											end
+											ClickSave = false
+										end
+									else
+										ClickSave = true
+									end
+								else
+									Renderer.SetDrawColor(30, 30, 30, 150)
+								end
+								Renderer.DrawFilledRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize), math.floor(20 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize))
+								Renderer.SetDrawColor(200, 200, 200, 150)
+								Renderer.DrawOutlineRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize), math.floor(20 * optionAltInfoTimeMinesPanelSize) + 1, math.floor(16 * optionAltInfoTimeMinesPanelSize) * 3)
+								Renderer.SetDrawColor(255, 255, 255, 255)
+								Renderer.DrawTextCentered(TechiesHUD.Panelfont1, x - math.floor(10 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) + math.floor(8 * optionAltInfoTimeMinesPanelSize), "-", 0)
+
+								-- num min text
+								Renderer.SetDrawColor(30, 30, 30, 150)
+								Renderer.DrawFilledRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 2, math.floor(20 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize))
+								Renderer.SetDrawColor(200, 200, 200, 150)
+								Renderer.DrawOutlineRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 2, math.floor(20 * optionAltInfoTimeMinesPanelSize) + 1, math.floor(16 * optionAltInfoTimeMinesPanelSize) * 2)
+								Renderer.SetDrawColor(255, 255, 255, 255)
+								Renderer.DrawTextCentered(TechiesHUD.Panelfont1, x - math.floor(10 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 2 + math.floor(8 * optionAltInfoTimeMinesPanelSize), need_enemy[Entity.GetIndex(Unit)], 0)
+
+								-- num min +
+								if Input.IsCursorInRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 3, math.floor(20 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize) + 1) then
+									CursorOnButton = true
+									Renderer.SetDrawColor(100, 100, 100, 250)
+									if Input.IsKeyDown(Enum.ButtonCode.MOUSE_RIGHT) then
+										if ClickSave then
+											need_enemy[Entity.GetIndex(Unit)] = need_enemy[Entity.GetIndex(Unit)] + 1
+											ClickSave = false
+										end
+									else
+										ClickSave = true
+									end
+								else
+									Renderer.SetDrawColor(30, 30, 30, 150)
+								end
+								Renderer.DrawFilledRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 3, math.floor(20 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize))
+								Renderer.SetDrawColor(200, 200, 200, 150)
+								Renderer.DrawOutlineRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 3, math.floor(20 * optionAltInfoTimeMinesPanelSize) + 1, math.floor(16 * optionAltInfoTimeMinesPanelSize))
+								Renderer.SetDrawColor(255, 255, 255, 255)
+								Renderer.DrawTextCentered(TechiesHUD.Panelfont1, x - math.floor(10 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 3 + math.floor(8 * optionAltInfoTimeMinesPanelSize), "+", 0)
+
+								for i, oldest_mine in pairs(stack_mines) do
+									local h = 0
+									if #stack_mines <= 3 then
+										h = 1
+									end
+									Renderer.SetDrawColor(255, 255, 255, 255)
+									Renderer.DrawText(TechiesHUD.Panelfont, x + math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * (i - 1), math.floor((oldest_mine.die_time - GameRules.GetGameTime()) / 60) .. ":" .. string.format("%02d", math.floor((oldest_mine.die_time - GameRules.GetGameTime()) % 60)), 0)
+									Renderer.DrawText(TechiesHUD.Panelfont, x + math.floor(5 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * (i - 1), math.floor(oldest_mine.level))
+									if Input.IsCursorInRect(x + math.floor(60 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * (i - 1), x + math.floor(80 * optionAltInfoTimeMinesPanelSize) - (x + math.floor(60 * optionAltInfoTimeMinesPanelSize)), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * #stack_mines - (y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * (#stack_mines - 1)) + 1) then
+										CursorOnButton = true
+										Renderer.SetDrawColor(100, 100, 100, 250)
+										Renderer.DrawFilledRect(x + math.floor(60 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * (i - 1), x + math.floor(80 * optionAltInfoTimeMinesPanelSize) - (x + math.floor(60 * optionAltInfoTimeMinesPanelSize)), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * #stack_mines - (y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * (#stack_mines - 1)) + h)
+										if Input.IsKeyDown(Enum.ButtonCode.MOUSE_RIGHT) then
+											if ClickSave then
+												Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, 0, Vector(0, 0, 0), NPC.GetAbilityByIndex(oldest_mine.Unit, 0), Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, oldest_mine.Unit, 0, 0)
+												ClickSave = false
+											end
+										else
+											ClickSave = true
+										end
+									end
+									Renderer.SetDrawColor(200, 200, 200, 150)
+									Renderer.DrawOutlineRect(x + math.floor(60 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * (i - 1), x + math.floor(80 * optionAltInfoTimeMinesPanelSize) - (x + math.floor(60 * optionAltInfoTimeMinesPanelSize)), math.floor(16 * optionAltInfoTimeMinesPanelSize) * (#stack_mines - (i - 1)) + h)
+								end
+							end
+						else
+							Renderer.DrawText(TechiesHUD.font, x, y, num_mines, 0)
 						end
 					end
 				end
 			end
+		elseif NPC.GetUnitName(Unit) == "npc_dota_techies_remote_mine" and not Entity.IsAlive(Unit) and TechiesHUDParticleList[Unit] then
+			Particle.Destroy(TechiesHUDParticleList[Unit].particle)
+			if TechiesHUDParticleList[Unit].particle2 then
+				Particle.Destroy(TechiesHUDParticleList[Unit].particle2)
+			end
+			TechiesHUDParticleList[Unit] = nil
+			state_mines[Entity.GetIndex(Unit)] = nil
+			need_enemy[Entity.GetIndex(Unit)] = nil
 		end -- remote range
 
 		if  Entity.IsHero(Unit)
@@ -659,7 +1031,7 @@ function TechiesHUD.OnDraw()
 			and not Entity.IsDormant(Unit) then
 				if optionBlastInfo and Ability.GetLevel(blast) ~= 0 then -- blast damage display
 					local x, y, visible = Renderer.WorldToScreen(UnitPos)
-					if visible then
+					if visible == 1 then
 						local Hp = Entity.GetHealth(Unit)
 						if Entity.GetMaxHealth(Unit) - Entity.GetHealth(Unit) ~= 0 then
 							Hp = Hp + NPC.GetHealthRegen(Unit) * 2
@@ -671,6 +1043,11 @@ function TechiesHUD.OnDraw()
 							Renderer.SetDrawColor(0, 255, 0, 255)
 						end
 						Renderer.DrawText(TechiesHUD.font, x, y, math.ceil(Hp), 0)
+						-- if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing then
+							-- Renderer.SetDrawColor(255, 255, 255, 255)
+							-- local x1, y1, visible1 = Renderer.WorldToScreen(UnitPos + Vector(NPC.GetMoveSpeed(Unit) * 2, 0, 0):Rotated(Entity.GetAbsRotation(Unit)))
+							-- Renderer.DrawLine(x, y, x1, y1)
+						-- end
 					end
 				end -- blast damage display
 
@@ -696,9 +1073,56 @@ function TechiesHUD.OnDraw()
 			end
 
 			if optionPanelInfo and Ability.GetLevel(remote) ~= 0 then -- remote num display
-				local Hp = Entity.GetHealth(Unit) / ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit))
-				local Hp_all = Entity.GetMaxHealth(Unit) / ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit))
-
+				local Hp
+				local Hp_all
+				if NPC.HasAbility(Unit, "spectre_dispersion") then -- damage_reflection_pct
+					local spectre_dispersion = 1 - Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "spectre_dispersion"), "damage_reflection_pct") / 100
+					Hp = Entity.GetHealth(Unit) / ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit) * spectre_dispersion)
+					Hp_all = Entity.GetMaxHealth(Unit) / ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit) * spectre_dispersion)
+				elseif NPC.HasAbility(Unit, "huskar_berserkers_blood") then -- maximum_resistance
+					local huskar_hp = Entity.GetHealth(Unit)
+					local huskar_max_hp = Entity.GetMaxHealth(Unit)
+					local resist = (1 - (huskar_hp - Entity.GetMaxHealth(Unit) * 0.1) / (Entity.GetMaxHealth(Unit) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "huskar_berserkers_blood"), "maximum_resistance") / 100)
+					if resist > Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "huskar_berserkers_blood"), "maximum_resistance") / 100 then
+						resist = Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "huskar_berserkers_blood"), "maximum_resistance") / 100
+					end
+					local base_resist = NPC.GetMagicalArmorDamageMultiplier(Unit) / (1 - resist)
+					local num_calc = 0
+					local last_remote_damage = 1
+					while huskar_hp > 0 and num_calc < 20 do
+						local resist = (1 - (huskar_hp - Entity.GetMaxHealth(Unit) * 0.1) / (Entity.GetMaxHealth(Unit) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "huskar_berserkers_blood"), "maximum_resistance") / 100)
+						if resist > Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "huskar_berserkers_blood"), "maximum_resistance") / 100 then
+							resist = Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "huskar_berserkers_blood"), "maximum_resistance") / 100
+						end
+						huskar_hp = huskar_hp - ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * base_resist * (1 - resist))
+						num_calc = num_calc + 1
+						last_remote_damage = ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * base_resist * (1 - resist))
+					end
+					Hp = num_calc + huskar_hp / last_remote_damage
+					num_calc = 0
+					last_remote_damage = 1
+					while huskar_max_hp > 0 and num_calc < 20 do
+						local resist = (1 - (huskar_max_hp - Entity.GetMaxHealth(Unit) * 0.1) / (Entity.GetMaxHealth(Unit) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "huskar_berserkers_blood"), "maximum_resistance") / 100)
+						if resist > Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "huskar_berserkers_blood"), "maximum_resistance") / 100 then
+							resist = Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "huskar_berserkers_blood"), "maximum_resistance") / 100
+						end
+						huskar_max_hp = huskar_max_hp - ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * base_resist * (1 - resist))
+						num_calc = num_calc + 1
+						last_remote_damage = ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * base_resist * (1 - resist))
+					end
+					Hp_all = num_calc + huskar_max_hp / last_remote_damage
+				else
+					Hp = Entity.GetHealth(Unit) / ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit))
+					Hp_all = Entity.GetMaxHealth(Unit) / ((remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit))
+				end
+				if NPC.HasModifier(Unit, "modifier_item_hood_of_defiance_barrier") then
+					Hp = Hp + 325 / (remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0))
+					Hp_all = Hp_all + 325 / (remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0))
+				end
+				if NPC.HasModifier(Unit, "modifier_item_pipe_barrier") then
+					Hp = Hp + 400 / (remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0))
+					Hp_all = Hp_all + 400 / (remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0))
+				end
 				local x, y, visible = Renderer.WorldToScreen(UnitPos)
 				if visible and Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing and optionAltInfoEnemyNumRemote and not Entity.IsDormant(Unit) then
 					Renderer.SetDrawColor(255, 255, 255, 255)
@@ -743,7 +1167,7 @@ function TechiesHUD.OnDraw()
 	end
 end
 
-function SetSpot()
+function TechiesHUD.SetSpot()
 	local optionAutoPlantStackRange = GUI.Get(TechiesHUD.Identity .. "optionAutoPlantStackRange")
 	if Input.IsKeyDown(Enum.ButtonCode.KEY_LSHIFT) then
 		local spot = {}
@@ -819,67 +1243,241 @@ function TechiesHUD.OnUpdate()
 			end
 		end
 	end
-
-	if hero_cam_time ~= nil and GameRules.GetGameTime() - hero_cam_time > 1 then
-		local myHero_pos = Entity.GetAbsOrigin(myHero)
-		Engine.ExecuteCommand("dota_camera_set_lookatpos " .. myHero_pos:GetX() .. " " .. myHero_pos:GetY())
-		hero_cam_time = nil
-	end
-	if Ability.GetLevel(remote) ~= 0 then -- remote auto detonate
-		local remote_sum_damage = {}
-		local fast_remote_sum_damage = {}
-		local force_remote_sum_damage = {}
+	if optionDetonate then -- auto detonate
+		--------------------------- camera
+		if hero_cam_time ~= nil and GameRules.GetGameTime() - hero_cam_time > 1 then
+			Engine.ExecuteCommand("dota_camera_set_lookatpos " .. hero_cam_first_pos:GetX() .. " " .. hero_cam_first_pos:GetY())
+			hero_cam_time = nil
+		end
+		--------------------------- calc damage
+		local hp = {}
+		local fasthp = {}
+		local magic_shield = {}
+		local magic_shield_f = {}
 		for i = 1, NPCs.Count() do
 			local Unit = NPCs.Get(i)
 			local UnitPos = Entity.GetAbsOrigin(Unit)
-			if NPC.GetModifier(Unit, "modifier_techies_remote_mine") and Entity.IsAlive(Unit) then
+			local heroes_in_radius = NPC.GetHeroesInRadius(Unit, 425 - 24, Enum.TeamType.TEAM_ENEMY)
+			if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
+			and need_enemy[Entity.GetIndex(Unit)]
+			and state_mines[Entity.GetIndex(Unit)]
+			and #heroes_in_radius >= need_enemy[Entity.GetIndex(Unit)]
+			then
 				if mines_damage[Entity.GetIndex(Unit)] == nil then
 					mines_damage[Entity.GetIndex(Unit)] = remote_damage
 				end
-				for j, Unit2 in pairs(NPC.GetHeroesInRadius(Unit, 425 - 24 + 600 + (NPC.HasItem(myHero, "item_aether_lens", 1) and 1 or 0) * 220, Enum.TeamType.TEAM_ENEMY)) do
-					--num_proc = num_proc + 1
-					local UnitPos2 = Entity.GetAbsOrigin(Unit2)
-					if NPC.IsPositionInRange(Unit, UnitPos2, 425, 0) then
-						if remote_sum_damage[Entity.GetIndex(Unit2)] == nil then
-							remote_sum_damage[Entity.GetIndex(Unit2)] = 0
+				for j, v in pairs(heroes_in_radius) do
+					if hp[Entity.GetIndex(v)] == nil then
+						hp[Entity.GetIndex(v)] = (Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3)
+						magic_shield[Entity.GetIndex(v)] = 0
+						if NPC.HasModifier(v, "modifier_item_hood_of_defiance_barrier") then
+							magic_shield[Entity.GetIndex(v)] = 325
 						end
-						remote_sum_damage[Entity.GetIndex(Unit2)] = remote_sum_damage[Entity.GetIndex(Unit2)] + mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)
-						if optionDetonateFast and CheckMove(Unit2, Unit, 0.3 + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) + 0.04 * (Entity.GetHealth(Unit2) / remote_damage)) == 1
-						then
-							if fast_remote_sum_damage[Entity.GetIndex(Unit2)] == nil then
-								fast_remote_sum_damage[Entity.GetIndex(Unit2)] = 0
+						if NPC.HasModifier(v, "modifier_item_pipe_barrier") then
+							magic_shield[Entity.GetIndex(v)] = 400
+						end
+					end
+					if fasthp[Entity.GetIndex(v)] == nil then
+						fasthp[Entity.GetIndex(v)] = (Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3)
+						magic_shield_f[Entity.GetIndex(v)] = 0
+						if NPC.HasModifier(v, "modifier_item_hood_of_defiance_barrier") then
+							magic_shield_f[Entity.GetIndex(v)] = 325
+						end
+						if NPC.HasModifier(v, "modifier_item_pipe_barrier") then
+							magic_shield_f[Entity.GetIndex(v)] = 400
+						end
+					end
+					if hp[Entity.GetIndex(v)] > 0 or optionLegitDetonate then
+						local additional_res = 1
+						local base_resist = NPC.GetMagicalArmorDamageMultiplier(v)
+
+						if NPC.HasAbility(v, "spectre_dispersion") then -- damage_reflection_pct
+							additional_res = additional_res * (1 - Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "spectre_dispersion"), "damage_reflection_pct") / 100)
+						end
+
+						if NPC.HasAbility(v, "huskar_berserkers_blood") then -- maximum_resistance
+							local resist = (1 - (hp[Entity.GetIndex(v)] - Entity.GetMaxHealth(v) * 0.1) / (Entity.GetMaxHealth(v) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100)
+							if resist > Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100 then
+								resist = Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100
 							end
-							fast_remote_sum_damage[Entity.GetIndex(Unit2)] = fast_remote_sum_damage[Entity.GetIndex(Unit2)] + mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)
+							base_resist = base_resist / (1 - (1 - (Entity.GetHealth(v) - Entity.GetMaxHealth(v) * 0.1) / (Entity.GetMaxHealth(v) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100))
+							additional_res = additional_res * (1 - resist)
+						end
+						hp[Entity.GetIndex(v)] = hp[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] - magic_shield[Entity.GetIndex(v)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * base_resist * additional_res
+						if magic_shield[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) > 0 then
+							magic_shield[Entity.GetIndex(v)] = magic_shield[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0))
+						else
+							magic_shield[Entity.GetIndex(v)] = 0
 						end
 					end
 
-					local rotate = Entity.GetAbsRotation(Unit2):GetYaw()
-					local x4 = 600 * math.cos(rotate / 57.3) - 0 * math.sin(rotate / 57.3)
-					local y4 = 0 * math.cos(rotate / 57.3) + 600 * math.sin(rotate / 57.3)
-					if NPC.IsPositionInRange(Unit, UnitPos2 + Vector(x4,y4,0), 425, 0) then
-						if force_remote_sum_damage[Entity.GetIndex(Unit2)] == nil then
-							force_remote_sum_damage[Entity.GetIndex(Unit2)] = 0
+					if fasthp[Entity.GetIndex(v)] > 0 and TechiesHUD.CheckMove(v, Unit, 0.3 + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) + 0.04 * (Entity.GetHealth(v) / remote_damage)) == 1 and optionDetonateFast then
+						local additional_res = 1
+						local base_resist = NPC.GetMagicalArmorDamageMultiplier(v)
+
+						if NPC.HasAbility(v, "spectre_dispersion") then -- damage_reflection_pct
+							additional_res = additional_res * (1 - Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "spectre_dispersion"), "damage_reflection_pct") / 100)
 						end
-						force_remote_sum_damage[Entity.GetIndex(Unit2)] = force_remote_sum_damage[Entity.GetIndex(Unit2)] + mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)
+
+						if NPC.HasAbility(v, "huskar_berserkers_blood") then -- maximum_resistance
+							local resist = (1 - (fasthp[Entity.GetIndex(v)] - Entity.GetMaxHealth(v) * 0.1) / (Entity.GetMaxHealth(v) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100)
+							if resist > Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100 then
+								resist = Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100
+							end
+							base_resist = base_resist / (1 - (1 - (Entity.GetHealth(v) - Entity.GetMaxHealth(v) * 0.1) / (Entity.GetMaxHealth(v) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100))
+							additional_res = additional_res * (1 - resist)
+						end
+						fasthp[Entity.GetIndex(v)] = fasthp[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] - magic_shield_f[Entity.GetIndex(v)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * base_resist * additional_res
+						magic_shield_f[Entity.GetIndex(v)] = 0
 					end
 				end
 			end
 		end
-		for i = 1, Heroes.Count() do
-			local Unit = Heroes.Get(i)
-			local UnitPos = Entity.GetAbsOrigin(Unit)
-			if Entity.IsHero(Unit)
+		--------------------------- detonate logic
+		if GameRules.GetGameTime() - check_detonate > 0.5 then
+			local need_damage = {}
+			local magic_shield = {}
+			local hero_pos = nil
+			for i = 1, NPCs.Count() do
+				local Unit = NPCs.Get(i)
+				local UnitPos = Entity.GetAbsOrigin(Unit)
+				local heroes_in_radius = NPC.GetHeroesInRadius(Unit, 425 - 24, Enum.TeamType.TEAM_ENEMY)
+				if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
+				and state_mines[Entity.GetIndex(Unit)]
+				--and #heroes_in_radius >= Menu.GetValue(TechiesHUD.optionDetonateNumEnemy)
+				then
+					local num_enemy = 0
+					for j, v in pairs(heroes_in_radius) do
+						if NPC.IsKillable(v) and not NPC.HasModifier(v, "modifier_oracle_false_promise") then
+							-- for k, b in pairs(NPC.GetModifiers(v)) do
+								-- Log.Write(Modifier.GetName(b))
+							-- end
+							local fast_hp_check = false
+							if hero_time[Entity.GetIndex(v)] == nil then
+								hero_time[Entity.GetIndex(v)] = 0
+							end
+							if hero_time[Entity.GetIndex(v)] == 1 then
+								num_enemy = 999
+							end
+							if fasthp[Entity.GetIndex(v)] ~= nil and fasthp[Entity.GetIndex(v)] < 0 then
+								if TechiesHUD.CheckMove(v, Unit, 0.3 + NetChannel.GetAvgLatency(Enum.Flow.FLOW_OUTGOING) + 0.03 * (Entity.GetHealth(v) / remote_damage)) == 1 and optionDetonateFast then
+									num_enemy = num_enemy + 1
+									fast_hp_check = true
+								end
+							end
+							if (hp[Entity.GetIndex(v)] ~= nil and hp[Entity.GetIndex(v)] < 0) then
+								if hero_time[Entity.GetIndex(v)] == 0 then
+									hero_time[Entity.GetIndex(v)] = GameRules.GetGameTime()
+								end
+								if hero_time[Entity.GetIndex(v)] ~= 0 and (GameRules.GetGameTime() - hero_time[Entity.GetIndex(v)] > optionDelay / 1000) and not fast_hp_check then
+									num_enemy = num_enemy + 1
+								end
+							else
+								if hero_time[Entity.GetIndex(v)] ~= 1 then
+									hero_time[Entity.GetIndex(v)] = 0
+								end
+							end
+						end
+					end
+					local check_enemy = 0
+					for j, v in pairs(heroes_in_radius) do
+						if (need_damage[Entity.GetIndex(v)] == nil or need_damage[Entity.GetIndex(v)] < Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3) then
+							check_enemy = 1
+						end
+					end
+					if need_enemy[Entity.GetIndex(Unit)] and num_enemy >= need_enemy[Entity.GetIndex(Unit)] and check_enemy > 0 then
+						check_detonate = GameRules.GetGameTime()
+						Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, 0, Vector(0, 0, 0), NPC.GetAbilityByIndex(Unit, 0), Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, Unit, 0, 0)
+						for j, v in pairs(heroes_in_radius) do
+							if need_damage[Entity.GetIndex(v)] == nil then
+								need_damage[Entity.GetIndex(v)] = 0
+								magic_shield[Entity.GetIndex(v)] = 0
+								if NPC.HasModifier(v, "modifier_item_hood_of_defiance_barrier") then
+									magic_shield[Entity.GetIndex(v)] = 325
+								end
+								if NPC.HasModifier(v, "modifier_item_pipe_barrier") then
+									magic_shield[Entity.GetIndex(v)] = 400
+								end
+							end
+							if hero_pos == nil then
+								hero_pos = Entity.GetAbsOrigin(v)
+							end
+							local additional_res = 1
+							local base_resist = NPC.GetMagicalArmorDamageMultiplier(v)
+
+							if NPC.HasAbility(v, "spectre_dispersion") then -- damage_reflection_pct
+								additional_res = additional_res * (1 - Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "spectre_dispersion"), "damage_reflection_pct") / 100)
+							end
+
+							if NPC.HasAbility(v, "huskar_berserkers_blood") then -- maximum_resistance
+								local resist = (1 - (((Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3) - need_damage[Entity.GetIndex(v)]) - Entity.GetMaxHealth(v) * 0.1) / (Entity.GetMaxHealth(v) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100)
+								if resist > Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100 then
+									resist = Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100
+								end
+								base_resist = base_resist / (1 - (1 - (Entity.GetHealth(v) - Entity.GetMaxHealth(v) * 0.1) / (Entity.GetMaxHealth(v) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100))
+								additional_res = additional_res * (1 - resist)
+							end
+							need_damage[Entity.GetIndex(v)] = need_damage[Entity.GetIndex(v)] + (mines_damage[Entity.GetIndex(Unit)] - magic_shield[Entity.GetIndex(v)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * base_resist * additional_res
+							if magic_shield[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) > 0 then
+								magic_shield[Entity.GetIndex(v)] = magic_shield[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0))
+							else
+								magic_shield[Entity.GetIndex(v)] = 0
+							end
+						end
+					end
+				end
+			end
+			if hero_pos ~= nil then
+				local x, y = Renderer.WorldToScreen(hero_pos)
+				if x < 0 or x > size_x or y < 0 or y > size_y then
+					Engine.ExecuteCommand("dota_camera_set_lookatpos " .. hero_pos:GetX() .. " " .. hero_pos:GetY())
+					hero_cam_first_pos = Entity.GetAbsOrigin(myHero)
+					hero_cam_time = GameRules.GetGameTime()
+				end
+				hero_pos = nil
+			end
+		end
+	end -- auto detonate
+
+	for i = 1, NPCs.Count() do
+		local Unit = NPCs.Get(i)
+		local UnitPos = Entity.GetAbsOrigin(Unit)
+		if Ability.GetLevel(remote) ~= 0 then -- remote auto detonate
+			if  Entity.IsHero(Unit)
 			and Entity.GetTeamNum(Unit) ~= Entity.GetTeamNum(myHero)
 			and not NPC.IsIllusion(Unit)
 			and not Entity.IsDormant(Unit)
-			and (NPC.IsKillable(Unit) or (NPC.GetUnitName(Unit) == "npc_dota_hero_skeleton_king" and optionDetonateWk) or (NPC.HasItem(Unit, "item_aegis", 1) and optionDetonateAegis))
+			and (NPC.IsKillable(Unit) or (NPC.HasItem(Unit, "item_aegis", 1) and TechiesHUD.optionDetonateAegis))
 			and Entity.IsAlive(Unit)
-			and not NPC.HasModifier(Unit, "modifier_manta")
 			then
+				--Log.Write(NPC.GetMagicalArmorDamageMultiplier(Unit) .. " " .. (Entity.GetHealth(Unit) - Entity.GetMaxHealth(Unit) * 0.1) / (Entity.GetMaxHealth(Unit) * 0.9))
 				if hero_time[Entity.GetIndex(Unit)] == nil then
 					hero_time[Entity.GetIndex(Unit)] = 0
 				end
-				if optionDetonate then -- auto detonate
+				local remote_sum_damage = 0
+				local force_remote_sum_damage = 0
+				for j = 1, NPCs.Count() do -- calc sum damage
+					local Unit2 = NPCs.Get(j)
+					if NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil and state_mines[Entity.GetIndex(Unit2)] then
+						if mines_damage[Entity.GetIndex(Unit2)] == nil then
+							mines_damage[Entity.GetIndex(Unit2)] = remote_damage
+						end
+						if NPC.IsPositionInRange(Unit2, UnitPos, 425, 0) then -- - NPC.GetMoveSpeed(Unit) * 0.1
+							remote_sum_damage = remote_sum_damage + mines_damage[Entity.GetIndex(Unit2)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)
+						end
+
+						local rotate = Entity.GetAbsRotation(Unit):GetYaw()
+						local x4 = 600 * math.cos(rotate / 57.3) - 0 * math.sin(rotate / 57.3)
+						local y4 = 0 * math.cos(rotate / 57.3) + 600 * math.sin(rotate / 57.3)
+						if NPC.IsPositionInRange(Unit2, UnitPos + Vector(x4,y4,0), 425, 0) then
+							force_remote_sum_damage = force_remote_sum_damage + mines_damage[Entity.GetIndex(Unit2)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)
+						end
+					end
+				end -- calc sum damage
+				if remote_sum_damage == 0 and hero_time[Entity.GetIndex(Unit)] ~= 1 then
+					hero_time[Entity.GetIndex(Unit)] = 0
+				end
+				if optionDetonate then
 					if optionForce then -- auto force stuff
 						if force ~= nil then
 							if hero_time[Entity.GetIndex(Unit)] == 1 and forced_time ~= 0 and GameRules.GetGameTime() - forced_time > 1 then
@@ -887,13 +1485,13 @@ function TechiesHUD.OnUpdate()
 								forced_time = 0
 							end
 							if NPC.IsPositionInRange(myHero, UnitPos, 1000, 0)
-							and force_remote_sum_damage[Entity.GetIndex(Unit)] ~= nil and force_remote_sum_damage[Entity.GetIndex(Unit)] * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit) and GameRules.GetGameTime() - forc_time > 0.5 and not Entity.IsTurning(Unit) then
+							and force_remote_sum_damage * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit) and GameRules.GetGameTime() - forc_time > 0.5 then
 								if force_direction[i] == nil or force_direction[i] == 0 then
 									force_direction[i] = GameRules.GetGameTime()
-								elseif Ability.GetCooldownTimeLeft(force) == 0 and GameRules.GetGameTime() - force_direction[i] > 0.2 then
+								elseif Ability.GetCooldownTimeLeft(force) == 0 and GameRules.GetGameTime() - force_direction[i] > Config.ReadInt("TechiesHUD", "Force Stuff delay", 500) / 1000 then
 									Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET, Unit, Vector(0, 0, 0), force, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero, 0, 0)
 									forc_time = GameRules.GetGameTime()
-									hero_time[Entity.GetIndex(Unit)] =  1
+									hero_time[Entity.GetIndex(Unit)] = 1
 									forced_time = GameRules.GetGameTime()
 									force_direction[i] = 0
 								end
@@ -902,44 +1500,7 @@ function TechiesHUD.OnUpdate()
 							end
 						end
 					end -- auto force stuff
-					if ((remote_sum_damage[Entity.GetIndex(Unit)] ~= nil and remote_sum_damage[Entity.GetIndex(Unit)] * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit)) or (fast_remote_sum_damage[Entity.GetIndex(Unit)] ~= nil and fast_remote_sum_damage[Entity.GetIndex(Unit)] * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit))) then -- and not NPC.HasModifier(Unit, "modifier_item_forcestaff_active")
-						if hero_time[Entity.GetIndex(Unit)] == 0 then
-							hero_time[Entity.GetIndex(Unit)] = GameRules.GetGameTime()
-						end
-						local remote_need_damage = Entity.GetHealth(Unit) + NPC.GetHealthRegen(Unit) * 0.3
-						if GameRules.GetGameTime() - check_detonate > 0.5 and hero_time[Entity.GetIndex(Unit)] ~= 0 and (GameRules.GetGameTime() - hero_time[Entity.GetIndex(Unit)] > optionDelay / 1000 or (fast_remote_sum_damage[Entity.GetIndex(Unit)] ~= nil and fast_remote_sum_damage[Entity.GetIndex(Unit)] * NPC.GetMagicalArmorDamageMultiplier(Unit) > Entity.GetHealth(Unit))) then
-							local unit_pos = nil
-							for j = 1, NPCs.Count() do
-								local Unit2 = NPCs.Get(j)
-								if NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil
-								and Entity.IsAlive(Unit2)
-								and NPC.IsPositionInRange(Unit2, UnitPos, 425, 0)
-								then
-									if remote_need_damage > 0 or optionLegitDetonate then
-										if optionDetonateCam then
-											unit_pos = Entity.GetAbsOrigin(Unit)
-										end
-										Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_NO_TARGET, 0, Vector(0, 0, 0), NPC.GetAbilityByIndex(Unit2, 0), Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, Unit2, 0, 0)
-										check_detonate = GameRules.GetGameTime()
-										remote_need_damage = remote_need_damage - (mines_damage[Entity.GetIndex(Unit2)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(Unit)
-									end
-								end
-							end
-							if unit_pos ~= nil then
-								local x, y = Renderer.WorldToScreen(unit_pos)
-								if x < 0 or x > size_x or y < 0 or y > size_y then
-									Engine.ExecuteCommand("dota_camera_set_lookatpos " .. unit_pos:GetX() .. " " .. unit_pos:GetY())
-									hero_cam_time = GameRules.GetGameTime()
-								end
-								unit_pos = nil
-							end
-						end
-					else
-						if hero_time[Entity.GetIndex(Unit)] ~= 1 then
-							hero_time[Entity.GetIndex(Unit)] = 0
-						end
-					end
-				end -- auto detonate
+				end
 			end
 		end
 	end
@@ -956,7 +1517,9 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_techies" then
 		return true
 	end
-
+	if CursorOnButton then
+		return false
+	end
 	if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION and orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO then return true end
     if not orders.ability then return true end
 
@@ -973,6 +1536,7 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 		local remote_damage = Ability.GetLevelSpecialValueFor(NPC.GetAbilityByIndex(myHero, 5), "damage")
 		local hp = {}
 		local num_ready_mines = 0
+		local magic_shield = {}
 		for i = 1, NPCs.Count() do
 			local Unit = NPCs.Get(i)
 			local UnitPos = Entity.GetAbsOrigin(Unit)
@@ -984,17 +1548,46 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 					mines_damage[Entity.GetIndex(Unit)] = remote_damage
 				end
 				local num_enemy = 0
-				for j, v in pairs(NPC.GetHeroesInRadius(Unit, 425 - 24, Enum.TeamType.TEAM_ENEMY)) do
+				for j, v in pairs(Entity.GetHeroesInRadius(Unit, 425 - 24, Enum.TeamType.TEAM_ENEMY)) do
 					if Entity.IsAlive(v)
 					and not Entity.IsDormant(v)
 					and not NPC.HasModifier(Unit, "modifier_manta")
-					and (NPC.IsKillable(v) or NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" or NPC.HasItem(v, "item_aegis", 1) or NPC.GetModifier(v, "modifier_dazzle_shallow_grave") ~= nil)
+					and (NPC.IsKillable(v) or NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" or NPC.HasItem(v, "item_aegis", 1) or NPC.HasModifier(v, "modifier_dazzle_shallow_grave") or NPC.HasModifier(v, "modifier_templar_assassin_refraction_absorb"))
+					and NPC.GetMagicalArmorDamageMultiplier(v) ~= 0
 					then
 						if hp[Entity.GetIndex(v)] == nil then
 							hp[Entity.GetIndex(v)] = Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3
+							magic_shield[Entity.GetIndex(v)] = 0
+							if NPC.HasModifier(v, "modifier_item_hood_of_defiance_barrier") then
+								magic_shield[Entity.GetIndex(v)] = 325
+							end
+							if NPC.HasModifier(v, "modifier_item_pipe_barrier") then
+								magic_shield[Entity.GetIndex(v)] = 400
+							end
 						end
 						if mines_damage[Entity.GetIndex(Unit)] ~= nil and hp[Entity.GetIndex(v)] > 0 or optionFDFailSwitchMode then
-							hp[Entity.GetIndex(v)] = hp[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * NPC.GetMagicalArmorDamageMultiplier(v)
+							local additional_res = 1
+							local base_resist = NPC.GetMagicalArmorDamageMultiplier(v)
+
+							if NPC.HasAbility(v, "spectre_dispersion") then -- damage_reflection_pct
+								additional_res = additional_res * (1 - Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "spectre_dispersion"), "damage_reflection_pct") / 100)
+							end
+
+							if NPC.HasAbility(v, "huskar_berserkers_blood") then -- maximum_resistance
+								local resist = (1 - ((hp[Entity.GetIndex(v)] + NPC.GetHealthRegen(v) * 0.3) - Entity.GetMaxHealth(v) * 0.1) / (Entity.GetMaxHealth(v) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100)
+								if resist > Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100 then
+									resist = Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100
+								end
+								base_resist = base_resist / (1 - (1 - (Entity.GetHealth(v) - Entity.GetMaxHealth(v) * 0.1) / (Entity.GetMaxHealth(v) * 0.9)) * (Ability.GetLevelSpecialValueFor(NPC.GetAbility(v, "huskar_berserkers_blood"), "maximum_resistance") / 100))
+								additional_res = additional_res * (1 - resist)
+							end
+
+							hp[Entity.GetIndex(v)] = hp[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] - magic_shield[Entity.GetIndex(v)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) * base_resist * additional_res
+							if magic_shield[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)) > 0 then
+								magic_shield[Entity.GetIndex(v)] = magic_shield[Entity.GetIndex(v)] - (mines_damage[Entity.GetIndex(Unit)] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0))
+							else
+								magic_shield[Entity.GetIndex(v)] = 0
+							end
 							num_enemy = num_enemy + 1
 						end
 					end
@@ -1006,6 +1599,7 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 		end
 		return false
 	end
+
 	if GUI.IsEnabled(TechiesHUD.Identity .. "optionStack") then
 		if Ability.GetName(orders.ability) ~= "techies_remote_mines"
 		and Ability.GetName(orders.ability) ~= "techies_land_mines"
@@ -1015,15 +1609,196 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 		for i = 1, NPCs.Count() do
 			local Unit = NPCs.Get(i)
 			local UnitPos = Entity.GetAbsOrigin(Unit)
-			if ((NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
-			or NPC.GetModifier(Unit, "modifier_techies_land_mine") ~= nil
-			or NPC.GetModifier(Unit, "modifier_techies_stasis_trap") ~= nil)
+			if ((Ability.GetName(orders.ability) == "techies_land_mines" and (NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil or NPC.GetModifier(Unit, "modifier_techies_stasis_trap") ~= nil))
+			or (Ability.GetName(orders.ability) == "techies_stasis_trap" and (NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil or NPC.GetModifier(Unit, "modifier_techies_land_mine") ~= nil))
+			or (Ability.GetName(orders.ability) == "techies_remote_mines" and (NPC.GetModifier(Unit, "modifier_techies_land_mine") ~= nil or NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil or NPC.GetModifier(Unit, "modifier_techies_stasis_trap") ~= nil)))
 			and Entity.IsAlive(Unit)
-			and NPC.IsPositionInRange(Unit, orders.position, GUI.Get(TechiesHUD.Identity .. "optionStackRange"), 0))
+			and NPC.IsPositionInRange(Unit, orders.position, GUI.Get(TechiesHUD.Identity .. "optionStackRange"), 0)
 			then
 				Player.PrepareUnitOrders(orders.player, orders.order, orders.target, UnitPos, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
 				return false
 			end
+		end
+	end
+
+	if optionMinePlacerLM then
+		if Ability.GetName(orders.ability) == "techies_land_mines" then
+			local closest_mine
+			local closest_mine1
+			for i, Unit in pairs(NPCs.GetAll()) do
+				local UnitPos = Entity.GetAbsOrigin(Unit)
+				if NPC.GetModifier(Unit, "modifier_techies_land_mine")
+				and Entity.IsAlive(Unit)
+				and NPC.IsPositionInRange(Unit, orders.position, 400, 0)
+				then
+					if not closest_mine then
+						closest_mine = Unit
+					elseif not closest_mine1 then
+						closest_mine1 = Unit
+					end
+					if (Entity.GetAbsOrigin(Unit) - orders.position):Length2DSqr() < (Entity.GetAbsOrigin(closest_mine) - orders.position):Length2DSqr()  then
+						closest_mine1 = closest_mine
+						closest_mine = Unit
+					end
+				end
+			end
+			local additional_h
+			if closest_mine and closest_mine1 then
+				additional_h = (Entity.GetAbsOrigin(closest_mine) - Entity.GetAbsOrigin(closest_mine1)):Length2D() / 400
+			end
+			local tmp_vec
+			if closest_mine and closest_mine1 then
+				local mine_pos = Entity.GetAbsOrigin(closest_mine)
+				local mine_pos1 = Entity.GetAbsOrigin(closest_mine1)
+				local a = (mine_pos - mine_pos1):Length2DSqr() / (2 * (mine_pos - mine_pos1):Length2D())
+				local d = (mine_pos - mine_pos1):Length2D()
+				local h = (400^2 - a^2)^0.5
+				local P2 = mine_pos + Vector(a, a, a) * (mine_pos1 - mine_pos) * Vector(1/d, 1/d, 1/d)
+				local P31 = Vector(P2:GetX() + h * (mine_pos1:GetY() - mine_pos:GetY()) / d, P2:GetY() - h * (mine_pos1:GetX() - mine_pos:GetX()) / d, P2:GetZ())
+				local P32 = Vector(P2:GetX() - h * (mine_pos1:GetY() - mine_pos:GetY()) / d, P2:GetY() + h * (mine_pos1:GetX() - mine_pos:GetX()) / d, P2:GetZ())
+
+				local closest_mine
+				local closest_mine1
+				local tmp_vec1 = P2 + ((P31 - P2):Normalized()):Scaled(h + 12 * additional_h)
+				local tmp_vec2 = P2 + ((P32 - P2):Normalized()):Scaled(h + 12 * additional_h)
+				for i, Unit in pairs(NPCs.GetAll()) do
+					local UnitPos = Entity.GetAbsOrigin(Unit)
+					if NPC.GetModifier(Unit, "modifier_techies_land_mine")
+					and Entity.IsAlive(Unit)
+					and NPC.IsPositionInRange(Unit, tmp_vec1, 400, 0)
+					then
+						if not closest_mine then
+						closest_mine = Unit
+						end
+						if (Entity.GetAbsOrigin(Unit) - tmp_vec1):Length2DSqr() < (Entity.GetAbsOrigin(closest_mine) - tmp_vec1):Length2DSqr()  then
+							closest_mine = Unit
+						end
+					end
+				end
+				for i, Unit in pairs(NPCs.GetAll()) do
+					local UnitPos = Entity.GetAbsOrigin(Unit)
+					if NPC.GetModifier(Unit, "modifier_techies_land_mine")
+					and Entity.IsAlive(Unit)
+					and NPC.IsPositionInRange(Unit, tmp_vec2, 400, 0)
+					then
+						if not closest_mine1 then
+							closest_mine1 = Unit
+						end
+						if (Entity.GetAbsOrigin(Unit) - tmp_vec2):Length2DSqr() < (Entity.GetAbsOrigin(closest_mine1) - tmp_vec2):Length2DSqr()  then
+							closest_mine1 = Unit
+						end
+					end
+				end
+				if (P31 - orders.position):Length2DSqr() <= (P32 - orders.position):Length2DSqr() and not closest_mine then
+					tmp_vec = P2 + ((P31 - P2):Normalized()):Scaled(h + 12 * additional_h)
+				elseif not closest_mine1 then
+					tmp_vec = P2 + ((P32 - P2):Normalized()):Scaled(h + 12 * additional_h)
+				end
+			elseif closest_mine then
+				local mine_pos = Entity.GetAbsOrigin(closest_mine)
+				local mine_pos1 = Entity.GetAbsOrigin(closest_mine)
+				local order_pos = orders.position
+				mine_pos1:SetZ(order_pos:GetZ())
+				mine_pos:SetZ(0)
+				order_pos:SetZ(0)
+				tmp_vec = mine_pos1 + ((order_pos - mine_pos):Normalized()):Scaled(412)
+			else
+				return true
+			end
+			if tmp_vec then
+				Player.PrepareUnitOrders(orders.player, orders.order, orders.target, tmp_vec, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
+			end
+			return false
+		end
+	end
+	if optionMinePlacerST then
+		if Ability.GetName(orders.ability) == "techies_stasis_trap" then
+			local closest_mine
+			local closest_mine1
+			for i, Unit in pairs(NPCs.GetAll()) do
+				local UnitPos = Entity.GetAbsOrigin(Unit)
+				if NPC.GetModifier(Unit, "modifier_techies_stasis_trap")
+				and Entity.IsAlive(Unit)
+				and NPC.IsPositionInRange(Unit, orders.position, 600, 0)
+				then
+					if not closest_mine then
+						closest_mine = Unit
+					elseif not closest_mine1 then
+						closest_mine1 = Unit
+					end
+					if (Entity.GetAbsOrigin(Unit) - orders.position):Length2DSqr() < (Entity.GetAbsOrigin(closest_mine) - orders.position):Length2DSqr()  then
+						closest_mine1 = closest_mine
+						closest_mine = Unit
+					end
+				end
+			end
+			local additional_h
+			if closest_mine and closest_mine1 then
+				additional_h = (Entity.GetAbsOrigin(closest_mine) - Entity.GetAbsOrigin(closest_mine1)):Length2D() / 600
+			end
+			local tmp_vec
+			if closest_mine and closest_mine1 then
+				local mine_pos = Entity.GetAbsOrigin(closest_mine)
+				local mine_pos1 = Entity.GetAbsOrigin(closest_mine1)
+				local a = (mine_pos - mine_pos1):Length2DSqr() / (2 * (mine_pos - mine_pos1):Length2D())
+				local d = (mine_pos - mine_pos1):Length2D()
+				local h = (600^2 - a^2)^0.5
+				local P2 = mine_pos + Vector(a, a, a) * (mine_pos1 - mine_pos) * Vector(1/d, 1/d, 1/d)
+				local P31 = Vector(P2:GetX() + h * (mine_pos1:GetY() - mine_pos:GetY()) / d, P2:GetY() - h * (mine_pos1:GetX() - mine_pos:GetX()) / d, P2:GetZ())
+				local P32 = Vector(P2:GetX() - h * (mine_pos1:GetY() - mine_pos:GetY()) / d, P2:GetY() + h * (mine_pos1:GetX() - mine_pos:GetX()) / d, P2:GetZ())
+
+				local closest_mine
+				local closest_mine1
+				local tmp_vec1 = P2 + ((P31 - P2):Normalized()):Scaled(h + 16 * additional_h)
+				local tmp_vec2 = P2 + ((P32 - P2):Normalized()):Scaled(h + 16 * additional_h)
+				for i, Unit in pairs(NPCs.GetAll()) do
+					local UnitPos = Entity.GetAbsOrigin(Unit)
+					if NPC.GetModifier(Unit, "modifier_techies_stasis_trap")
+					and Entity.IsAlive(Unit)
+					and NPC.IsPositionInRange(Unit, tmp_vec1, 600, 0)
+					then
+						if not closest_mine then
+						closest_mine = Unit
+						end
+						if (Entity.GetAbsOrigin(Unit) - tmp_vec1):Length2DSqr() < (Entity.GetAbsOrigin(closest_mine) - tmp_vec1):Length2DSqr()  then
+							closest_mine = Unit
+						end
+					end
+				end
+				for i, Unit in pairs(NPCs.GetAll()) do
+					local UnitPos = Entity.GetAbsOrigin(Unit)
+					if NPC.GetModifier(Unit, "modifier_techies_stasis_trap")
+					and Entity.IsAlive(Unit)
+					and NPC.IsPositionInRange(Unit, tmp_vec2, 600, 0)
+					then
+						if not closest_mine1 then
+							closest_mine1 = Unit
+						end
+						if (Entity.GetAbsOrigin(Unit) - tmp_vec2):Length2DSqr() < (Entity.GetAbsOrigin(closest_mine1) - tmp_vec2):Length2DSqr()  then
+							closest_mine1 = Unit
+						end
+					end
+				end
+				if (P31 - orders.position):Length2DSqr() <= (P32 - orders.position):Length2DSqr() and not closest_mine then
+					tmp_vec = P2 + ((P31 - P2):Normalized()):Scaled(h + 16 * additional_h)
+				elseif not closest_mine1 then
+					tmp_vec = P2 + ((P32 - P2):Normalized()):Scaled(h + 16 * additional_h)
+				end
+			elseif closest_mine then
+				local mine_pos = Entity.GetAbsOrigin(closest_mine)
+				local mine_pos1 = Entity.GetAbsOrigin(closest_mine)
+				local order_pos = orders.position
+				mine_pos1:SetZ(order_pos:GetZ())
+				mine_pos:SetZ(0)
+				order_pos:SetZ(0)
+				tmp_vec = mine_pos1 + ((order_pos - mine_pos):Normalized()):Scaled(612)
+			else
+				return true
+			end
+			if tmp_vec then
+				Player.PrepareUnitOrders(orders.player, orders.order, orders.target, tmp_vec, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
+			end
+			return false
 		end
 	end
     return true
