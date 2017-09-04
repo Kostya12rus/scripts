@@ -30,6 +30,11 @@ AutoBot.Locale = {
 		["english"] = "On low HP go to fountain (only in play type)",
 		["russian"] = "При малом здоровье бежать на базу (только в режиме игры)",
 		["chinese"] = "在小健康運行的基礎（只在遊戲模式）"
+	},
+	["autoqueue"] = {
+		["english"] = "Auto queue",
+		["russian"] = "Автоматический поиск игры",
+		["chinese"] = "自动游戏搜索"
 	}
 }
 
@@ -41,6 +46,7 @@ AutoBot.Work = false
 AutoBot.CurrentTime = 0
 AutoBot.NextTime = 0
 AutoBot.FollowHero = nil
+AutoBot.AQ = false
 
 function AutoBot.OnDraw()
 	if GUI == nil then return end
@@ -75,10 +81,16 @@ function AutoBot.OnDraw()
 		GUI.AddMenuItem(AutoBot.Identity, AutoBot.Identity .. "onlowhp", AutoBot.Locale["onlowhp"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(AutoBot.Identity, AutoBot.Identity .. "lvlupabilities", AutoBot.Locale["lvlupabilities"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(AutoBot.Identity, AutoBot.Identity .. "centercamera", AutoBot.Locale["centercamera"], GUI.MenuType.CheckBox, 0)
+		GUI.AddMenuItem(AutoBot.Identity, AutoBot.Identity .. "autoqueue", AutoBot.Locale["autoqueue"], GUI.MenuType.CheckBox, 0)
+		GUI.Subscribe(AutoBot.Identity, GUI.GameStates.OnGameEnd, AutoBot.OnEnd)
 	end
-	
+	if GUI.IsEnabled(AutoBot.Identity .. "autoqueue") and AutoBot.AQ and GUI.SleepReady("queue_timeout") then
+		Menu.SetValue(Menu.GetOption({"Utility"}, "Auto Queue"), 1)
+		AutoBot.AQ = false
+	end
 	if AutoBot.NextTime ~= 0 and not Engine.IsInGame() then AutoBot.Reset() end
 end
+
 
 function AutoBot.OnUpdate()
 	if GUI == nil then return end
@@ -229,6 +241,20 @@ function AutoBot.Reset()
 	AutoBot.CurrentTime = 0
 	AutoBot.NextTime = 0
 	AutoBot.FollowHero = nil
+end
+
+function AutoBot.OnGameStart()
+	if GUI.IsEnabled(AutoBot.Identity .. "autoqueue") then
+		Menu.SetValue(Menu.GetOption({"Utility"}, "Auto Queue"), 0)
+	end
+end
+
+function AutoBot.OnEnd(oldstate, newstate)
+	if GUI.IsEnabled(AutoBot.Identity .. "autoqueue") then
+		Engine.ExecuteCommand("disconnect")
+		GUI.Sleep("queue_timeout", 15)
+		AutoBot.AQ = true
+	end
 end
 
 function AutoBot.Initialize()
