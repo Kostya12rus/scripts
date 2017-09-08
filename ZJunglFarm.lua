@@ -15,7 +15,7 @@ function JunglFarm.OnDraw()
 			coints = 1
 		end
 	end
-    local myHero = Heroes.GetLocal()
+	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_sand_king" then return end
 	if Menu.IsEnabled(JunglFarm.Draw) then
@@ -161,17 +161,17 @@ end
 
 function JunglFarm.DrawCircle(UnitPos, radius, index)
 	local size_x, size_y = Renderer.GetScreenSize()
-    local x1, y1 = Renderer.WorldToScreen(UnitPos)
-    if x1 < size_x and x1 > 0 and y1 < size_y and y1 > 0 then
-        local x4, y4, x3, y3, visible3
-        local dergee = index
-        for angle = 0, 360 / dergee do
-            x4 = 0 * math.cos(angle * dergee / 57.3) - radius * math.sin(angle * dergee / 57.3)
-            y4 = radius * math.cos(angle * dergee / 57.3) + 0 * math.sin(angle * dergee / 57.3)
-            x3,y3 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
-            Renderer.DrawLine(x1,y1,x3,y3)
-            x1,y1 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
-        end
-    end
+	local x1, y1 = Renderer.WorldToScreen(UnitPos)
+	if x1 < size_x and x1 > 0 and y1 < size_y and y1 > 0 then
+		local x4, y4, x3, y3, visible3
+		local dergee = index
+		for angle = 0, 360 / dergee do
+			x4 = 0 * math.cos(angle * dergee / 57.3) - radius * math.sin(angle * dergee / 57.3)
+			y4 = radius * math.cos(angle * dergee / 57.3) + 0 * math.sin(angle * dergee / 57.3)
+			x3,y3 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
+			Renderer.DrawLine(x1,y1,x3,y3)
+			x1,y1 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
+		end
+	end
 end
 return JunglFarm
