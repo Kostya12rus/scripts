@@ -28,7 +28,7 @@ function JunglFarm.OnDraw()
 		JunglFarm.DrawCircle(myPos, 525, 2)
 	end
 	local lvlskill2 = Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1))
-    local skil2 = NPC.GetAbilityByIndex(myHero, 1)
+	local skil2 = NPC.GetAbilityByIndex(myHero, 1)
 	local GameTime = GameRules.GetGameTime()
 	local PreGameTime = GameRules.GetGameStartTime()
 	local RealTime = GameTime-PreGameTime
@@ -57,8 +57,8 @@ function JunglFarm.OnDraw()
 			end
 		end
 	end	
-    my_team = Entity.GetTeamNum(myHero)
-    if my_team ~= 3 then
+	my_team = Entity.GetTeamNum(myHero)
+	if my_team ~= 3 then
 		spot = {Vector(-2089,-2833,256),Vector(-1802,-4071,141),Vector(-793,-3263,256),Vector(654,-4439,384),Vector(3334,-4575,256),Vector(4652,-4210,256)} 
 		spot[8] = Vector(-7139,-6618,520) -- fontan
 	else	
