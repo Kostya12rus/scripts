@@ -8,6 +8,17 @@ JunglFarm.fontNps = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
 local coints
 local ucanmove
 function JunglFarm.OnDraw()
+	if Menu.IsEnabled(JunglFarm.Draw) and Engine.IsInGame() then
+		local mouse = Input.GetWorldCursorPos()
+		local mouseX = math.floor(mouse:GetX())
+		local mouseY = math.floor(mouse:GetY())
+		local mouseZ = math.floor(mouse:GetZ())
+		Renderer.DrawText(JunglFarm.font, 10, 290,mouseX .. " " .. mouseY .. " " .. mouseZ , 1)
+		JunglFarm.DrawCircle(myPos, 1000, 2)
+		JunglFarm.DrawCircle(myPos, 525, 2)
+	end
+end
+function JunglFarm.OnUpdate()
 	if not Menu.IsEnabled(JunglFarm.optionEnable) then return end
 	if Menu.IsEnabled(JunglFarm.autopick) then
 		if GameRules.GetGameState() == 2 then
@@ -18,22 +29,10 @@ function JunglFarm.OnDraw()
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_sand_king" then return end
-	if Menu.IsEnabled(JunglFarm.Draw) then
-		local mouse = Input.GetWorldCursorPos()
-		local mouseX = math.floor(mouse:GetX())
-		local mouseY = math.floor(mouse:GetY())
-		local mouseZ = math.floor(mouse:GetZ())
-		Renderer.DrawText(JunglFarm.font, 10, 290,mouseX .. " " .. mouseY .. " " .. mouseZ , 1)
-		JunglFarm.DrawCircle(myPos, 1000, 2)
-		JunglFarm.DrawCircle(myPos, 525, 2)
-	end
 	local lvlskill2 = Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 1))
 	local skil2 = NPC.GetAbilityByIndex(myHero, 1)
-	local GameTime = GameRules.GetGameTime()
-	local PreGameTime = GameRules.GetGameStartTime()
-	local RealTime = GameTime-PreGameTime
-	local Minute = math.floor(RealTime/60)
-	local Second = math.floor(RealTime-(Minute*60))
+	local Minute = math.floor((GameRules.GetGameTime()-GameRules.GetGameStartTime())/60)
+	local Second = math.floor((GameRules.GetGameTime()-GameRules.GetGameStartTime())%60)
 	local CointNPC = 0
 	for i = 1, NPCs.Count() do
 		local unitNA = NPCs.Get(i)
@@ -142,7 +141,6 @@ function JunglFarm.LvlUp(myHero)
 	local myLvl = NPC.GetCurrentLevel(myHero)
 	local lvltable = {}
 	if myLvl == 1 or myLvl == 3 or myLvl == 5 or myLvl == 7 then
-		Upgrade = 1
 		local train_ability = NPC.GetAbilityByIndex(myHero, 1)
 		Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY, myHero, Vector(0,0,0), train_ability, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, myHero, true, true)
 	else
