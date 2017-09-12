@@ -33,6 +33,8 @@ function Meepo.OnUpdate()
     if not Event.InGame then return end
     local myHero = Heroes.GetLocal()
     if not myHero then return end
+    local myname = NPC.GetUnitName(myHero)
+    if myname ~= 'npc_dota_hero_meepo' then return end
     if not Meepo.TEAM then
         Meepo.TEAM = Entity.GetTeamNum(myHero)
         if Meepo.TEAM == 3 then

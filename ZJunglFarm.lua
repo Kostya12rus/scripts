@@ -8,17 +8,6 @@ JunglFarm.fontNps = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
 local coints
 local ucanmove
 function JunglFarm.OnDraw()
-	if Menu.IsEnabled(JunglFarm.Draw) and Engine.IsInGame() then
-		local mouse = Input.GetWorldCursorPos()
-		local mouseX = math.floor(mouse:GetX())
-		local mouseY = math.floor(mouse:GetY())
-		local mouseZ = math.floor(mouse:GetZ())
-		Renderer.DrawText(JunglFarm.font, 10, 290,mouseX .. " " .. mouseY .. " " .. mouseZ , 1)
-		JunglFarm.DrawCircle(myPos, 1000, 2)
-		JunglFarm.DrawCircle(myPos, 525, 2)
-	end
-end
-function JunglFarm.OnUpdate()
 	if not Menu.IsEnabled(JunglFarm.optionEnable) then return end
 	if Menu.IsEnabled(JunglFarm.autopick) then
 		if GameRules.GetGameState() == 2 then
@@ -34,6 +23,15 @@ function JunglFarm.OnUpdate()
 	local Minute = math.floor((GameRules.GetGameTime()-GameRules.GetGameStartTime())/60)
 	local Second = math.floor((GameRules.GetGameTime()-GameRules.GetGameStartTime())%60)
 	local CointNPC = 0
+	if Menu.IsEnabled(JunglFarm.Draw) and Engine.IsInGame() then
+		local mouse = Input.GetWorldCursorPos()
+		local mouseX = math.floor(mouse:GetX())
+		local mouseY = math.floor(mouse:GetY())
+		local mouseZ = math.floor(mouse:GetZ())
+		Renderer.DrawText(JunglFarm.font, 10, 500,mouseX .. " " .. mouseY .. " " .. mouseZ , 1)
+		JunglFarm.DrawCircle(myPos, 1000, 2)
+		JunglFarm.DrawCircle(myPos, 525, 2)
+	end
 	for i = 1, NPCs.Count() do
 		local unitNA = NPCs.Get(i)
 		if Entity.IsAlive(unitNA) then
@@ -46,7 +44,7 @@ function JunglFarm.OnUpdate()
 			
 			if worldVis and NPC.IsNeutral(unitNA) and NPC.IsPositionInRange(unitNA, myPos, 1000, 0) and not NPC.IsWaitingToSpawn(unitNA) then
 				if Menu.IsEnabled(JunglFarm.Draw) then
-					Renderer.DrawText(JunglFarm.fontNps, x1, y1, (Health/MaxHealth*100), 1)
+					Renderer.DrawText(JunglFarm.fontNps, x1, y1, math.floor(Health/MaxHealth*100), 1)
 					JunglFarm.DrawCircle(UnitPos, 100, 5)
 				end
 				if NPC.GetUnitName(unitNA) then
@@ -66,7 +64,7 @@ function JunglFarm.OnUpdate()
 	end
 	if Menu.IsEnabled(JunglFarm.Draw) then
 		for i = 1, #spot do
-			if i ~= 7 then
+			if spot[i] ~= nil then
 				JunglFarm.DrawCircle(spot[i], 20, 30)
 			end
 		end
