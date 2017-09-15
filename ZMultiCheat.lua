@@ -16,7 +16,7 @@ function MultiCheat.OnUpdate()
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end 
 	
-	if Menu.IsEnabled(MultiCheat.Rofl) then MultiCheat.RoflTime() end -- rofl evry 14 second
+	if Menu.IsEnabled(MultiCheat.Rofl) and Entity.IsAlive(myHero) then MultiCheat.RoflTime() end -- rofl evry 14 second
 	
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_furion" then MultiCheat.Furion()
 	elseif NPC.GetUnitName(myHero) == "npc_dota_hero_shadow_shaman" then MultiCheat.Shadowshaman()
