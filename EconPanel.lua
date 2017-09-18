@@ -216,7 +216,7 @@ function EconPanel.OnDraw()
 	table.sort(econTable, function(a, b) return a[2] > b[2] end)
 	
 	-- draw parameters
-	local drawX = 10
+	local drawX = 300
 	local drawY = 100
 	local lineGap = 20
 	local wordGap = 10

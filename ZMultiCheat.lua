@@ -5,6 +5,7 @@ MultiCheat.FurAndShamBlock = Menu.AddOption({"Kostya12rus","MultiCheat","3 FurAn
 MultiCheat.BlockKey = Menu.AddKeyOption({"Kostya12rus","MultiCheat","3 FurAndShamBlock"},"BlockKey",Enum.ButtonCode.KEY_D)
 MultiCheat.Font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 MultiCheat.FontSkill = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
+MultiCheat.imgmesad = Renderer.LoadImage("resource/flash3/images/spellicons/invoker_sun_strike.png")
 
 NeedTime = 0
 AnimTable = {}
@@ -30,6 +31,7 @@ function MultiCheat.OnUnitAnimation(animation)
     table.insert(castpoint, animation.playbackRate)
 end
 function MultiCheat.OnDraw()
+	MultiCheat.test()
     -- if AnimTable ~= nil then
         -- xpos = 100
         -- for i = 1, #AnimTable do
@@ -77,7 +79,48 @@ function MultiCheat.OnUpdate()
   else return end
 end
 
-
+function MultiCheat.test()
+	-- local size_x, size_y = Renderer.GetScreenSize() --team 2
+	-- local nedx = math.floor(size_x/3+11)
+	-- local Nedy = 45
+	-- local gorizont = 60
+	-- local vertical = gorizont
+	-- Renderer.DrawFilledRect(nedx, Nedy, gorizont, vertical)
+	-- local nedx = nedx + 63
+	-- Renderer.DrawFilledRect(nedx, Nedy, gorizont, vertical)
+	-- local nedx = nedx + 63
+	-- Renderer.DrawFilledRect(nedx, Nedy, gorizont, vertical)
+	-- local nedx = nedx + 63
+	-- Renderer.DrawFilledRect(nedx, Nedy, gorizont, vertical)
+	-- local nedx = nedx + 63
+	-- Renderer.DrawFilledRect(nedx, Nedy, gorizont, vertical)
+	
+	
+	-- local size_x2, size_y2 = Renderer.GetScreenSize()
+	-- local nedx2 = math.floor(size_x/1.85)
+	-- local Nedy2 = 45
+	-- Renderer.DrawFilledRect(nedx2, Nedy2, gorizont, vertical)
+	-- local nedx2 = nedx2 + 63
+	-- Renderer.DrawFilledRect(nedx2, Nedy2, gorizont, vertical)
+	-- local nedx2 = nedx2 + 63
+	-- Renderer.DrawFilledRect(nedx2, Nedy2, gorizont, vertical)
+	-- local nedx2 = nedx2 + 63
+	-- Renderer.DrawFilledRect(nedx2, Nedy2, gorizont, vertical)
+	-- local nedx2 = nedx2 + 63
+	-- Renderer.DrawFilledRect(nedx2, Nedy2, gorizont, vertical)
+	-- nesadx=1000
+	-- safafy=100
+	-- for i = 1, NPCs.Count() do
+		-- local entity = NPCs.Get(i) 
+		-- if entity and Entity.IsHero(entity) then
+			-- local name = NPC.GetUnitName(entity)
+			-- local playid = (Hero.GetPlayerID(entity)-4)
+			-- Renderer.DrawText(MultiCheat.Font, (nesadx + 50), safafy, name, 1)
+			-- Renderer.DrawText(MultiCheat.Font, nesadx, safafy, playid, 1)
+			-- safafy = safafy + 20
+		-- end 
+	-- end
+end
 
 function MultiCheat.Furion()
   local myHero = Heroes.GetLocal()
