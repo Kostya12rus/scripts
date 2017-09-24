@@ -1,25 +1,7 @@
--- ===========================================
--- Economic Panel (Version 2.0)
--- Author : Eroica (eroicacmcs@gmail.com)
--- Date : 2017.2.22
--- ===========================================
--- 
--- Usage:
--- 1. Place this script to ./scripts/ folder
--- 2. Navigate in menu : "Awareness" -> "Economic Panel" (On/Off)
--- 
--- Features:
--- 1. Show economic status of every player in game (like spetator mode). It is based on the total value of items that players have in inventory.
--- 2. Show economic difference between two teams.
--- 
--- Thanks @paroxysm for his item panel script. It is a great reference.
--- Please feel free to report bugs or provide suggestions.
--- ===========================================
-
 local EconPanel = {}
 
-EconPanel.optionEnable = Menu.AddOption({ "Awareness", "Econ Panel" }, "Enable Econ Panel", "show hero ranking of total item price")
-EconPanel.key = Menu.AddKeyOption({ "Awareness", "Econ Panel" }, "Turn On/Off Key", Enum.ButtonCode.KEY_L)
+EconPanel.optionEnable = Menu.AddOption({ "Kostya12rus", "Econ Panel" }, "Enable Econ Panel", "show hero ranking of total item price")
+EconPanel.key = Menu.AddKeyOption({ "Kostya12rus", "Econ Panel" }, "Turn On/Off Key", Enum.ButtonCode.KEY_L)
 EconPanel.font = Renderer.LoadFont("Tahoma", 16, Enum.FontWeight.EXTRABOLD)
 EconPanel.isOpen = true
 EconPanel.heroIconPath = "resource/flash3/images/heroes/"
@@ -186,7 +168,6 @@ EconPanel.item2price["item_veil_of_discord"] = 2240 -- "Veil of Discord"
 EconPanel.item2price["item_vladmir"] = 2275 -- "Vladmir's Offering"
 EconPanel.item2price["item_wraith_band"] = 485 -- "Wraith Band"
 EconPanel.item2price["item_yasha"] = 2050 -- "Yasha"
-
 
 EconPanel.item2price["item_spinner"] = 3000
 EconPanel.item2price["item_memolator"] = 3500

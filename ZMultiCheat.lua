@@ -147,62 +147,62 @@ function MultiCheat.test()
 end
 
 function MultiCheat.DrawOwerItem()
-	local size_x, size_y = Renderer.GetScreenSize()
-	TableItemAndHero = {
-	 [1] =   math.floor(size_x/3+11)         
-	,[2] =  (math.floor(size_x/3+11) + 63)  
-	,[3] =  (math.floor(size_x/3+11) + 126) 
-	,[4] =  (math.floor(size_x/3+11) + 189) 
-	,[5] =  (math.floor(size_x/3+11) + 252) 
-	,[6] =   math.floor(size_x/1.85)         
-	,[7] =  (math.floor(size_x/1.85) + 63)
-	,[8] =  (math.floor(size_x/1.85) + 126)
-	,[9] =  (math.floor(size_x/1.85) + 189)
-	,[10] = (math.floor(size_x/1.85) + 252)}
-	for i = 1, NPCs.Count() do
-		local entity = NPCs.Get(i) 
-		if entity and Entity.IsHero(entity) then
-			local HeroName = NPC.GetUnitName(entity)
-			local CordY = 65
-			local ImgSize = 60
-			local ImgSizeY = ImgSize-10
-			local Player_ID = Hero.GetPlayerID(entity)+1
-			local CordX = TableItemAndHero[Player_ID]
-			Renderer.SetDrawColor(255, 255, 255, 255)
-			if NPC.HasItem(entity, "item_rapier", 1) then
-				Renderer.DrawImage(MultiCheat.rapier, CordX, CordY, ImgSize, ImgSizeY)
-				CordY = (CordY + ImgSizeY - 1)
-			end
-			if NPC.HasItem(entity, "item_gem", 1) then
-				Renderer.DrawImage(MultiCheat.gem, CordX, CordY, ImgSize, ImgSizeY)
-				CordY = (CordY + ImgSizeY - 1)
-			end
-			if NPC.HasItem(entity, "item_ward_dispenser", 1) then
-				Renderer.DrawImage(MultiCheat.ward_dispenser, CordX, CordY, ImgSize, ImgSizeY)
-				CordY = (CordY + ImgSizeY - 1)
-			end
-			if NPC.HasItem(entity, "item_ward_dispenser_sentry", 1) then
-				Renderer.DrawImage(MultiCheat.ward_dispenser_sentry, CordX, CordY, ImgSize, ImgSizeY)
-				CordY = (CordY + ImgSizeY - 1)
-			end
-			if NPC.HasItem(entity, "item_ward_sentry", 1) then
-				Renderer.DrawImage(MultiCheat.ward_sentry, CordX, CordY, ImgSize, ImgSizeY)
-				CordY = (CordY + ImgSizeY - 1)
-			end
-			if NPC.HasItem(entity, "item_ward_observer", 1) then
-				Renderer.DrawImage(MultiCheat.ward_observer, CordX, CordY, ImgSize, ImgSizeY)
-				CordY = (CordY + ImgSizeY - 1)
-			end
-			if NPC.HasItem(entity, "item_dust", 1) then
-				Renderer.DrawImage(MultiCheat.dust, CordX, CordY, ImgSize, ImgSizeY)
-				CordY = (CordY + ImgSizeY - 1)
-			end
-			if NPC.HasItem(entity, "item_smoke_of_deceit", 1) then
-				Renderer.DrawImage(MultiCheat.smoke_of_deceit, CordX, CordY, ImgSize, ImgSizeY)
-				CordY = (CordY + ImgSizeY - 1)
-			end
-		end 
-	end
+  local size_x, size_y = Renderer.GetScreenSize()
+  TableItemAndHero = {
+   [1] =   math.floor(size_x/3+11)         
+  ,[2] =  (math.floor(size_x/3+11) + 63)  
+  ,[3] =  (math.floor(size_x/3+11) + 126) 
+  ,[4] =  (math.floor(size_x/3+11) + 189) 
+  ,[5] =  (math.floor(size_x/3+11) + 252) 
+  ,[6] =   math.floor(size_x/1.85)         
+  ,[7] =  (math.floor(size_x/1.85) + 63)
+  ,[8] =  (math.floor(size_x/1.85) + 126)
+  ,[9] =  (math.floor(size_x/1.85) + 189)
+  ,[10] = (math.floor(size_x/1.85) + 252)}
+  for i = 1, NPCs.Count() do
+    local entity = NPCs.Get(i) 
+    if entity and Entity.IsHero(entity) then
+      local HeroName = NPC.GetUnitName(entity)
+      local CordY = 65
+      local ImgSize = 60
+      local ImgSizeY = ImgSize-10
+      local Player_ID = Hero.GetPlayerID(entity)+1
+      local CordX = TableItemAndHero[Player_ID]
+      Renderer.SetDrawColor(255, 255, 255, 255)
+      if NPC.HasItem(entity, "item_rapier", 1) then
+       Renderer.DrawImage(MultiCheat.rapier, CordX, CordY, ImgSize, ImgSizeY)
+       CordY = (CordY + ImgSizeY - 1)
+      end
+      if NPC.HasItem(entity, "item_gem", 1) then
+       Renderer.DrawImage(MultiCheat.gem, CordX, CordY, ImgSize, ImgSizeY)
+       CordY = (CordY + ImgSizeY - 1)
+      end
+      if NPC.HasItem(entity, "item_ward_dispenser", 1) then
+        Renderer.DrawImage(MultiCheat.ward_dispenser, CordX, CordY, ImgSize, ImgSizeY)
+        CordY = (CordY + ImgSizeY - 1)
+      end
+      if NPC.HasItem(entity, "item_ward_dispenser_sentry", 1) then
+        Renderer.DrawImage(MultiCheat.ward_dispenser_sentry, CordX, CordY, ImgSize, ImgSizeY)
+        CordY = (CordY + ImgSizeY - 1)
+      end
+      if NPC.HasItem(entity, "item_ward_sentry", 1) then
+        Renderer.DrawImage(MultiCheat.ward_sentry, CordX, CordY, ImgSize, ImgSizeY)
+        CordY = (CordY + ImgSizeY - 1)
+      end
+      if NPC.HasItem(entity, "item_ward_observer", 1) then
+        Renderer.DrawImage(MultiCheat.ward_observer, CordX, CordY, ImgSize, ImgSizeY)
+        CordY = (CordY + ImgSizeY - 1)
+      end
+      if NPC.HasItem(entity, "item_dust", 1) then
+        Renderer.DrawImage(MultiCheat.dust, CordX, CordY, ImgSize, ImgSizeY)
+        CordY = (CordY + ImgSizeY - 1)
+      end
+      if NPC.HasItem(entity, "item_smoke_of_deceit", 1) then
+        Renderer.DrawImage(MultiCheat.smoke_of_deceit, CordX, CordY, ImgSize, ImgSizeY)
+        CordY = (CordY + ImgSizeY - 1)
+      end
+    end 
+  end
 end
 
 function MultiCheat.Furion()
