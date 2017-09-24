@@ -71,7 +71,7 @@ function ItemCooldown.OnDraw()
 
 	for i = 1, Heroes.Count() do
 		local hero = Heroes.Get(i)
-		if not Entity.IsDormant(hero) and not NPC.IsIllusion(hero) and Entity.IsAlive(hero) then
+		if not Entity.IsSameTeam(myHero, hero) and not Entity.IsDormant(hero) and not NPC.IsIllusion(hero) and Entity.IsAlive(hero) then
 			ItemCooldown.DrawDisplay(hero)
 		end
 	end
