@@ -7,6 +7,66 @@ JunglFarm.font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 JunglFarm.fontNps = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
 local coints
 local ucanmove
+local PlayerNameTable = {}
+local CointPlayerName = 1
+local NeedTime = 0
+local ochered = 1
+local IHaveNick = false
+
+function JunglFarm.OnGameStart()
+	local PlayerNameTable = {}
+	local CointPlayerName = 1
+	local NeedTime = 0
+	local ochered = 1
+	local IHaveNick = false
+end
+
+function JunglFarm.OnUpdate()
+	if not Menu.IsEnabled(JunglFarm.optionEnable) then return end
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_sand_king" then return end
+	
+	if PlayerNameTable and IHaveNick then
+		ChatMessage = ""
+		for p = 1,#PlayerNameTable do
+			if PlayerNameTable[p] ~= nil then
+				ChatMessage = PlayerNameTable[p] .. ", ".. ChatMessage
+				if IHaveNick and p == #PlayerNameTable then
+					IHaveNick = false
+				end
+			end
+		end
+	end	
+	Renderer.DrawText(JunglFarm.font, 1000, 500,ChatMessage, 1)	
+	if GameRules.GetGameState() == 4 and not IHaveNick then
+		if NeedTime <= GameRules.GetGameTime() and ochered == 1 then
+			NeedTime = GameRules.GetGameTime() + 10
+			ochered = 2
+		end
+		if NeedTime <= GameRules.GetGameTime() and ochered == 2 then
+			Engine.ExecuteCommand("say_team  Приветствую вас")
+			NeedTime = GameRules.GetGameTime() + 2
+			ochered = 3
+		end
+		if NeedTime <= GameRules.GetGameTime() and ochered == 3 then
+			Engine.ExecuteCommand('say_team  Я "' .. Player.GetName(Players.GetLocal()) .. '" автоматический бот, который фармит в лесу')
+			NeedTime = GameRules.GetGameTime() + 2
+			ochered = 4
+		end
+		if NeedTime <= GameRules.GetGameTime() and ochered == 4 then
+			Engine.ExecuteCommand("say_team  Обижаться на меня не стоит. Я лишь на этапе Alpha теста")
+			NeedTime = GameRules.GetGameTime() + 2
+			ochered = 5
+		end
+		if NeedTime <= GameRules.GetGameTime() and ochered == 5 then
+			Engine.ExecuteCommand("say_team  Вы можете написать отзыв у меня в профиле стим, он открыт для всех")
+			NeedTime = GameRules.GetGameTime() + 2
+			ochered = 6
+		end
+	end
+end
+
 function JunglFarm.OnDraw()
 	if not Menu.IsEnabled(JunglFarm.optionEnable) then return end
 	if Menu.IsEnabled(JunglFarm.autopick) then
@@ -32,6 +92,10 @@ function JunglFarm.OnDraw()
 		JunglFarm.DrawCircle(myPos, 1000, 2)
 		JunglFarm.DrawCircle(myPos, 525, 2)
 	end
+	for j = 1,#PlayerNameTable do
+		table.remove(PlayerNameTable)
+	end
+	local CointPlayerName = 1
 	for i = 1, NPCs.Count() do
 		local unitNA = NPCs.Get(i)
 		if Entity.IsAlive(unitNA) then
@@ -50,10 +114,18 @@ function JunglFarm.OnDraw()
 				if NPC.GetUnitName(unitNA) then
 					CointNPC = CointNPC + 1
 				end	
-			else
 			end
 		end
+		if unitNA and Entity.IsHero(unitNA) and Entity.IsSameTeam(myHero, unitNA)then
+			local PlayerName = Player.GetName(Entity.GetOwner(unitNA))
+			if PlayerName ~= Player.GetName(Players.GetLocal()) then
+				PlayerNameTable[CointPlayerName] = PlayerName
+				CointPlayerName = CointPlayerName + 1
+			end
+		end 
 	end	
+	
+	
 	my_team = Entity.GetTeamNum(myHero)
 	if my_team ~= 3 then
 		spot = {Vector(-2089,-2833,256),Vector(-1802,-4071,141),Vector(-793,-3263,256),Vector(654,-4439,384),Vector(3334,-4575,256),Vector(4652,-4210,256)} 
@@ -156,18 +228,18 @@ function JunglFarm.LvlUp(myHero)
 end
 
 function JunglFarm.DrawCircle(UnitPos, radius, index)
-	local size_x, size_y = Renderer.GetScreenSize()
-	local x1, y1 = Renderer.WorldToScreen(UnitPos)
-	if x1 < size_x and x1 > 0 and y1 < size_y and y1 > 0 then
-		local x4, y4, x3, y3, visible3
-		local dergee = index
-		for angle = 0, 360 / dergee do
-			x4 = 0 * math.cos(angle * dergee / 57.3) - radius * math.sin(angle * dergee / 57.3)
-			y4 = radius * math.cos(angle * dergee / 57.3) + 0 * math.sin(angle * dergee / 57.3)
-			x3,y3 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
-			Renderer.DrawLine(x1,y1,x3,y3)
-			x1,y1 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
-		end
-	end
+  local size_x, size_y = Renderer.GetScreenSize()
+  local x1, y1 = Renderer.WorldToScreen(UnitPos)
+  if x1 < size_x and x1 > 0 and y1 < size_y and y1 > 0 then
+    local x4, y4, x3, y3, visible3
+    local dergee = index
+    for angle = 0, 360 / dergee do
+      x4 = 0 * math.cos(angle * dergee / 57.3) - radius * math.sin(angle * dergee / 57.3)
+      y4 = radius * math.cos(angle * dergee / 57.3) + 0 * math.sin(angle * dergee / 57.3)
+      x3,y3 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
+      Renderer.DrawLine(x1,y1,x3,y3)
+      x1,y1 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
+    end
+  end
 end
 return JunglFarm

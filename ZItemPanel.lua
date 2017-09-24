@@ -19,10 +19,10 @@ ItemPanel.Locale = {
 	}
 }
 
-ItemPanel.Size = Menu.AddOption({ "Utility","Item Panel" }, "Size", "", 16, 64, 8)
+ItemPanel.Size = Menu.AddOption({ "Kostya12rus","Item Panel" }, "Size", "", 16, 64, 8)
 
 ItemPanel.IsOpen = false
-ItemPanel.IconPath = "resource/flash3/images/items/"
+ItemPanel.IconPath = "~/Kostya12rus/Items/"
 ItemPanel.ItemIcons = {}
 ItemPanel.HeroPath = "resource/flash3/images/heroes/"
 ItemPanel.HeroIcons = {}
@@ -193,6 +193,35 @@ ItemPanel.items["item_dagon_2"] = "Dagon2"
 ItemPanel.items["item_dagon_3"] = "Dagon3"
 ItemPanel.items["item_dagon_4"] = "Dagon4"
 ItemPanel.items["item_dagon_5"] = "Dagon5" 
+
+
+
+ItemPanel.items["item_spinner"] = "Spiner" 
+ItemPanel.items["item_memolator"] = "Memolator" 
+ItemPanel.items["item_mega_spinner"] = "Mega Spinner" 
+ItemPanel.items["item_hoverboard"] = "Hoverboard" 
+ItemPanel.items["item_boots_of_invisibility"] = "Boots Of Invisibility" 
+ItemPanel.items["item_imba_phase_boots_2"] = "Abibas" 
+ItemPanel.items["item_memolator2"] = "Memolator2"  
+ItemPanel.items["item_baldezh"] = "Baldezh"
+ItemPanel.items["item_cosmobaldezh"] = "Cosmobaldezh"
+ItemPanel.items["item_superbaldezh"] = "Superbaldezh"
+ItemPanel.items["item_uebator"] = "Uebator"
+ItemPanel.items["item_mem_sange"] = "Mem Sange"
+ItemPanel.items["item_mem_yasha"] = "Mem Yasha"
+ItemPanel.items["item_mem_cheburek"] = "Mem Cheburek"
+ItemPanel.items["item_mem_chebureksword"] = "Mem ChebureksWord"
+ItemPanel.items["item_mem_sange_yasha"] = "Mem Sange Yasha"
+ItemPanel.items["item_mem_sange_cheburek"] = "Mem Sange Cheburek"
+ItemPanel.items["item_sobolev"] = "Sobolev"
+ItemPanel.items["item_larin"] = "Larin"
+ItemPanel.items["item_burgers"] = "Burgers"
+ItemPanel.items["item_sharoeb"] = "Sharoeb"
+ItemPanel.items["item_kolbasa"] = "Kolbasa"
+ItemPanel.items["item_ultimate_mem"] = "Aganim Mem"
+ItemPanel.items["item_tar2"] = "Tar2"
+ItemPanel.items["item_butter2"] = "Bf2"
+ItemPanel.items["item_divine_rapier_lapka"] = "Ultra Rapier"
 
 ItemPanel.OnAir = false
 local offsetPosX = 0

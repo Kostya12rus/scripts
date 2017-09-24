@@ -187,6 +187,34 @@ EconPanel.item2price["item_vladmir"] = 2275 -- "Vladmir's Offering"
 EconPanel.item2price["item_wraith_band"] = 485 -- "Wraith Band"
 EconPanel.item2price["item_yasha"] = 2050 -- "Yasha"
 
+
+EconPanel.item2price["item_spinner"] = 3000
+EconPanel.item2price["item_memolator"] = 3500
+EconPanel.item2price["item_mega_spinner"] = 6000 
+EconPanel.item2price["item_hoverboard"] = 3000
+EconPanel.item2price["item_boots_of_invisibility"] = 2240
+EconPanel.item2price["item_imba_phase_boots_2"] = 2480
+EconPanel.item2price["item_memolator2"] = 7000 
+EconPanel.item2price["item_baldezh"] = 1370
+EconPanel.item2price["item_cosmobaldezh"] = 2670
+EconPanel.item2price["item_superbaldezh"] = 3970
+EconPanel.item2price["item_uebator"] = 11640
+EconPanel.item2price["item_mem_sange"] = 1750
+EconPanel.item2price["item_mem_yasha"] = 1750
+EconPanel.item2price["item_mem_cheburek"] = 2190
+EconPanel.item2price["item_mem_chebureksword"] = 5690
+EconPanel.item2price["item_mem_sange_yasha"] = 3500
+EconPanel.item2price["item_mem_sange_cheburek"] = 3940
+EconPanel.item2price["item_sobolev"] = 3000
+EconPanel.item2price["item_larin"] = 3000
+EconPanel.item2price["item_burgers"] = 6000
+EconPanel.item2price["item_sharoeb"] = 8250
+EconPanel.item2price["item_kolbasa"] = 5000
+EconPanel.item2price["item_ultimate_mem"] = 8400
+EconPanel.item2price["item_tar2"] = 10400
+EconPanel.item2price["item_butter2"] = 11050
+EconPanel.item2price["item_divine_rapier_lapka"] = 12000
+
 function EconPanel.OnUpdate()
 	if Menu.IsEnabled(EconPanel.optionEnable) and Menu.IsKeyDownOnce(EconPanel.key) then
 		EconPanel.isOpen = not EconPanel.isOpen

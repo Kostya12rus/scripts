@@ -1,16 +1,28 @@
 local MultiCheat = {}
 MultiCheat.optionEnable = Menu.AddOption({"Kostya12rus","MultiCheat"}, "1 Activate", "")
 MultiCheat.Rofl = Menu.AddOption({"Kostya12rus","MultiCheat"}, "2 Rofle", "")
-MultiCheat.FurAndShamBlock = Menu.AddOption({"Kostya12rus","MultiCheat","3 FurAndShamBlock"}, "Activate", "")
-MultiCheat.BlockKey = Menu.AddKeyOption({"Kostya12rus","MultiCheat","3 FurAndShamBlock"},"BlockKey",Enum.ButtonCode.KEY_D)
+MultiCheat.Draw_Item = Menu.AddOption({"Kostya12rus","MultiCheat"}, "3 Draw Item", "")
+MultiCheat.FurAndShamBlock = Menu.AddOption({"Kostya12rus","MultiCheat","4 FurAndShamBlock"}, "Activate", "")
+MultiCheat.Test = Menu.AddOption({"Kostya12rus","MultiCheat"}, "Test", "")
+MultiCheat.BlockKey = Menu.AddKeyOption({"Kostya12rus","MultiCheat","4 FurAndShamBlock"},"BlockKey",Enum.ButtonCode.KEY_D)
 MultiCheat.Font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 MultiCheat.FontSkill = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
-MultiCheat.imgmesad = Renderer.LoadImage("resource/flash3/images/spellicons/invoker_sun_strike.png")
+
+MultiCheat.gem =                   Renderer.LoadImage("resource/flash3/images/items/gem.png")
+MultiCheat.ward_sentry =           Renderer.LoadImage("resource/flash3/images/items/ward_sentry.png")
+MultiCheat.ward_observer =         Renderer.LoadImage("resource/flash3/images/items/ward_observer.png")
+MultiCheat.ward_dispenser_sentry = Renderer.LoadImage("resource/flash3/images/items/ward_dispenser_sentry.png")
+MultiCheat.ward_dispenser =        Renderer.LoadImage("resource/flash3/images/items/ward_dispenser.png")
+MultiCheat.rapier =                Renderer.LoadImage("resource/flash3/images/items/rapier.png")
+MultiCheat.dust =                  Renderer.LoadImage("resource/flash3/images/items/dust.png")
+MultiCheat.smoke_of_deceit =       Renderer.LoadImage("resource/flash3/images/items/smoke_of_deceit.png")
 
 NeedTime = 0
 AnimTable = {}
 HeroTable = {}
 castpoint = {}
+TableItemAndHero = {}
+
 function MultiCheat.OnGameStart()
   NeedTime = 0
 end
@@ -31,7 +43,15 @@ function MultiCheat.OnUnitAnimation(animation)
     table.insert(castpoint, animation.playbackRate)
 end
 function MultiCheat.OnDraw()
-	MultiCheat.test()
+	if not Menu.IsEnabled(MultiCheat.optionEnable) then return end
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end 
+	if Menu.IsEnabled(MultiCheat.Draw_Item) then 
+		MultiCheat.DrawOwerItem()
+	end
+	if Menu.IsEnabled(MultiCheat.Test) then 
+		MultiCheat.test()
+	end
     -- if AnimTable ~= nil then
         -- xpos = 100
         -- for i = 1, #AnimTable do
@@ -80,46 +100,109 @@ function MultiCheat.OnUpdate()
 end
 
 function MultiCheat.test()
-	-- local size_x, size_y = Renderer.GetScreenSize() --team 2
-	-- local nedx = math.floor(size_x/3+11)
-	-- local Nedy = 45
-	-- local gorizont = 60
-	-- local vertical = gorizont
-	-- Renderer.DrawFilledRect(nedx, Nedy, gorizont, vertical)
-	-- local nedx = nedx + 63
-	-- Renderer.DrawFilledRect(nedx, Nedy, gorizont, vertical)
-	-- local nedx = nedx + 63
-	-- Renderer.DrawFilledRect(nedx, Nedy, gorizont, vertical)
-	-- local nedx = nedx + 63
-	-- Renderer.DrawFilledRect(nedx, Nedy, gorizont, vertical)
-	-- local nedx = nedx + 63
-	-- Renderer.DrawFilledRect(nedx, Nedy, gorizont, vertical)
+	local size_x, size_y = Renderer.GetScreenSize()
+	msg = ""
+	local myHero = Heroes.GetLocal()
+	for l = 1, NPCs.Count() do
+		local unitNA = NPCs.Get(l)
+		if unitNA then
+			if Entity.IsHero(unitNA) and Entity.IsSameTeam(myHero, unitNA)then
+				local PlayerName = Player.GetName(Entity.GetOwner(unitNA))
+				if PlayerName ~= Player.GetName(Players.GetLocal()) then
+					msg = PlayerName ..", ".. msg
+				end
+			end 
+			if l == NPCs.Count() then
+				 Renderer.DrawTextCenteredX(MultiCheat.Font, size_x/2, 50, msg, 1)
+			end
+		end
+	end	
 	
+	local myHero = Heroes.GetLocal()
+	local x1 = 1000
+	local y1 = 100
+	local x2 = x1 + 500
+	local y2 = y1
 	
-	-- local size_x2, size_y2 = Renderer.GetScreenSize()
-	-- local nedx2 = math.floor(size_x/1.85)
-	-- local Nedy2 = 45
-	-- Renderer.DrawFilledRect(nedx2, Nedy2, gorizont, vertical)
-	-- local nedx2 = nedx2 + 63
-	-- Renderer.DrawFilledRect(nedx2, Nedy2, gorizont, vertical)
-	-- local nedx2 = nedx2 + 63
-	-- Renderer.DrawFilledRect(nedx2, Nedy2, gorizont, vertical)
-	-- local nedx2 = nedx2 + 63
-	-- Renderer.DrawFilledRect(nedx2, Nedy2, gorizont, vertical)
-	-- local nedx2 = nedx2 + 63
-	-- Renderer.DrawFilledRect(nedx2, Nedy2, gorizont, vertical)
-	-- nesadx=1000
-	-- safafy=100
-	-- for i = 1, NPCs.Count() do
-		-- local entity = NPCs.Get(i) 
-		-- if entity and Entity.IsHero(entity) then
-			-- local name = NPC.GetUnitName(entity)
-			-- local playid = (Hero.GetPlayerID(entity)-4)
-			-- Renderer.DrawText(MultiCheat.Font, (nesadx + 50), safafy, name, 1)
-			-- Renderer.DrawText(MultiCheat.Font, nesadx, safafy, playid, 1)
-			-- safafy = safafy + 20
-		-- end 
-	-- end
+	for asf = 1, NPCs.Count() do
+	local asfasfa = NPCs.Get(asf) 
+		if asfasfa and Entity.IsHero(asfasfa) then
+			local HeroName = NPC.GetUnitName(asfasfa)
+				
+			local slotNum = 9
+			for q = 0, slotNum-1 do
+				local item = NPC.GetItemByIndex(asfasfa, q)
+				if item then
+					itemName = Ability.GetName(item)
+					Renderer.DrawTextCenteredX(MultiCheat.Font, x2, y2, itemName, 1)
+					y2 = y2 + 20
+				end
+			end
+			
+			Renderer.DrawText(MultiCheat.Font, x1, y1, HeroName, 1)
+			y1 = y2
+		end
+	end
+	
+end
+
+function MultiCheat.DrawOwerItem()
+	local size_x, size_y = Renderer.GetScreenSize()
+	TableItemAndHero = {
+	 [1] =   math.floor(size_x/3+11)         
+	,[2] =  (math.floor(size_x/3+11) + 63)  
+	,[3] =  (math.floor(size_x/3+11) + 126) 
+	,[4] =  (math.floor(size_x/3+11) + 189) 
+	,[5] =  (math.floor(size_x/3+11) + 252) 
+	,[6] =   math.floor(size_x/1.85)         
+	,[7] =  (math.floor(size_x/1.85) + 63)
+	,[8] =  (math.floor(size_x/1.85) + 126)
+	,[9] =  (math.floor(size_x/1.85) + 189)
+	,[10] = (math.floor(size_x/1.85) + 252)}
+	for i = 1, NPCs.Count() do
+		local entity = NPCs.Get(i) 
+		if entity and Entity.IsHero(entity) then
+			local HeroName = NPC.GetUnitName(entity)
+			local CordY = 65
+			local ImgSize = 60
+			local ImgSizeY = ImgSize-10
+			local Player_ID = Hero.GetPlayerID(entity)+1
+			local CordX = TableItemAndHero[Player_ID]
+			Renderer.SetDrawColor(255, 255, 255, 255)
+			if NPC.HasItem(entity, "item_rapier", 1) then
+				Renderer.DrawImage(MultiCheat.rapier, CordX, CordY, ImgSize, ImgSizeY)
+				CordY = (CordY + ImgSizeY - 1)
+			end
+			if NPC.HasItem(entity, "item_gem", 1) then
+				Renderer.DrawImage(MultiCheat.gem, CordX, CordY, ImgSize, ImgSizeY)
+				CordY = (CordY + ImgSizeY - 1)
+			end
+			if NPC.HasItem(entity, "item_ward_dispenser", 1) then
+				Renderer.DrawImage(MultiCheat.ward_dispenser, CordX, CordY, ImgSize, ImgSizeY)
+				CordY = (CordY + ImgSizeY - 1)
+			end
+			if NPC.HasItem(entity, "item_ward_dispenser_sentry", 1) then
+				Renderer.DrawImage(MultiCheat.ward_dispenser_sentry, CordX, CordY, ImgSize, ImgSizeY)
+				CordY = (CordY + ImgSizeY - 1)
+			end
+			if NPC.HasItem(entity, "item_ward_sentry", 1) then
+				Renderer.DrawImage(MultiCheat.ward_sentry, CordX, CordY, ImgSize, ImgSizeY)
+				CordY = (CordY + ImgSizeY - 1)
+			end
+			if NPC.HasItem(entity, "item_ward_observer", 1) then
+				Renderer.DrawImage(MultiCheat.ward_observer, CordX, CordY, ImgSize, ImgSizeY)
+				CordY = (CordY + ImgSizeY - 1)
+			end
+			if NPC.HasItem(entity, "item_dust", 1) then
+				Renderer.DrawImage(MultiCheat.dust, CordX, CordY, ImgSize, ImgSizeY)
+				CordY = (CordY + ImgSizeY - 1)
+			end
+			if NPC.HasItem(entity, "item_smoke_of_deceit", 1) then
+				Renderer.DrawImage(MultiCheat.smoke_of_deceit, CordX, CordY, ImgSize, ImgSizeY)
+				CordY = (CordY + ImgSizeY - 1)
+			end
+		end 
+	end
 end
 
 function MultiCheat.Furion()
@@ -135,19 +218,19 @@ function MultiCheat.Furion()
   local callforce = NPC.GetAbilityByIndex(myHero, 2)
   local lvlcallforce = Ability.GetLevel(callforce)
   local RodOfAtos = NPC.GetItem(myHero, "item_rod_of_atos", true)
-  local nnneeedmanna = 0
+  local need_mana_for_cast = 0
   if Ability.IsReady(callforce) then
-    nnneeedmanna = nnneeedmanna + Ability.GetManaCost(callforce)
+    need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(callforce)
     if RodOfAtos and Ability.IsCastable(RodOfAtos, NPC.GetMana(myHero)) then
-      nnneeedmanna = nnneeedmanna + Ability.GetManaCost(RodOfAtos)
+      need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(RodOfAtos)
       if Ability.IsReady(sprout) then
-        nnneeedmanna = nnneeedmanna + Ability.GetManaCost(sprout)
+        need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(sprout)
       end
     elseif Ability.IsReady(sprout) then
-      nnneeedmanna = nnneeedmanna + Ability.GetManaCost(sprout)
+      need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(sprout)
     end
   end
-  if Menu.IsKeyDown(MultiCheat.BlockKey) and MyAndEnemyDistanse <= distanse_sprout and Ability.IsReady(callforce) and lvlcallforce == 4 and NPC.GetMana(myHero) >= nnneeedmanna then
+  if Menu.IsKeyDown(MultiCheat.BlockKey) and MyAndEnemyDistanse <= distanse_sprout and Ability.IsReady(callforce) and lvlcallforce == 4 and NPC.GetMana(myHero) >= need_mana_for_cast then
     if RodOfAtos and Ability.IsCastable(RodOfAtos, NPC.GetMana(myHero)) then Ability.CastTarget(RodOfAtos, enemy) end
     if Ability.IsReady(sprout) and #trees < 5 then
         Ability.CastTarget(sprout, enemy)
@@ -173,19 +256,19 @@ function MultiCheat.Shadowshaman()
   local distanse_voodoo = Ability.GetCastRange(voodoo)
   local Serpent_Ward = NPC.GetAbilityByIndex(myHero, 3)
   local RodOfAtos = NPC.GetItem(myHero, "item_rod_of_atos", true)
-  local nnneeedmanna = 0
+  local need_mana_for_cast = 0
   if Ability.IsReady(Serpent_Ward) then
-    nnneeedmanna = nnneeedmanna + Ability.GetManaCost(Serpent_Ward)
+    need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(Serpent_Ward)
     if RodOfAtos and Ability.IsCastable(RodOfAtos, NPC.GetMana(myHero)) then
-      nnneeedmanna = nnneeedmanna + Ability.GetManaCost(RodOfAtos)
+      need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(RodOfAtos)
       if Ability.IsReady(voodoo) then
-        nnneeedmanna = nnneeedmanna + Ability.GetManaCost(voodoo)
+        need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(voodoo)
       end
     elseif Ability.IsReady(voodoo) then
-      nnneeedmanna = nnneeedmanna + Ability.GetManaCost(voodoo)
+      need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(voodoo)
     end
   end
-  if Menu.IsKeyDown(MultiCheat.BlockKey) and MyAndEnemyDistanse <= distanse_voodoo and Ability.IsReady(Serpent_Ward) and NPC.GetMana(myHero) >= nnneeedmanna then
+  if Menu.IsKeyDown(MultiCheat.BlockKey) and MyAndEnemyDistanse <= distanse_voodoo and Ability.IsReady(Serpent_Ward) and NPC.GetMana(myHero) >= need_mana_for_cast then
     if RodOfAtos and Ability.IsCastable(RodOfAtos, NPC.GetMana(myHero)) then Ability.CastTarget(RodOfAtos, enemy) end
     if Ability.IsReady(voodoo) then
       Ability.CastTarget(voodoo, enemy)
