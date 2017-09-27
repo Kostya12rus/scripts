@@ -331,13 +331,13 @@ function MultiCheat.RoflTime()
 end
 
 function MultiCheat.BreakDance(hero)
-	if Menu.IsKeyDown(MultiCheat.BDKey) then
-		if tick <= GameRules.GetGameTime() then
-			local NeedPosinot = MultiCheat.PositionAngle(hero,180,1)
-			MultiCheat.MoveTo(NeedPosinot)
-			tick = GameRules.GetGameTime() + 0.001
-		end
-	end
+  if Menu.IsKeyDown(MultiCheat.BDKey) then
+    if tick <= GameRules.GetGameTime() then
+      local NeedPosinot = MultiCheat.PositionAngle(hero,180,1)
+      MultiCheat.MoveTo(NeedPosinot)
+      tick = GameRules.GetGameTime() + 0.001
+    end
+  end
 end
 
 --Untility function
