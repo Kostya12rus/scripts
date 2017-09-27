@@ -2,11 +2,14 @@ local MultiCheat = {}
 MultiCheat.optionEnable = Menu.AddOption({"Kostya12rus","MultiCheat"}, "1 Activate", "")
 MultiCheat.Rofl = Menu.AddOption({"Kostya12rus","MultiCheat"}, "2 Rofle", "")
 MultiCheat.Draw_Item = Menu.AddOption({"Kostya12rus","MultiCheat"}, "3 Draw Item", "")
-MultiCheat.FurAndShamBlock = Menu.AddOption({"Kostya12rus","MultiCheat","4 FurAndShamBlock"}, "Activate", "")
-MultiCheat.Test = Menu.AddOption({"Kostya12rus","MultiCheat"}, "Test", "")
-MultiCheat.BlockKey = Menu.AddKeyOption({"Kostya12rus","MultiCheat","4 FurAndShamBlock"},"BlockKey",Enum.ButtonCode.KEY_D)
+MultiCheat.NickAndItems = Menu.AddOption({"Kostya12rus","MultiCheat"}, "4 Nick And Items", "")
+MultiCheat.FurAndShamBlock = Menu.AddOption({"Kostya12rus","MultiCheat","5 FurAndShamBlock"}, "Activate", "")
+MultiCheat.BlockKey = Menu.AddKeyOption({"Kostya12rus","MultiCheat","5 FurAndShamBlock"},"BlockKey",Enum.ButtonCode.KEY_D)
+MultiCheat.BD = Menu.AddOption({"Kostya12rus","MultiCheat","6 Break Dance"}, "Activate", "")
+MultiCheat.BDKey = Menu.AddKeyOption({"Kostya12rus","MultiCheat","6 Break Dance"},"BlockKey",Enum.ButtonCode.KEY_T)
 MultiCheat.Font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 MultiCheat.FontSkill = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
+MultiCheat.Test = Menu.AddOption({"Kostya12rus","MultiCheat"}, "Test", "")
 
 MultiCheat.gem =                   Renderer.LoadImage("resource/flash3/images/items/gem.png")
 MultiCheat.ward_sentry =           Renderer.LoadImage("resource/flash3/images/items/ward_sentry.png")
@@ -22,9 +25,11 @@ AnimTable = {}
 HeroTable = {}
 castpoint = {}
 TableItemAndHero = {}
+tick = 0
 
 function MultiCheat.OnGameStart()
   NeedTime = 0
+  tick = 0
 end
 
 function MultiCheat.OnUnitAnimation(animation)
@@ -46,12 +51,12 @@ function MultiCheat.OnDraw()
 	if not Menu.IsEnabled(MultiCheat.optionEnable) then return end
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end 
-	if Menu.IsEnabled(MultiCheat.Draw_Item) then 
-		MultiCheat.DrawOwerItem()
-	end
-	if Menu.IsEnabled(MultiCheat.Test) then 
-		MultiCheat.test()
-	end
+	if Menu.IsEnabled(MultiCheat.Draw_Item) then MultiCheat.DrawOwerItem() end
+	if Menu.IsEnabled(MultiCheat.NickAndItems) then MultiCheat.NickAndItem() end
+	
+	if Menu.IsEnabled(MultiCheat.Test) then MultiCheat.test() end
+	
+	
     -- if AnimTable ~= nil then
         -- xpos = 100
         -- for i = 1, #AnimTable do
@@ -85,6 +90,7 @@ function MultiCheat.OnDraw()
         -- DrawY = DrawY + 20
       -- end
   -- end
+  
 end
 
 function MultiCheat.OnUpdate()
@@ -93,6 +99,7 @@ function MultiCheat.OnUpdate()
   if not myHero then return end 
   
   if Menu.IsEnabled(MultiCheat.Rofl) and Entity.IsAlive(myHero) then MultiCheat.RoflTime() end -- rofl evry 15 second
+  if Menu.IsEnabled(MultiCheat.BD) and Entity.IsAlive(myHero) then MultiCheat.BreakDance(myHero) end
   
   if NPC.GetUnitName(myHero) == "npc_dota_hero_furion" then MultiCheat.Furion()
   elseif NPC.GetUnitName(myHero) == "npc_dota_hero_shadow_shaman" then MultiCheat.Shadowshaman()
@@ -100,6 +107,42 @@ function MultiCheat.OnUpdate()
 end
 
 function MultiCheat.test()
+	local myHero = Heroes.GetLocal()
+	local teactpos = 360 / 4
+	local distansee = 110
+	
+	for a = 1, NPCs.Count() do
+		local jeaeke = NPCs.Get(a)
+		if Entity.IsHero(jeaeke) then
+			if Entity.IsSameTeam(myHero, jeaeke) then
+				Renderer.SetDrawColor(0, 255, 0, 255)
+			else
+				Renderer.SetDrawColor(255, 0, 0, 255)
+			end
+			x1,y1 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*1+teactpos/2,distansee))
+			x2,y2 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*2+teactpos/2,distansee))
+			x3,y3 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*3+teactpos/2,distansee))
+			x4,y4 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*4+teactpos/2,distansee))
+			
+			Renderer.DrawLine(x1, y1, x2,  y2)
+			Renderer.DrawLine(x2, y2, x3,  y3)
+			Renderer.DrawLine(x3, y3, x4,  y4)
+			Renderer.DrawLine(x1, y1, x4,  y4)
+			
+			Renderer.DrawLine(x1, y1, x1, y1-50)
+			Renderer.DrawLine(x2, y2, x2, y2-50)
+			Renderer.DrawLine(x3, y3, x3, y3-50)
+			Renderer.DrawLine(x4, y4, x4, y4-50)
+			
+			Renderer.DrawLine(x1, y1-50, x2,  y2-50)
+			Renderer.DrawLine(x2, y2-50, x3,  y3-50)
+			Renderer.DrawLine(x3, y3-50, x4,  y4-50)
+			Renderer.DrawLine(x1, y1-50, x4,  y4-50)
+		end
+	end
+end
+
+function MultiCheat.NickAndItem()
 	local size_x, size_y = Renderer.GetScreenSize()
 	msg = ""
 	local myHero = Heroes.GetLocal()
@@ -281,9 +324,59 @@ end
 
 function MultiCheat.RoflTime()
   ostime = GameRules.GetGameTime()
-  if NeedTime  <= ostime then
+  if NeedTime <= ostime then
     Engine.ExecuteCommand("say /laugh")
     NeedTime = ostime + 15
   end
 end
+
+function MultiCheat.BreakDance(hero)
+	if Menu.IsKeyDown(MultiCheat.BDKey) then
+		if tick <= GameRules.GetGameTime() then
+			local NeedPosinot = MultiCheat.PositionAngle(hero,180,1)
+			MultiCheat.MoveTo(NeedPosinot)
+			tick = GameRules.GetGameTime() + 0.001
+		end
+	end
+end
+
+--Untility function
+
+-- Идти моему герою в заданную позицию
+function MultiCheat.MoveTo(vector) 
+  Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, Heroes.GetLocal(), vector, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY)
+end
+
+-- Найти точку от NPS в заданном угле и дистации
+function MultiCheat.PositionAngle(nps,rotation,range)
+  local angle = Entity.GetRotation(nps)
+  local angleOffset = Angle(0, 45+rotation, 0)
+  angle:SetYaw(angle:GetYaw() + angleOffset:GetYaw())
+  local x,y,z = angle:GetVectors()
+  local direction = x + y + z
+  direction:SetZ(0)
+  direction:Normalize()
+  direction:Scale(range)
+  local origin = NPC.GetAbsOrigin(nps)
+  NeedPos = origin + direction
+  return NeedPos
+end
+
+-- Рисовать круг под NPS
+function MultiCheat.DrawCircle(UnitPos, radius, index)
+  local size_x, size_y = Renderer.GetScreenSize()
+  local x1, y1 = Renderer.WorldToScreen(UnitPos)
+  if x1 < size_x and x1 > 0 and y1 < size_y and y1 > 0 then
+    local x4, y4, x3, y3, visible3
+    local dergee = index
+    for angle = 0, 360 / dergee do
+      x4 = 0 * math.cos(angle * dergee / 57.3) - radius * math.sin(angle * dergee / 57.3)
+      y4 = radius * math.cos(angle * dergee / 57.3) + 0 * math.sin(angle * dergee / 57.3)
+      x3,y3 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
+      Renderer.DrawLine(x1,y1,x3,y3)
+      x1,y1 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
+    end
+  end
+end
+
 return MultiCheat
