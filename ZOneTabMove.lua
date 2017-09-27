@@ -1,6 +1,6 @@
 local MovePosition = {}
 MovePosition.optionEnable = Menu.AddOption({"Kostya12rus","Waltz"}, "Activate", "")
-MovePosition.optionKey = Menu.AddKeyOption({"Kostya12rus","Waltz"},"Key for waltz",Enum.ButtonCode.KEY_D)
+MovePosition.optionKey = Menu.AddKeyOption({"Kostya12rus","Waltz"}, "Key for waltz",Enum.ButtonCode.KEY_D)
 local tick = 0
 
 function MovePosition.OnGameStart()
@@ -12,7 +12,7 @@ function MovePosition.OnUpdate()
   local myHero = Heroes.GetLocal()
   if not myHero then return end 
   local degree = 160  -- угол поворота персонажа       можно менять   
-  local timign = 0.15 -- повторно задать угол поворота можно менять   
+  local timing = 0.15 -- повторно задать угол поворота можно менять   
   if Menu.IsKeyDown(MovePosition.optionKey) then
     if tick <= GameRules.GetGameTime() then
       local angle = Entity.GetRotation(myHero)
@@ -24,9 +24,9 @@ function MovePosition.OnUpdate()
       direction:Normalize()
       direction:Scale(1)
       local origin = NPC.GetAbsOrigin(myHero)
-      tohere = origin + direction
-      MovePosition.NeedMove(myHero , tohere)
-      tick = GameRules.GetGameTime() + timign
+      NeedPos = origin + direction
+      MovePosition.NeedMove(myHero, NeedPos)
+      tick = GameRules.GetGameTime() + timing
     end
   end
 end
