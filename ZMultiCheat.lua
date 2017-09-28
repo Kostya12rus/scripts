@@ -11,21 +11,13 @@ MultiCheat.Font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 MultiCheat.FontSkill = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
 MultiCheat.Test = Menu.AddOption({"Kostya12rus","MultiCheat"}, "Test", "")
 
-MultiCheat.gem =                   Renderer.LoadImage("resource/flash3/images/items/gem.png")
-MultiCheat.ward_sentry =           Renderer.LoadImage("resource/flash3/images/items/ward_sentry.png")
-MultiCheat.ward_observer =         Renderer.LoadImage("resource/flash3/images/items/ward_observer.png")
-MultiCheat.ward_dispenser_sentry = Renderer.LoadImage("resource/flash3/images/items/ward_dispenser_sentry.png")
-MultiCheat.ward_dispenser =        Renderer.LoadImage("resource/flash3/images/items/ward_dispenser.png")
-MultiCheat.rapier =                Renderer.LoadImage("resource/flash3/images/items/rapier.png")
-MultiCheat.dust =                  Renderer.LoadImage("resource/flash3/images/items/dust.png")
-MultiCheat.smoke_of_deceit =       Renderer.LoadImage("resource/flash3/images/items/smoke_of_deceit.png")
-
 NeedTime = 0
 AnimTable = {}
 HeroTable = {}
 castpoint = {}
 TableItemAndHero = {}
 tick = 0
+MultiCheat.ImgItem = {}
 
 function MultiCheat.OnGameStart()
   NeedTime = 0
@@ -108,7 +100,8 @@ end
 
 function MultiCheat.test()
 	local myHero = Heroes.GetLocal()
-	local teactpos = 360 / 4
+	local Number_Of_Sides = 4
+	local teactpos = 360 / Number_Of_Sides
 	local distansee = 110
 	
 	for a = 1, NPCs.Count() do
@@ -119,25 +112,18 @@ function MultiCheat.test()
 			else
 				Renderer.SetDrawColor(255, 0, 0, 255)
 			end
-			x1,y1 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*1+teactpos/2,distansee))
-			x2,y2 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*2+teactpos/2,distansee))
-			x3,y3 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*3+teactpos/2,distansee))
-			x4,y4 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*4+teactpos/2,distansee))
-			
-			Renderer.DrawLine(x1, y1, x2,  y2)
-			Renderer.DrawLine(x2, y2, x3,  y3)
-			Renderer.DrawLine(x3, y3, x4,  y4)
-			Renderer.DrawLine(x1, y1, x4,  y4)
-			
-			Renderer.DrawLine(x1, y1, x1, y1-50)
-			Renderer.DrawLine(x2, y2, x2, y2-50)
-			Renderer.DrawLine(x3, y3, x3, y3-50)
-			Renderer.DrawLine(x4, y4, x4, y4-50)
-			
-			Renderer.DrawLine(x1, y1-50, x2,  y2-50)
-			Renderer.DrawLine(x2, y2-50, x3,  y3-50)
-			Renderer.DrawLine(x3, y3-50, x4,  y4-50)
-			Renderer.DrawLine(x1, y1-50, x4,  y4-50)
+			for o = 1,Number_Of_Sides do
+					x1,y1 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*o+teactpos/2,distansee))
+				if o ~= Number_Of_Sides then
+					x2,y2 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*(o+1)+teactpos/2,distansee))
+				else
+					x2,y2 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*1+teactpos/2,distansee))
+				end
+				MultiCheat.DrawLine(x1, y1, x2,  y2)
+				MultiCheat.DrawLine(x1, y1, x1, y1-50)
+				MultiCheat.DrawLine(x2, y2, x2, y2-50)
+				MultiCheat.DrawLine(x1, y1-50, x2,  y2-50)
+			end
 		end
 	end
 end
@@ -171,7 +157,6 @@ function MultiCheat.NickAndItem()
 	local asfasfa = NPCs.Get(asf) 
 		if asfasfa and Entity.IsHero(asfasfa) then
 			local HeroName = NPC.GetUnitName(asfasfa)
-				
 			local slotNum = 9
 			for q = 0, slotNum-1 do
 				local item = NPC.GetItemByIndex(asfasfa, q)
@@ -183,7 +168,11 @@ function MultiCheat.NickAndItem()
 			end
 			
 			Renderer.DrawText(MultiCheat.Font, x1, y1, HeroName, 1)
-			y1 = y2
+			if y1 ~= y2 then
+				y1 = y2
+			else
+				y1 = y2+20
+			end
 		end
 	end
 	
@@ -202,48 +191,35 @@ function MultiCheat.DrawOwerItem()
   ,[8] =  (math.floor(size_x/1.85) + 126)
   ,[9] =  (math.floor(size_x/1.85) + 189)
   ,[10] = (math.floor(size_x/1.85) + 252)}
+  ItemPanel = {"item_rapier","item_gem","item_ward_dispenser","item_ward_dispenser_sentry","item_ward_sentry","item_ward_observer","item_dust","item_smoke_of_deceit"}
   for i = 1, NPCs.Count() do
     local entity = NPCs.Get(i) 
     if entity and Entity.IsHero(entity) then
-      local HeroName = NPC.GetUnitName(entity)
       local CordY = 65
       local ImgSize = 60
       local ImgSizeY = ImgSize-10
       local Player_ID = Hero.GetPlayerID(entity)+1
       local CordX = TableItemAndHero[Player_ID]
+	  if CordX == nil then return end
       Renderer.SetDrawColor(255, 255, 255, 255)
-      if NPC.HasItem(entity, "item_rapier", 1) then
-       Renderer.DrawImage(MultiCheat.rapier, CordX, CordY, ImgSize, ImgSizeY)
-       CordY = (CordY + ImgSizeY - 1)
-      end
-      if NPC.HasItem(entity, "item_gem", 1) then
-       Renderer.DrawImage(MultiCheat.gem, CordX, CordY, ImgSize, ImgSizeY)
-       CordY = (CordY + ImgSizeY - 1)
-      end
-      if NPC.HasItem(entity, "item_ward_dispenser", 1) then
-        Renderer.DrawImage(MultiCheat.ward_dispenser, CordX, CordY, ImgSize, ImgSizeY)
-        CordY = (CordY + ImgSizeY - 1)
-      end
-      if NPC.HasItem(entity, "item_ward_dispenser_sentry", 1) then
-        Renderer.DrawImage(MultiCheat.ward_dispenser_sentry, CordX, CordY, ImgSize, ImgSizeY)
-        CordY = (CordY + ImgSizeY - 1)
-      end
-      if NPC.HasItem(entity, "item_ward_sentry", 1) then
-        Renderer.DrawImage(MultiCheat.ward_sentry, CordX, CordY, ImgSize, ImgSizeY)
-        CordY = (CordY + ImgSizeY - 1)
-      end
-      if NPC.HasItem(entity, "item_ward_observer", 1) then
-        Renderer.DrawImage(MultiCheat.ward_observer, CordX, CordY, ImgSize, ImgSizeY)
-        CordY = (CordY + ImgSizeY - 1)
-      end
-      if NPC.HasItem(entity, "item_dust", 1) then
-        Renderer.DrawImage(MultiCheat.dust, CordX, CordY, ImgSize, ImgSizeY)
-        CordY = (CordY + ImgSizeY - 1)
-      end
-      if NPC.HasItem(entity, "item_smoke_of_deceit", 1) then
-        Renderer.DrawImage(MultiCheat.smoke_of_deceit, CordX, CordY, ImgSize, ImgSizeY)
-        CordY = (CordY + ImgSizeY - 1)
-      end
+	  for items = 1, #ItemPanel do
+		for index_item = 0, 15 do
+		  local item = NPC.GetItemByIndex(entity, index_item)
+		  if item then
+		  local itemName = Ability.GetName(item)
+		    if ItemPanel[items] ==  itemName then
+		      tempName = ItemPanel[items]:gsub("item_", "")
+		      imageHandle = MultiCheat.ImgItem[tempName]
+		      if imageHandle == nil then
+		    	imageHandle = MultiCheat.ItemImage(tempName)
+		    	MultiCheat.ImgItem[tempName] = imageHandle
+		      end
+		      Renderer.DrawImage(imageHandle, CordX, CordY, ImgSize, ImgSizeY)
+		      CordY = (CordY + ImgSizeY - 1)
+		    end
+		  end
+		end
+	  end
     end 
   end
 end
@@ -341,6 +317,16 @@ function MultiCheat.BreakDance(hero)
 end
 
 --Untility function
+
+--Загрузить картинку вещи
+function MultiCheat.ItemImage(item)
+  return Renderer.LoadImage("~/Kostya12rus/Items/" ..item..".png")
+end 
+
+-- Рисовать черту
+function MultiCheat.DrawLine(x1,y1,x2,y2)
+  Renderer.DrawLine(x1, y1, x2,  y2)
+end
 
 -- Идти моему герою в заданную позицию
 function MultiCheat.MoveTo(vector) 
