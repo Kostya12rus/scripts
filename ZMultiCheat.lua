@@ -1,14 +1,22 @@
 local MultiCheat = {}
+
+MultiCheat.Font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
+MultiCheat.FontSkill = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
+MultiCheat.Font2 = Renderer.LoadFont("Tahoma", 11, Enum.FontWeight.EXTRABOLD)
 MultiCheat.optionEnable = Menu.AddOption({"Kostya12rus","MultiCheat"}, "1 Activate", "")
 MultiCheat.Rofl = Menu.AddOption({"Kostya12rus","MultiCheat"}, "2 Rofle", "")
-MultiCheat.Draw_Item = Menu.AddOption({"Kostya12rus","MultiCheat"}, "3 Draw Item", "")
+MultiCheat.Draw_Item = Menu.AddOption({"Kostya12rus","MultiCheat","3 Draw Item"}, "Draw Item ON/OFF", "")
+MultiCheat.Draw_Hud_HPandMANA = Menu.AddOption({"Kostya12rus","MultiCheat","3 Draw Item"}, "Draw HP and Mana ON/OFF", "")
+MultiCheat.Draw_InPosHeroHpAndMana = Menu.AddOption({"Kostya12rus","MultiCheat","3 Draw Item"}, "Draw HP and Mana In hero pos ON/OFF", "")
 MultiCheat.NickAndItems = Menu.AddOption({"Kostya12rus","MultiCheat"}, "4 Nick And Items", "")
 MultiCheat.FurAndShamBlock = Menu.AddOption({"Kostya12rus","MultiCheat","5 FurAndShamBlock"}, "Activate", "")
 MultiCheat.BlockKey = Menu.AddKeyOption({"Kostya12rus","MultiCheat","5 FurAndShamBlock"},"BlockKey",Enum.ButtonCode.KEY_D)
-MultiCheat.BD = Menu.AddOption({"Kostya12rus","MultiCheat","6 Break Dance"}, "Activate", "")
+MultiCheat.BD = Menu.AddOption({"Kostya12rus","MultiCheat","6 Break Dance"}, "Break Dance on/off", "")
 MultiCheat.BDKey = Menu.AddKeyOption({"Kostya12rus","MultiCheat","6 Break Dance"},"BlockKey",Enum.ButtonCode.KEY_T)
-MultiCheat.Font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
-MultiCheat.FontSkill = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
+MultiCheat.CsGoESPbole = Menu.AddOption({"Kostya12rus","MultiCheat","7 CsGO 3D ESP"}, "CsGo ESP on/off", "")
+MultiCheat.CsGoESPName = Menu.AddOption({"Kostya12rus","MultiCheat","7 CsGO 3D ESP"}, "CsGo ESP Name Hero on/off", "")
+MultiCheat.CsGoESPBox  = Menu.AddOption({"Kostya12rus","MultiCheat","7 CsGO 3D ESP"}, "CsGo ESP Draw Box on/off", "")
+MultiCheat.CsGoESPSize = Menu.AddOption({"Kostya12rus","MultiCheat","7 CsGO 3D ESP"}, "CsGo ESP Size", "", 3, 360, 1)
 MultiCheat.Test = Menu.AddOption({"Kostya12rus","MultiCheat"}, "Test", "")
 
 NeedTime = 0
@@ -18,6 +26,7 @@ castpoint = {}
 TableItemAndHero = {}
 tick = 0
 MultiCheat.ImgItem = {}
+MultiCheat.boolean = false
 
 function MultiCheat.OnGameStart()
   NeedTime = 0
@@ -38,51 +47,21 @@ function MultiCheat.OnUnitAnimation(animation)
     table.insert(AnimTable, animation.sequenceName)
     table.insert(HeroTable, NPC.GetUnitName(animation.unit))
     table.insert(castpoint, animation.playbackRate)
+	if animation.unit ~= Heroes.GetLocal() then return end
+	if (animation.activity == Enum.GameActivity.ACT_DOTA_RUN or animation.activity == Enum.GameActivity.ACT_DOTA_IDLE_RARE) then
+		Renderer.DrawTextCenteredX(MultiCheat.Font, 1000, 500, "true", 1)
+	end
 end
+
 function MultiCheat.OnDraw()
 	if not Menu.IsEnabled(MultiCheat.optionEnable) then return end
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end 
 	if Menu.IsEnabled(MultiCheat.Draw_Item) then MultiCheat.DrawOwerItem() end
 	if Menu.IsEnabled(MultiCheat.NickAndItems) then MultiCheat.NickAndItem() end
+	if Menu.IsEnabled(MultiCheat.CsGoESPbole) then MultiCheat.CsGoESP() end
 	
 	if Menu.IsEnabled(MultiCheat.Test) then MultiCheat.test() end
-	
-	
-    -- if AnimTable ~= nil then
-        -- xpos = 100
-        -- for i = 1, #AnimTable do
-            -- anim = AnimTable[i]
-            -- hero = HeroTable[i]
-            -- castpointasda = castpoint[i]
-            -- Renderer.DrawText(MultiCheat.Font, 500, xpos, hero, 1)
-            -- Renderer.DrawText(MultiCheat.Font, 1000, xpos, anim, 1)
-            -- Renderer.DrawText(MultiCheat.Font, 1500, xpos, castpointasda, 1)
-            -- xpos = xpos + 20
-        -- end
-    -- end
-    
-  -- local myHero = Heroes.GetLocal()
-  -- if not myHero then return end 
-  -- local DrawX = 500
-  -- local DrawY = 300
-  -- local abilities = {}
-  -- for i = 0, 24 do
-      -- local ability = NPC.GetAbilityByIndex(myHero, i)
-      -- if ability ~= nil and Entity.IsAbility(ability) then
-        -- local DrawX = 500
-        -- table.insert(abilities, ability)
-        -- index_skill = Ability.GetIndex(ability)
-        -- name_skill = Ability.GetName(ability)
-        -- distanse_skill = Ability.GetCastRange(ability)
-        -- Renderer.DrawText(MultiCheat.Font, DrawX, DrawY, i, 1)
-        -- DrawX = DrawX + 100
-        -- DrawX = DrawX + 50
-        -- Renderer.DrawText(MultiCheat.Font, DrawX, DrawY, name_skill, 1)
-        -- DrawY = DrawY + 20
-      -- end
-  -- end
-  
 end
 
 function MultiCheat.OnUpdate()
@@ -99,33 +78,38 @@ function MultiCheat.OnUpdate()
 end
 
 function MultiCheat.test()
-	local myHero = Heroes.GetLocal()
-	local Number_Of_Sides = 4
-	local teactpos = 360 / Number_Of_Sides
-	local distansee = 110
-	
-	for a = 1, NPCs.Count() do
-		local jeaeke = NPCs.Get(a)
-		if Entity.IsHero(jeaeke) then
-			if Entity.IsSameTeam(myHero, jeaeke) then
-				Renderer.SetDrawColor(0, 255, 0, 255)
-			else
-				Renderer.SetDrawColor(255, 0, 0, 255)
-			end
-			for o = 1,Number_Of_Sides do
-					x1,y1 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*o+teactpos/2,distansee))
-				if o ~= Number_Of_Sides then
-					x2,y2 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*(o+1)+teactpos/2,distansee))
-				else
-					x2,y2 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*1+teactpos/2,distansee))
-				end
-				MultiCheat.DrawLine(x1, y1, x2,  y2)
-				MultiCheat.DrawLine(x1, y1, x1, y1-50)
-				MultiCheat.DrawLine(x2, y2, x2, y2-50)
-				MultiCheat.DrawLine(x1, y1-50, x2,  y2-50)
-			end
-		end
-	end
+end
+
+function MultiCheat.CsGoESP()
+  local myHero = Heroes.GetLocal()
+  local Number_Of_Sides = Menu.GetValue(MultiCheat.CsGoESPSize)
+  local teactpos = 360 / Number_Of_Sides
+  local distansee = 110
+  for a = 1, NPCs.Count() do
+    local jeaeke = NPCs.Get(a)
+    if Entity.IsHero(jeaeke) and Entity.IsAlive(jeaeke) and not NPC.IsIllusion(jeaeke) then
+      if Entity.IsSameTeam(myHero, jeaeke) then Renderer.SetDrawColor(0, 255, 0, 255) else Renderer.SetDrawColor(255, 0, 0, 255) end
+      if Menu.IsEnabled(MultiCheat.CsGoESPBox) then
+        for o = 1,Number_Of_Sides do
+            x1,y1 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*o+teactpos/2,distansee))
+          if o ~= Number_Of_Sides then
+            x2,y2 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*(o+1)+teactpos/2,distansee))
+          else
+            x2,y2 = Renderer.WorldToScreen(MultiCheat.PositionAngle(jeaeke,teactpos*1+teactpos/2,distansee))
+          end
+          MultiCheat.DrawLine(x1, y1, x2,  y2)
+          MultiCheat.DrawLine(x1, y1, x1, y1-50)
+          MultiCheat.DrawLine(x2, y2, x2, y2-50)
+          MultiCheat.DrawLine(x1, y1-50, x2,  y2-50)
+        end
+      end
+      if Menu.IsEnabled(MultiCheat.CsGoESPName) then
+        local pos = Entity.GetAbsOrigin(jeaeke)
+        local x1, y1 = Renderer.WorldToScreen(pos)
+        Renderer.DrawTextCenteredX(MultiCheat.Font, x1, y1+40, NPC.GetUnitName(jeaeke), 1)
+      end
+    end
+  end
 end
 
 function MultiCheat.NickAndItem()
@@ -219,6 +203,42 @@ function MultiCheat.DrawOwerItem()
 		    end
 		  end
 		end
+	  end
+	  if Menu.IsEnabled(MultiCheat.Draw_Hud_HPandMANA) and Entity.IsAlive(entity) and not NPC.IsIllusion(entity) then
+	    local Health = Entity.GetHealth(entity)
+	    local MaxHealth = Entity.GetMaxHealth(entity)
+	    local HealthProc = Health/(MaxHealth/100)
+	    local Mana = NPC.GetMana(entity)
+	    local MaxMana = NPC.GetMaxMana(entity)
+	    local ManaProc = Mana/(MaxMana/100)
+	    local SizeHealHud = MultiCheat.toint(ImgSize/100*HealthProc)
+	    local SizeManaHud = MultiCheat.toint(ImgSize/100*ManaProc)
+		Renderer.SetDrawColor(255, 255, 255, 255)
+	    Renderer.DrawFilledRect(CordX, 42, ImgSize, 10)
+	    Renderer.DrawFilledRect(CordX, 55, ImgSize, 10)
+	    if HealthProc <= 200 and HealthProc > 80 then Renderer.SetDrawColor(0, 255, 0, 255)
+	    elseif HealthProc <= 80 and HealthProc > 60 then Renderer.SetDrawColor(0, 255, 127, 255)
+	    elseif HealthProc <= 60 and HealthProc > 40 then Renderer.SetDrawColor(154, 205, 50, 255)
+	    elseif HealthProc <= 40 and HealthProc > 20 then Renderer.SetDrawColor(255, 255, 0, 255)
+	    elseif HealthProc <= 20 and HealthProc > 10 then Renderer.SetDrawColor(255, 165, 0, 255)
+	    elseif HealthProc <= 10 and HealthProc >= 0 then Renderer.SetDrawColor(255, 0, 0, 255) end
+	    Renderer.DrawFilledRect(CordX, 42, SizeHealHud, 10)
+	    Renderer.DrawOutlineRect(CordX, 42, ImgSize, 10)
+	    Renderer.SetDrawColor(0, 0, 255, 255)
+	    Renderer.DrawFilledRect(CordX, 55, SizeManaHud, 10)
+	    Renderer.DrawOutlineRect(CordX, 55, ImgSize, 10)
+	    Renderer.SetDrawColor(0, 0, 0, 255)
+	    Renderer.DrawTextCenteredX(MultiCheat.Font2, CordX+30, 42,Health, 1)
+	    Renderer.SetDrawColor(0, 0, 0, 255)
+	    Renderer.DrawTextCenteredX(MultiCheat.Font2, CordX+30, 55,Mana, 1)
+	    if Menu.IsEnabled(MultiCheat.Draw_InPosHeroHpAndMana) and not Entity.IsSameTeam(Heroes.GetLocal(), entity) and not Entity.IsDormant(entity) then
+	      local HudUnPos = Entity.GetAbsOrigin(entity)
+	      local Xhud, Yhud, WorldWisHud= Renderer.WorldToScreen(HudUnPos)
+	      Renderer.SetDrawColor(0, 255, 0, 255)
+	      Renderer.DrawTextCenteredX(MultiCheat.FontSkill, Xhud, Yhud-110, Health .. "/" .. MaxHealth, 1)
+	      Renderer.SetDrawColor(0, 0, 255, 255)
+	      Renderer.DrawTextCenteredX(MultiCheat.FontSkill, Xhud, Yhud-100, Mana .. "/" .. MaxMana, 1)
+	    end
 	  end
     end 
   end
@@ -318,12 +338,23 @@ end
 
 --Untility function
 
+-- из float в int
+function MultiCheat.toint(n)
+    local s = tostring(n)
+    local i, j = s:find('%.')
+    if i then
+        return tonumber(s:sub(1, i-1))
+    else
+        return n
+    end
+end
+
 --Загрузить картинку вещи
 function MultiCheat.ItemImage(item)
   return Renderer.LoadImage("~/Kostya12rus/Items/" ..item..".png")
 end 
 
--- Рисовать черту
+-- Рисовать линию
 function MultiCheat.DrawLine(x1,y1,x2,y2)
   Renderer.DrawLine(x1, y1, x2,  y2)
 end

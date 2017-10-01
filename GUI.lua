@@ -29,11 +29,12 @@ GUI.Font.ContentBold = Renderer.LoadFont("Arial", 17, Enum.FontWeight.BOLD)
 GUI.Font.ContentSmallBold = Renderer.LoadFont("Arial", 15, Enum.FontWeight.BOLD)
 GUI.Font.UltraSmallBold = Renderer.LoadFont("Arial", 11, Enum.FontWeight.BOLD)
 GUI.Font.Header = Renderer.LoadFont("Arial", 19, Enum.FontWeight.BOLD)
+GUI.Font.Search = Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
 GUI.Font.Footer = Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.GameState = -2
 GUI.Config = "GUI"
-GUI.Version = 170826
-GUI.TextVersion = 'v 17.08.26'
+GUI.Version = 170930
+GUI.TextVersion = 'v 17.09.30'
 
 GUI.GameStates = {}
 GUI.GameStates.OnGameMenu = -1
@@ -113,6 +114,7 @@ GUI.Settings.PosY = -1
 GUI.Storage = {}
 
 GUI.Data = {}
+GUI.ImageCashe = {}
 GUI.CallBackKey = {}
 GUI.Subscriptions = {}
 GUI.HeroesIconPath = "resource/flash3/images/heroes/"
@@ -206,8 +208,10 @@ GUI.NotifyType.ImageText = 1
 GUI.NotifyType.ImageTextImage = 2
 GUI.Notices = {}
 
-function GUI.Write(text)
-	Log.Write("[" .. os.date("%X") .. "]\tGUI\t->\t" .. text)
+function GUI.Write(text, identity, log)
+	identity = identity or GUI.Config
+    log = log or true
+	if log then Log.Write("[" .. os.date("%X") .. "]\t" .. identity .. "\t->\t" .. text) end
 end
 
 function GUI.OnDraw()
@@ -323,7 +327,7 @@ function CheckKeys()
 			GUI.CurrentKey = current_key
 		end
 	end
-	
+		
 	if Input.IsKeyDownOnce(70) then
 		GUI.CurrentKey = " "
 	end
@@ -417,6 +421,7 @@ function GUI.Initialize(code, category, name, desc, author, ...)
 			GUI_HObject["perfect_desc"] = ''
 			GUI_HObject["perfect_author"] = ''
 			GUI_HObject["iscat"] = true
+			GUI_HObject["switch"] = true
 			GUI_HObject["category"] = GUI.Category.Heroes
 			GUI.Items[identity] = GUI_HObject
 		end
@@ -425,6 +430,7 @@ function GUI.Initialize(code, category, name, desc, author, ...)
 		GUI_Object["cat"] = identity
 	end
 	
+	if GUI_Object["switch"] == nil then GUI_Object["switch"] = true end
 	GUI.Items[code] = GUI_Object
 	GUI.Data[code] = 0
 end
@@ -788,17 +794,17 @@ function GUI.Draw(leftclick, rightclick)
 			(
 				(v["cat"] ~= nil and (GUI.SelectedMenu == v["cat"] or (k == GUI.SelectedMenu and v["iscat"] == nil) ) )
 				or ( GUI.Items[GUI.SelectedMenu] ~= nil and GUI.Items[GUI.SelectedMenu]["cat"] ~= nil and GUI.Items[GUI.SelectedMenu]["cat"] == v["cat"] and GUI.Items[GUI.SelectedMenu]["iscat"] == nil  )
-				or ( (GUI.SelectedMenu == "" or GUI.SelectedMenu == ":about" or (GUI.Items[GUI.SelectedMenu]["cat"] == nil and GUI.Items[GUI.SelectedMenu]["iscat"] == nil )) and v["category"] ~= nil and GUI.SelectedCategory == v["category"] ) -- идеально
+				or ( (GUI.SelectedMenu == "" or GUI.SelectedMenu == ":about" or (GUI.Items[GUI.SelectedMenu]["cat"] == nil and GUI.Items[GUI.SelectedMenu]["iscat"] == nil )) and v["category"] ~= nil and GUI.SelectedCategory == v["category"] )
 			)
 		then
 			temp_val = temp_val + 1
 			
 			if i >= (c * showonpage) and i < ((c + 1) * showonpage) then 
 				DrawMenuItem(v, startx + 6, nextposition, menusize_x, menusize_y, v["perfect_name"], leftclick, k)
-				i = i + 1
 				nextposition = nextposition + menusize_y
 			end
 		end
+		i = i + 1
 	end
 	
 	local totalpage = math.ceil(temp_val / showonpage)
@@ -942,7 +948,7 @@ function DrawMenuBox(k, startx, starty, workbox_x, workbox_y, limit_y, leftclick
 			if value["type"] == GUI.MenuType.Slider and GUI.Items[k]["page"] < drawed then
 				if xt + 100 < limit_y then
 					DrawSlider(leftclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, value)
-					xt = xt + 100
+					xt = xt + 104
 					realshow = realshow + 1
 				else donotshow = true end
 			end
@@ -950,7 +956,7 @@ function DrawMenuBox(k, startx, starty, workbox_x, workbox_y, limit_y, leftclick
 			-- IMAGEBOX
 			if value["type"] == GUI.MenuType.ImageBox and GUI.Items[k]["page"] < drawed then
 				if xt + (32 * math.ceil(Length(value["heroes"]) / value["inrow"])) + 50 < limit_y then
-					DrawImageBox(false, leftclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, value)
+					DrawImageBox(leftclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, value)
 					xt = xt + (value["size_y"] * math.ceil(Length(value["heroes"]) / value["inrow"])) + 50
 					realshow = realshow + 1
 				else donotshow = true end
@@ -1057,11 +1063,16 @@ function DrawMenuItem(value, x, y, size_x, size_y, name, click, key)
 			else
 				GUI.Set(key, 1)
 			end
+			if value["onchange"] ~= nil then
+				value["onchange"](key, GUI.Get(key))
+			end
 		end
 		
 		if GUI.IsEnabled(key) then menu_icon = GUI.Theme.CheckActive end
 		if value["iscat"] ~= nil and value["iscat"] then menu_icon = GUI.Theme.Category end
+		if not value["switch"] then menu_icon = GUI.Theme.MenuItem end
 	end
+	
 	
 	Renderer.DrawImage(menu_icon, x + 10, y + 10, 16, 16)
 	Renderer.SetDrawColor(hex2rgb(GUI.Colors.MenuDelimeter))
@@ -1134,30 +1145,53 @@ function DrawPagination(key, click, x, y, size_x, size_y, showed, count, totalsh
 	end
 end
 
-function DrawImageBox(inpos, click, x, y, value)
+function DrawImageBox(click, x, y, value)
 	Renderer.DrawText(GUI.Font.Menu, x + 10, y + 10, value["name"], false)
 	local key = value["code"]
 	local count = 1
 	local tempx = x
+	local safe_x = x
+	local safe_y = y
 	local datawork = GUI.Data[key]
 	Renderer.SetDrawColor(255, 255, 255, 60)
-	local sortedKeys = getKeysSortedByValue(value["heroes"], function(a, b) return a < b end)
+	local sortedKeys = getKeysSortedByValue(value["heroes"], function(a, b) return a < b end)		
 	
 	for _, k in ipairs(sortedKeys) do
 		local tempName = k:gsub(value["replace"], "")
-		local imageHandle = value["cache"][tempName]
+		local imageHandle = GUI.ImageCashe[tempName]
 		if imageHandle == nil then
 			if value["iconpath"] ~= "" then
 				imageHandle = Renderer.LoadImage(value["iconpath"] .. tempName .. ".png")
 			else
 				imageHandle = Renderer.LoadImage(value["heroes"][k] .. tempName .. ".png")
 			end
-			value["cache"][tempName] = imageHandle
+			GUI.ImageCashe[tempName] = imageHandle
+		end
+
+		if value["search"] ~= nil and strpos(tempName, string.lower(value["search"])) ~= false then
+			Renderer.SetDrawColor(0, 255, 0, 255)
+			Renderer.DrawOutlineRect(tempx, y + 40, value["size_x"], value["size_y"])
+			Renderer.SetDrawColor(255, 255, 255, 60)
 		end
 		
 		local inpos = Input.IsCursorInRect(tempx, y + 40, value["size_x"], value["size_y"])
 		
 		if inpos then
+			if GUI.CurrentKey ~= "" then
+				if value["search"] == nil then value["search"] = "" end
+			
+				if GUI.CurrentKey == "backspace" then
+					if value["search"] ~= "" then
+						value["search"] = string.sub(value["search"], 0, string.len(value["search"]) - 1)
+					end
+				else
+					value["search"] = value["search"] .. GUI.CurrentKey
+				end
+				value["last_time"] = os.clock()
+				GUI.CurrentKey = ""
+			end
+		
+		
 			Renderer.SetDrawColor(255, 0, 0, 255)
 			Renderer.DrawOutlineRect(tempx, y + 40, value["size_x"], value["size_y"])
 			Renderer.SetDrawColor(255, 255, 255, 60)
@@ -1193,6 +1227,19 @@ function DrawImageBox(inpos, click, x, y, value)
 		end
 		count = count + 1
 	end
+	
+	if value["search"] ~= nil and value["last_time"] ~= nil and value["last_time"] + 3 > os.clock() then
+		Renderer.SetDrawColor(80, 80, 80, 40)
+		Renderer.DrawFilledRect(safe_x, safe_y + 40, value["inrow"] * (value["size_x"] + 1), (math.ceil(Length(sortedKeys) / value["inrow"]) * value["size_y"]))
+	
+		Renderer.SetDrawColor(255, 255, 255, 255)
+		Renderer.DrawTextCentered(GUI.Font.Search, safe_x + math.floor((value["inrow"] * (value["size_x"] + 1)) / 2), safe_y + 40 + math.floor((math.ceil(Length(sortedKeys) / value["inrow"]) * value["size_y"]) / 2), value["search"], false)
+	end
+	
+	if value["search"] ~= nil and value["last_time"] ~= nil and value["last_time"] + 5 < os.clock() then
+		value["search"] = nil
+	end
+	
 	GUI.Set(key, datawork)
 end
 
@@ -1217,7 +1264,7 @@ function DrawSelectBox(leftclick, x, y, value)
 				end
 				
 				if value["callback"] ~= nil then
-					value["callback"](datawork)
+					value["callback"](key, datawork)
 				end
 			end
 			Renderer.SetDrawColor(255, 255, 255, 255)
@@ -1239,24 +1286,46 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 	local key = value["code"]
 	local count = 1
 	local tempx = x
+	local safe_x = x
+	local safe_y = y
 	local datawork = GUI.Data[key]
 	Renderer.SetDrawColor(255, 255, 255, 60)
 	local sortedKeys = getKeysSortedByValue(value["heroes"], function(a, b) return a < b end)
 	
 	for _, k in ipairs(sortedKeys) do
 		local tempName = k:gsub(value["replace"], "")
-		local imageHandle = value["cache"][tempName]
+		local imageHandle = GUI.ImageCashe[tempName]
 		if imageHandle == nil then
 			if value["iconpath"] ~= "" then
 				imageHandle = Renderer.LoadImage(value["iconpath"] .. tempName .. ".png")
 			else
 				imageHandle = Renderer.LoadImage(value["heroes"][k] .. tempName .. ".png")
 			end
-			value["cache"][tempName] = imageHandle
+			GUI.ImageCashe[tempName] = imageHandle
+		end
+		
+		if value["search"] ~= nil and strpos(tempName, string.lower(value["search"])) ~= false then
+			Renderer.SetDrawColor(0, 255, 0, 255)
+			Renderer.DrawOutlineRect(tempx, y + 40, value["size_x"], value["size_y"])
+			Renderer.SetDrawColor(255, 255, 255, 60)
 		end
 		
 		local inpos = Input.IsCursorInRect(tempx, y + 40, value["size_x"], value["size_y"])
 		if inpos then
+			if GUI.CurrentKey ~= "" then
+				if value["search"] == nil then value["search"] = "" end
+			
+				if GUI.CurrentKey == "backspace" then
+					if value["search"] ~= "" then
+						value["search"] = string.sub(value["search"], 0, string.len(value["search"]) - 1)
+					end
+				else
+					value["search"] = value["search"] .. GUI.CurrentKey
+				end
+				value["last_time"] = os.clock()
+				GUI.CurrentKey = ""
+			end
+		
 			if leftclick then
 				if not hasValue(datawork, k) then
 					datawork[Length(datawork) + 1] = k
@@ -1315,6 +1384,19 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 		end
 		count = count + 1
 	end
+	
+	if value["search"] ~= nil and value["last_time"] ~= nil and value["last_time"] + 3 > os.clock() then
+		Renderer.SetDrawColor(80, 80, 80, 40)
+		Renderer.DrawFilledRect(safe_x, safe_y + 40, 12 * (value["size_x"] + 1), (math.ceil(Length(sortedKeys) / 12) * value["size_y"]))
+	
+		Renderer.SetDrawColor(255, 255, 255, 255)
+		Renderer.DrawTextCentered(GUI.Font.Search, safe_x + math.floor((12 * (value["size_x"] + 1)) / 2), safe_y + 40 + math.floor((math.ceil(Length(sortedKeys) / 12) * value["size_y"]) / 2), value["search"], false)
+	end
+	
+	if value["search"] ~= nil and value["last_time"] ~= nil and value["last_time"] + 5 < os.clock() then
+		value["search"] = nil
+	end
+	
 	GUI.Set(key, datawork)
 end
 
@@ -1361,6 +1443,20 @@ function DrawSlider(leftclick, x, y, value)
 	local percent = math.ceil((pos / full) * 100)
 	local t =  2.45
 	Renderer.DrawText(GUI.Font.Content, x + 10, y + 10, value["name"], false)
+	
+	Renderer.SetDrawColor(255, 255, 255, 25)
+	Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, x, y + 74, value["min"], false)
+	if Input.IsKeyDown(Enum.ButtonCode.MOUSE_LEFT) then
+		if Input.IsCursorInRect(x - 5, y + 69, 10, 10) then
+			GUI.Set(key, value["min"])
+		end
+		if Input.IsCursorInRect(x + 250, y + 69, 10, 10) then
+			GUI.Set(key, value["max"])
+		end
+	end
+	Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, x + 255, y + 74, value["max"], false)
+	Renderer.SetDrawColor(255, 255, 255, 255)
+	
 	Renderer.DrawImage(GUI.Theme.SliderBase, x, y + 50, 255, 4)
 	local fil = math.floor(percent * t)
 	Renderer.DrawImage(GUI.Theme.SliderFill, x, y + 50, 5 + fil, 4)
@@ -1390,7 +1486,45 @@ function DrawSlider(leftclick, x, y, value)
 		end
 	end
 	
-	Renderer.DrawTextCenteredX(GUI.Font.ContentSmallBold, x + (240 / 2), y + 64, GUI.Get(key), false)
+	inpos = Input.IsCursorInRect((x + (240 / 2)) - 30, y + 68, 60, 16)
+	if inpos then
+	
+		if GUI.CurrentKey ~= "" and tonumber(GUI.CurrentKey) ~= nil then
+			if value["newvalue"] == nil then value["newvalue"] = "" end
+		
+			if GUI.CurrentKey == "backspace" then
+				if value["newvalue"] ~= "" then
+					value["newvalue"] = string.sub(value["newvalue"], 0, string.len(value["newvalue"]) - 1)
+				end
+			else
+				value["newvalue"] = value["newvalue"] .. GUI.CurrentKey
+			end
+			
+			GUI.CurrentKey = ""
+			value["last_time"] = os.clock()
+		end
+		
+	end
+	
+	if value["newvalue"] ~= nil and value["last_time"] ~= nil and value["last_time"] + 1 < os.clock() then
+		local t = tonumber(value["newvalue"])
+		if	t ~= nil 
+			and t >= value["min"]
+			and t <= value["max"]
+		then
+			GUI.Set(key, t)
+			if value["callback"] ~= nil then
+				value["callback"](key, t)
+			end
+		end
+		value["newvalue"] = nil
+	end
+	
+	if value["newvalue"] ~= nil then
+		Renderer.DrawTextCenteredX(GUI.Font.ContentBold, x + (240 / 2), y + 68, value["newvalue"], false)
+	else
+		Renderer.DrawTextCenteredX(GUI.Font.ContentBold, x + (240 / 2), y + 68, GUI.Get(key), false)
+	end
 end
 
 function DrawKeyBox(click, x, y, size_x, size_y, value)
@@ -1472,6 +1606,7 @@ end
 function ApplyTheme()
 	local f = GUI.GetThemeName()
 	GUI.Theme.Background = Renderer.LoadImage("~/" .. f .. "/background.png")
+	GUI.Theme.MenuItem = Renderer.LoadImage("~/" .. f .. "/menu.png")
 	GUI.Theme.MenuInActive = Renderer.LoadImage("~/" .. f .. "/menu-inactive.png")
 	GUI.Theme.MenuOnMouse = Renderer.LoadImage("~/" .. f .. "/menu-onmouse.png")
 	GUI.Theme.MenuActive = Renderer.LoadImage("~/" .. f .. "/menu-active.png")
@@ -1691,58 +1826,58 @@ function GUI.DEBUG.Add(name, var)
 	GUI.DEBUG.Variables[name] = var
 end
 -----------------------------------------------------------------------------------------------------------
-function tableToString(table)
+function tableToString (table)
 	return "return" .. tostr(table)
 end
 
-function trim(s)
+function trim (s)
    return s:match( "^%s*(.-)%s*$" )
 end
 
-function stringToTable(str)
+function stringToTable (str)
 	local f = load(str)
 	return f()
 end
 
 function val_to_str ( v )
-  if "string" == type( v ) then
-    v = string.gsub( v, "\n", "\\n" )
-    if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
-      return "'" .. v .. "'"
-    end
-    return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
-  elseif type(v) == "number" then
+	if "string" == type( v ) then
+		v = string.gsub( v, "\n", "\\n" )
+		if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
+			return "'" .. v .. "'"
+		end
+		return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
+	elseif type(v) == "number" then
 	return v
-  else
-    return "table" == type( v ) and tostr( v ) or
-      tostr( v )
-  end
+	else
+		return "table" == type( v ) and tostr( v ) or
+			tostr( v )
+	end
 end
 
 function key_to_str ( k )
-  if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
-    return k
-  else
-    return "[" .. val_to_str( k ) .. "]"
-  end
+	if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
+		return k
+	else
+		return "[" .. val_to_str( k ) .. "]"
+	end
 end
 
-function tostr( tbl )
-  local result, done = {}, {}
-  for k, v in ipairs( tbl ) do
-    table.insert( result, val_to_str( v ) )
-    done[ k ] = true
-  end
-  for k, v in pairs( tbl ) do
-    if not done[ k ] then
-      table.insert( result,
-        key_to_str( k ) .. "=" .. val_to_str( v ) )
-    end
-  end
-  return "{" .. table.concat( result, "," ) .. "}"
+function tostr ( tbl )
+	local result, done = {}, {}
+	for k, v in ipairs( tbl ) do
+		table.insert( result, val_to_str( v ) )
+		done[ k ] = true
+	end
+	for k, v in pairs( tbl ) do
+		if not done[ k ] then
+			table.insert( result,
+				key_to_str( k ) .. "=" .. val_to_str( v ) )
+		end
+	end
+	return "{" .. table.concat( result, "," ) .. "}"
 end
 -----------------------------------------------------------------------------------------------------------
-function spairs(t, order)
+function spairs (t, order)
     local keys = {}
     for k in pairs(t) do keys[#keys+1] = k end
 
@@ -1761,17 +1896,17 @@ function spairs(t, order)
     end
 end
 
-function getKeysSortedByValue(tbl, sortFunction)
-  local keys = {}
-  for key in pairs(tbl) do
-    table.insert(keys, key)
-  end
+function getKeysSortedByValue (tbl, sortFunction)
+	local keys = {}
+	for key in pairs(tbl) do
+		table.insert(keys, key)
+	end
 
-  table.sort(keys, function(a, b)
-    return sortFunction(tbl[a], tbl[b])
-  end)
+	table.sort(keys, function(a, b)
+		return sortFunction(tbl[a], tbl[b])
+	end)
 
-  return keys
+	return keys
 end
 
 function removeValue (t, value)
@@ -1804,7 +1939,7 @@ function hasIValue (tab, val)
     return false
 end
 
-function swapElements(t, kf, kt)
+function swapElements (t, kf, kt)
 	local tv = t[kf]
 	t[kf] = t[kt]
 	t[kt] = tv
@@ -1821,11 +1956,11 @@ function hasValue (tab, val)
     return false
 end
 
-function slug(str)
+function slug (str)
 	return string.lower(string.gsub(string.gsub(str,"[^ A-Za-z]",""),"[ ]+","-"))
 end
 
-function Length(t)
+function Length (t)
 	count = 0
 	for k,v in pairs(t) do
 		 count = count + 1
@@ -1834,13 +1969,32 @@ function Length(t)
 	return count
 end
 
-function hex2rgb(hex)
+function hex2rgb (hex)
     hex = hex:gsub("#","")
     if(string.len(hex) == 3) then
         return tonumber("0x"..hex:sub(1,1)) * 17, tonumber("0x"..hex:sub(2,2)) * 17, tonumber("0x"..hex:sub(3,3)) * 17
     elseif(string.len(hex) == 6) then
         return tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
     end
+end
+
+function strpos (haystack, needle, offset) 
+	local pattern = string.format("(%s)", needle)
+	local i       = string.find (haystack, pattern, (offset or 0))
+  
+	return (i ~= nil and i or false)
+end
+
+function explode (str, div)
+	if (div=='') then return false end
+	local pos,arr = 0,{}
+
+	for st,sp in function() return string.find(str,div,pos,true) end do
+		table.insert(arr,string.sub(str,pos,st-1)) 
+		pos = sp + 1
+	end
+	table.insert(arr,string.sub(str,pos))
+	return arr
 end
 
 return GUI
