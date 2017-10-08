@@ -293,7 +293,7 @@ function EconPanel.GetEcon(hero)
 	local slotNum = 9
 	for i = 0, slotNum-1 do
 		myItem = NPC.GetItemByIndex(hero, i) -- index starts from 0
-		if myItem then
+		if myItem and Entity.IsAbility(myItem)then
 			itemName = Ability.GetName(myItem)
 			if EconPanel.item2price[itemName] then -- database doesnt include all itemName, such as recipes.
 				totalEcon = totalEcon + EconPanel.item2price[itemName]

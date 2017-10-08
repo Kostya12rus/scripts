@@ -9,7 +9,9 @@ MultiCheat.Draw_Item =               Menu.AddOption({"Kostya12rus","MultiCheat",
 MultiCheat.Draw_Hud_HPandMANA =      Menu.AddOption({"Kostya12rus","MultiCheat",  "3 Draw Item"}, "Draw HP and Mana ON/OFF", "")
 MultiCheat.Draw_InPosHeroHpAndMana = Menu.AddOption({"Kostya12rus","MultiCheat",  "3 Draw Item"}, "Draw HP and Mana In hero pos ON/OFF", "")
 MultiCheat.Draw_Ultimate =           Menu.AddOption({"Kostya12rus","MultiCheat",  "3 Draw Item"}, "Draw Ultimate ON/OFF", "")
-MultiCheat.NickAndItems =            Menu.AddOption({"Kostya12rus","MultiCheat"}, "4 Nick And Items", "")
+MultiCheat.NickAndItems =            Menu.AddOption({"Kostya12rus","MultiCheat",  "4 Nick And Items"}, "Activate", "")
+MultiCheat.NickAndItemsDraw =        Menu.AddOption({"Kostya12rus","MultiCheat",  "4 Nick And Items"}, "Draw Name", "")
+MultiCheat.NickAndItemseKey =     Menu.AddKeyOption({"Kostya12rus","MultiCheat",  "4 Nick And Items"}, "Fuck Key",Enum.ButtonCode.KEY_P)
 MultiCheat.FurAndShamBlock =         Menu.AddOption({"Kostya12rus","MultiCheat",  "5 FurAndShamBlock"}, "Activate", "")
 MultiCheat.BlockKey =             Menu.AddKeyOption({"Kostya12rus","MultiCheat",  "5 FurAndShamBlock"},"BlockKey",Enum.ButtonCode.KEY_D)
 MultiCheat.BD =                      Menu.AddOption({"Kostya12rus","MultiCheat",  "6 Break Dance"}, "Break Dance on/off", "")
@@ -25,12 +27,16 @@ function MultiCheat.Init()
   AnimTable = {}
   HeroTable = {}
   castpoint = {}
-  TableItemAndHero = {}
   TableAbilCoold = {}
   tick = 0
   MultiCheat.ImgItem = {}
-  MultiCheat.boolean = false
   ImgSpeelRange = {}
+  Key1 = false
+  Key2 = false
+  Key3 = false
+  msgMyTeam = ""
+  msgEnemy = ""
+  HeroNameAndAny = {}
 end
 function MultiCheat.OnGameStart()
   MultiCheat.Init()
@@ -83,10 +89,10 @@ function MultiCheat.OnUpdate()
   else return end
 end
 
-function MultiCheat.test()
-end
+-- function MultiCheat.test()
+-- end
 
-function MultiCheat.RangeSpeel() -- RangeSpeel
+function MultiCheat.test() -- RangeSpeel
 	local NotNeedSkill = {"invoker_empty1","invoker_empty2"}
 	local myHero = Heroes.GetLocal()
 	local X = 500
@@ -146,24 +152,82 @@ end
 
 function MultiCheat.NickAndItem()
 	local size_x, size_y = Renderer.GetScreenSize()
-	msg = ""
 	local myHero = Heroes.GetLocal()
+	local NeddX = 100
+	NameKey = 1
+	StateKey = 2
+	TeamKey = 3
+	ValueKill = 4
 	Renderer.SetDrawColor(255,255,255,255)
 	for l = 1, NPCs.Count() do
 		local unitNA = NPCs.Get(l)
 		if unitNA then
-			if Entity.IsHero(unitNA) and Entity.IsSameTeam(myHero, unitNA)then
+			if Entity.IsHero(unitNA) and Entity.IsPlayer(Entity.GetOwner(unitNA)) and not NPC.IsIllusion(unitNA) then
 				local PlayerName = Player.GetName(Entity.GetOwner(unitNA))
-				if PlayerName ~= Player.GetName(Players.GetLocal()) then
-					msg = PlayerName ..", ".. msg
+				local PlayerState = Player.GetPlayerData(Entity.GetOwner(unitNA)).connectionState
+				local PlayerKills = Player.GetTeamData(Entity.GetOwner(unitNA)).streak
+				if Menu.IsEnabled(MultiCheat.NickAndItemsDraw) then
+					Renderer.DrawTextCenteredX(MultiCheat.Font, size_x/2-100, NeddX, PlayerName, 1)
+					Renderer.DrawTextCenteredX(MultiCheat.Font, size_x/2+100, NeddX, PlayerState, 1)
+					Renderer.DrawTextCenteredX(MultiCheat.Font, size_x/2+150, NeddX, type(Chat.GetChannels()), 1)
+					NeddX = NeddX + 20
 				end
-			end 
+				if HeroNameAndAny[NPC.GetUnitName(unitNA)] == nil then
+					HeroNameAndAny[NPC.GetUnitName(unitNA)] = {}
+					Herotable = HeroNameAndAny[NPC.GetUnitName(unitNA)]
+					Herotable[NameKey] = PlayerName
+					Herotable[StateKey] = PlayerState
+					Herotable[TeamKey] = Entity.IsSameTeam(myHero, unitNA)
+					Herotable[ValueKill] = PlayerKills
+				end
+			end
+			
 			if l == NPCs.Count() then
-				 Renderer.DrawTextCenteredX(MultiCheat.Font, size_x/2, 50, msg, 1)
+				NeddX = 500
+				msgMyTeam = ""
+				msgEnemy = ""
+				for key,n in pairs(HeroNameAndAny) do
+					nick = HeroNameAndAny[key][NameKey]
+					status = HeroNameAndAny[key][StateKey]
+					teamkey = HeroNameAndAny[key][TeamKey]
+					killkey = HeroNameAndAny[key][ValueKill]
+					if teamkey then
+						if nick ~= Player.GetName(Players.GetLocal()) then
+							msgMyTeam = nick ..", ".. msgMyTeam
+						end
+					else
+						msgEnemy = nick ..", ".. msgEnemy
+					end
+					if Menu.IsEnabled(MultiCheat.NickAndItemsDraw) then
+						Renderer.DrawTextCenteredX(MultiCheat.Font, size_x/2-200, NeddX, key:gsub("nps_dota_hero_", ""), 1)
+						Renderer.DrawTextCenteredX(MultiCheat.Font, size_x/2+50, NeddX, nick, 1)
+						Renderer.DrawTextCenteredX(MultiCheat.Font, size_x/2+150, NeddX, status, 1)
+						Renderer.DrawTextCenteredX(MultiCheat.Font, size_x/2+250, NeddX, killkey, 1)
+						NeddX = NeddX + 20
+					end
+				end
 			end
 		end
 	end	
-	
+	if Menu.IsKeyDownOnce(MultiCheat.NickAndItemseKey) then
+		Key1 = true
+	end
+	if Key1 then
+		Engine.ExecuteCommand("say "..msgMyTeam.. "жесткие пидарасы")
+		Key1 = false
+		Key2 = true
+		tick = GameRules.GetGameTime() + 1 
+	end
+	if Key2 and tick <= GameRules.GetGameTime() then
+		Engine.ExecuteCommand("say "..msgEnemy.. "а вы вообще ущербы!!")
+		Key2 = false
+		Key3 = true
+		tick = GameRules.GetGameTime() + 1 
+	end
+	if Key3 and tick <= GameRules.GetGameTime()then
+		Engine.ExecuteCommand("say Все идите нахуй")
+		Key3 = false
+	end
 	local myHero = Heroes.GetLocal()
 	local x1 = 1000
 	local y1 = 100
@@ -172,7 +236,7 @@ function MultiCheat.NickAndItem()
 	
 	for asf = 1, NPCs.Count() do
 	local asfasfa = NPCs.Get(asf) 
-		if asfasfa and Entity.IsHero(asfasfa) then
+		if asfasfa and Entity.IsHero(asfasfa) and not NPC.IsIllusion(asfasfa) and Menu.IsEnabled(MultiCheat.NickAndItemsDraw) then
 			local HeroName = NPC.GetUnitName(asfasfa)
 			local slotNum = 9
 			for q = 0, slotNum-1 do
@@ -183,13 +247,8 @@ function MultiCheat.NickAndItem()
 					y2 = y2 + 20
 				end
 			end
-			
 			Renderer.DrawText(MultiCheat.Font, x1, y1, HeroName, 1)
-			if y1 ~= y2 then
-				y1 = y2
-			else
-				y1 = y2+20
-			end
+			if y1 ~= y2 then y1 = y2 else y1 = y2+20 end
 		end
 	end
 	
@@ -211,7 +270,7 @@ function MultiCheat.DrawOwerItem()
   ItemPanel = {"item_rapier","item_gem","item_ward_dispenser","item_ward_dispenser_sentry","item_ward_sentry","item_ward_observer","item_dust","item_smoke_of_deceit"}
   for i = 1, NPCs.Count() do
     local entity = NPCs.Get(i) 
-    if entity and Entity.IsHero(entity) then
+    if entity and Entity.IsHero(entity) and not NPC.IsIllusion(entity) then
       local CordY = 85
       local ImgSize = 60
       local ImgSizeY = ImgSize-10
@@ -222,7 +281,7 @@ function MultiCheat.DrawOwerItem()
 	  for items = 1, #ItemPanel do
 		for index_item = 0, 15 do
 		  local item = NPC.GetItemByIndex(entity, index_item)
-		  if item then
+		  if item and Entity.IsAbility(item) then
 		  local itemName = Ability.GetName(item)
 		    if ItemPanel[items] ==  itemName then
 		      tempName = ItemPanel[items]:gsub("item_", "")
@@ -237,7 +296,7 @@ function MultiCheat.DrawOwerItem()
 		  end
 		end
 	  end
-	  if Menu.IsEnabled(MultiCheat.Draw_Hud_HPandMANA) and Entity.IsAlive(entity) and not NPC.IsIllusion(entity) then
+	  if Menu.IsEnabled(MultiCheat.Draw_Hud_HPandMANA) and Entity.IsAlive(entity) then
 	    local Health = Entity.GetHealth(entity)
 	    local MaxHealth = Entity.GetMaxHealth(entity)
 	    local HealthProc = Health/(MaxHealth/100)
@@ -276,7 +335,7 @@ function MultiCheat.DrawOwerItem()
 	    end
 	  end
 	  local myHero = Heroes.GetLocal()
-	  if Menu.IsEnabled(MultiCheat.Draw_Ultimate) and not NPC.IsIllusion(entity) and not Entity.IsSameTeam(myHero,entity) then
+	  if Menu.IsEnabled(MultiCheat.Draw_Ultimate) and not Entity.IsSameTeam(myHero,entity) then
 	    for i = 0,24 do
 	      local ability = NPC.GetAbilityByIndex(entity, i)
 	      if ability ~= nil and Entity.IsAbility(ability) and Ability.IsUltimate(ability) and Ability.GetLevel(ability) > 0 then
