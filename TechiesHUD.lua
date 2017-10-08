@@ -6,8 +6,8 @@ TechiesHUD.Locale = {
 		["english"] = "TechiesHUD"
 	},
 	["desc"] = {
-		["english"] = "TechiesHUD v1.2",
-		["russian"] = "TechiesHUD v1.2"
+		["english"] = "TechiesHUD v1.2.1",
+		["russian"] = "TechiesHUD v1.2.1"
 	},
 	["optionDetonate"] = {
 		["english"] = "Auto detonate remote mines",
@@ -247,9 +247,7 @@ TechiesHUD.Locale = {
 	}
 }
 
-if not TechiesHUDParticleList then
-	TechiesHUDParticleList = {}
-end
+local TechiesHUDParticleList = {}
 
 local optionTotal
 local optionUpdate
@@ -1381,7 +1379,7 @@ function TechiesHUD.OnUpdate()
 					end
 					local check_enemy = 0
 					for j, v in pairs(heroes_in_radius) do
-						if (need_damage[Entity.GetIndex(v)] == nil or need_damage[Entity.GetIndex(v)] < Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3) then
+						if (need_damage[Entity.GetIndex(v)] == nil or need_damage[Entity.GetIndex(v)] < Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3) or optionLegitDetonate then
 							check_enemy = 1
 						end
 					end
