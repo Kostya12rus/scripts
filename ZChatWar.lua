@@ -7,26 +7,11 @@ ZChatWar.optionEnable = Menu.AddOption({"Kostya12rus","Chat War"}, "Activate", "
 --[[
 HeroDataInfo[NPC.GetUnitName(NA_Unit)] = 
 {
-	NameKey =        Ник Игрока
+	NickKey =        Ник Игрока
 	TeamKey =        Тригер на каманду в которой находиться игрок
-	ValueStreakKey = Всего убийств без смертей
-	RespawnTimeKey = Время до возрождения, если мертв
-	OldStreakKey =   Счетчик для обновления
-	TimeTick =       Время совершения последнего убийсва, отчет до нового, чтобы засчитал стрик
-	BeenKill =       Тригер Срабатывает при убийстве
-	Killtick =       Количество быстрых убийств подряд 
-	Msgtick =        Тригер для вывода сообщения в чат
-	HeroNamePlayer = Имя героя на котором играет игрок
-	PlayerGameID =   Игровой ID игрока
+	NamePlayer =     Имя героя на котором играет игрок
+	OwnerKey =       userdata игрока
 }
-
-
-
-
-
-
-
-
 ]]
 
 function ZChatWar.OnUpdate()
@@ -36,84 +21,20 @@ function ZChatWar.OnUpdate()
 	local NeedX = 1000
 	local NeedY = 500
 	local NeedX1 = 1000
-	local KillTeam = 0
-	local KillEnem = 0
 	for i=1,NPCs.Count() do
 		NA_Unit = NPCs.Get(i)
 		if Entity.IsHero(NA_Unit) and Entity.IsPlayer(Entity.GetOwner(NA_Unit)) and not NPC.IsIllusion(NA_Unit) then
-			if HeroDataInfo[NPC.GetUnitName(NA_Unit)] == nil then HeroDataInfo[NPC.GetUnitName(NA_Unit)] = {} end
-			Herotable = HeroDataInfo[NPC.GetUnitName(NA_Unit)]
-			Herotable[NameKey] = Player.GetName(Entity.GetOwner(NA_Unit))
+			if HeroDataInfo[Hero.GetPlayerID(NA_Unit)] == nil then HeroDataInfo[Hero.GetPlayerID(NA_Unit)] = {} end
+			Herotable = HeroDataInfo[Hero.GetPlayerID(NA_Unit)]
+			Herotable[NickKey] = Player.GetName(Entity.GetOwner(NA_Unit))
 			Herotable[TeamKey] = Entity.IsSameTeam(myHero, NA_Unit)
-			Herotable[ValueStreakKey] = Player.GetTeamData(Entity.GetOwner(NA_Unit)).streak
-			Herotable[RespawnTimeKey] = Player.GetTeamData(Entity.GetOwner(NA_Unit)).respawnTime
-			Herotable[PlayerGameID] = Hero.GetPlayerID(NA_Unit)
-			--Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, NeedY, Herotable[PlayerGameID], 1)
-			if Herotable[TimeTick] == nil then Herotable[TimeTick] = 9999999 end
-			if Herotable[BeenKill] == nil then Herotable[BeenKill] = false end
-			if Herotable[Killtick] == nil then Herotable[Killtick] = 0 end
-			if Herotable[Msgtick] == nil then Herotable[Msgtick] = false end
-			if Herotable[HeroNamePlayer] == nil then 
+			Herotable[OwnerKey] = Entity.IsSameTeam(myHero, NA_Unit)
+			if Herotable[NamePlayer] == nil then 
 				for ConsoleName,DefName in pairs(HeroNameTable) do
 					if ConsoleName == NPC.GetUnitName(NA_Unit) then
-						Herotable[HeroNamePlayer] = DefName 
+						Herotable[NamePlayer] = DefName 
 					end
 				end
-			end
-			if (Herotable[ValueStreakKey] == 0 and Herotable[RespawnTimeKey] <= 0) or Herotable[OldStreakKey] == nil then
-				Herotable[OldStreakKey] = 0
-			end
-			if Herotable[OldStreakKey] == 0 and Herotable[ValueStreakKey] >= 2 then
-				Herotable[OldStreakKey] = Herotable[ValueStreakKey]
-			end
-			if Herotable[ValueStreakKey] > Herotable[OldStreakKey] then
-				Herotable[OldStreakKey] = Herotable[OldStreakKey]+1
-				Herotable[Killtick] = Herotable[Killtick]+1
-				Herotable[BeenKill] = true
-			end
-			if Herotable[TimeTick] >= GameRules.GetGameTime() and Herotable[BeenKill] then
-				Herotable[TimeTick] = GameRules.GetGameTime() + TimeStreak
-				Herotable[BeenKill] = false
-				Herotable[Msgtick] = true
-			end
---[[	Сообщения для килл стриков		]]--
---[[]]	if Herotable[TimeTick]-GameRules.GetGameTime() <= TimeStreak-1 and Herotable[Msgtick] then 
---[[]]		if Herotable[Killtick] == 2 and kill2 then
---[[ДаблКилл]]	Engine.ExecuteCommand("say Красавчик "..Herotable[NameKey]..", сделал ДаблКил")
---[[]]			local kill2 = false
---[[]]		else
---[[]]			local kill2 = true
---[[]]		end
---[[]]		if Herotable[Killtick] == 3 and kill3 then
---[[ТриплКилл]]	Engine.ExecuteCommand("say Это трипл килл в исполнении "..Herotable[NameKey])
---[[]]			local kill3 = false
---[[]]		else 
---[[]]			local kill3 = true 
---[[]]		end
---[[]]		if Herotable[Killtick] == 4 and kill4 then
---[[УльтраКилл]]Engine.ExecuteCommand("say "..Herotable[NameKey]..", он пришел за рампагой")
---[[]]			local kill4 = false
---[[]]		else 
---[[]]			local kill4 = true 
---[[]]		end
---[[]]		if Herotable[Killtick] == 5 and kill5 then
---[[Рампага]]	Engine.ExecuteCommand("say Это рампага в исполнении "..Herotable[NameKey].." на "..Herotable[HeroNamePlayer]..", просто лайк")
---[[]]			local kill5 = false
---[[]]		else 
---[[]]			local kill5 = true 
---[[]]		end
---[[]]		if Herotable[Killtick] > 5 and kill6 then
---[[Больше]]	Engine.ExecuteCommand("say Остановите "..Herotable[NameKey]..", он просто ебанутый, сделал "..Herotable[Killtick].." килов подряд")
---[[  5   ]]	local kill6 = false
---[[киллов]]else 
---[[]]			local kill6 = true 
---[[]]		end
---[[]]		Herotable[Msgtick] = false
---[[]]	end
---[[-------------------------------------------------]]--
-			if Herotable[TimeTick] < GameRules.GetGameTime() and not Herotable[BeenKill] then
-				Herotable[Killtick] = 0
-				Herotable[TimeTick]=Herotable[TimeTick]+1
 			end
 		end
 		
@@ -228,7 +149,6 @@ function ZChatWar.OnUpdate()
 --[[---------------------------------------------------]]
 		
 		if i == NPCs.Count() then
-		
 		end
 	end
 end
@@ -236,34 +156,77 @@ end
 function ZChatWar.OnChatEvent(chatEvent)
 	InfoPlayer_1 = chatEvent.players[1]
 	InfoPlayer_2 = chatEvent.players[2]
+	InfoPlayer_3 = chatEvent.players[3]
+	InfoPlayer_4 = chatEvent.players[4]
+	InfoPlayer_5 = chatEvent.players[5]
 	if chatEvent.type == 5 then	
-		for NameHero,tabls in pairs(HeroDataInfo) do
-			if HeroDataInfo[NameHero][PlayerGameID] == InfoPlayer_1 then
-				WhoKillFBName = HeroDataInfo[NameHero][HeroNamePlayer]
-				WhoKillFBNick = HeroDataInfo[NameHero][NameKey]
-				WhoKillFBMyFreiend = HeroDataInfo[NameHero][TeamKey]
-			end
-			if HeroDataInfo[NameHero][PlayerGameID] == InfoPlayer_2 then
-				WhoDeadFBName = HeroDataInfo[NameHero][HeroNamePlayer]
-				WhoDeadFBNick = HeroDataInfo[NameHero][NameKey]
-			end
-			if WhoKillFBName and WhoDeadFBName then
-				if WhoKillFBNick == Player.GetName(Players.GetLocal()) then
-					Engine.ExecuteCommand("say Да я охуеннен, это бионгодлайк, мне лайк, бомж "..WhoDeadFBNick)
-				end
-				if WhoDeadFBNick == Player.GetName(Players.GetLocal()) then
-					Engine.ExecuteCommand("say Ну вообще пиздато ноль хелпы. "..WhoKillFBNick..", ты вообще черт ебучий")
-				end
-				if WhoDeadFBNick ~= Player.GetName(Players.GetLocal()) and WhoKillFBNick ~= Player.GetName(Players.GetLocal()) then
-					if not WhoKillFBMyFreiend then
-						Engine.ExecuteCommand("say Ой "..WhoDeadFBName.." даун. Давайте его зарепортим, чтобы он больше ФБ не отдавал!!!")
-					else
-						Engine.ExecuteCommand("say "..WhoKillFBNick.." красава, пиздато играешь")
-					end
-				end
+		if HeroDataInfo[InfoPlayer_1][NickKey] == Player.GetName(Players.GetLocal()) then
+			Engine.ExecuteCommand("say Да я охуеннен, это бионгодлайк, мне лайк, бомж "..HeroDataInfo[InfoPlayer_2][NickKey])
+		end
+		if HeroDataInfo[InfoPlayer_2][NickKey] == Player.GetName(Players.GetLocal()) then
+			Engine.ExecuteCommand("say Ну вообще пиздато ноль хелпы. "..HeroDataInfo[InfoPlayer_1][NickKey]..", ты вообще черт ебучий")
+		end
+		if HeroDataInfo[InfoPlayer_2][NickKey] ~= Player.GetName(Players.GetLocal()) and HeroDataInfo[InfoPlayer_1][NickKey] ~= Player.GetName(Players.GetLocal()) then
+			if HeroDataInfo[InfoPlayer_1][TeamKey] then
+				Engine.ExecuteCommand("say Ой "..HeroDataInfo[InfoPlayer_2][NickKey].." даун. Давайте его зарепортим, чтобы он больше ФБ не отдавал!!!")
+			else
+				Engine.ExecuteCommand("say "..HeroDataInfo[InfoPlayer_1][NickKey].." красава, пиздато играешь")
 			end
 		end
 	end	
+	if chatEvent.type == 6 then
+		if HeroDataInfo[InfoPlayer_1][NickKey] == Player.GetName(Players.GetLocal()) then
+			if InfoPlayer_3 == 2 then
+				Chat.Say(AllChat,"Пацаны да я охуенен")
+			end
+			if InfoPlayer_3 == 3 then
+				Chat.Say(AllChat,"ЕЕЕЕ BOY, да я просто кибер катлет")
+			end
+			if InfoPlayer_3 == 4 then
+				Chat.Say(AllChat,"Сосочки затвердели, давайте рампагу")
+			end
+			if InfoPlayer_3 == 5 then
+				Chat.Say(AllChat,"Просто в нулину вас вынес, никчемные, труха")
+			end
+			if InfoPlayer_3 > 5 then
+				Chat.Say(AllChat,"Давайте ещё больше, а то "..InfoPlayer_3.." киллов, это очень мало")
+			end
+		else
+			if HeroDataInfo[InfoPlayer_1][TeamKey] then
+				if InfoPlayer_3 == 2 then
+					Engine.ExecuteCommand("say Красавчик "..HeroDataInfo[InfoPlayer_1][NickKey]..", сделал ДаблКил")
+				end
+				if InfoPlayer_3 == 3 then
+					Engine.ExecuteCommand("say Это трипл килл в исполнении "..HeroDataInfo[InfoPlayer_1][NickKey])
+				end
+				if InfoPlayer_3 == 4 then
+					Engine.ExecuteCommand("say "..HeroDataInfo[InfoPlayer_1][NickKey]..", он пришел за рампагой")
+				end
+				if InfoPlayer_3 == 5 then
+					Engine.ExecuteCommand("say Это рампага в исполнении "..HeroDataInfo[InfoPlayer_1][NickKey].." на "..HeroDataInfo[InfoPlayer_1][NamePlayer]..", просто лайк")
+				end
+				if InfoPlayer_3 > 5 then
+					Engine.ExecuteCommand("say Остановите "..HeroDataInfo[InfoPlayer_1][NickKey]..", он просто ебанутый, сделал "..InfoPlayer_3.." килов подряд")
+				end
+			else
+				if InfoPlayer_3 == 2 then
+					Engine.ExecuteCommand("say Красавчик "..HeroDataInfo[InfoPlayer_1][NickKey]..", сделал ДаблКил")
+				end
+				if InfoPlayer_3 == 3 then
+					Engine.ExecuteCommand("say Это трипл килл в исполнении "..HeroDataInfo[InfoPlayer_1][NickKey])
+				end
+				if InfoPlayer_3 == 4 then
+					Engine.ExecuteCommand("say "..HeroDataInfo[InfoPlayer_1][NickKey]..", он пришел за рампагой")
+				end
+				if InfoPlayer_3 == 5 then
+					Engine.ExecuteCommand("say Это рампага в исполнении "..HeroDataInfo[InfoPlayer_1][NickKey].." на "..HeroDataInfo[InfoPlayer_1][NamePlayer]..", просто лайк")
+				end
+				if InfoPlayer_3 > 5 then
+					Engine.ExecuteCommand("say Остановите "..HeroDataInfo[InfoPlayer_1][NickKey]..", он просто ебанутый, сделал "..InfoPlayer_3.." килов подряд")
+				end
+			end
+		end
+	end
 	PlaerChat = chatEvent.players
 	TypeChat = chatEvent.type
 	ValueChat = chatEvent.value
@@ -278,25 +241,18 @@ function ZChatWar.OnDraw()
 		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, y, key .." | ".. name , 1)
 		y=y+20
 	end
-	if WhoKillFBNick and WhoDeadFBNick then
-		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 360, WhoKillFBNick, 1)
-		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 380, WhoDeadFBNick, 1)
-	end
+	-- if HeroDataInfo[InfoPlayer_1][NickKey] and HeroDataInfo[InfoPlayer_2][NickKey] then
+		-- Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 360, HeroDataInfo[InfoPlayer_1][NickKey], 1)
+		-- Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 380, HeroDataInfo[InfoPlayer_2][NickKey], 1)
+	-- end
 end
 
 function ZChatWar.init()
 	HeroDataInfo = {}
-	NameKey = 1
+	NickKey = 1
 	TeamKey = 2
-	ValueStreakKey = 3
-	RespawnTimeKey = 4
-	OldStreakKey = 5
-	TimeTick = 6
-	BeenKill = 7
-	Killtick = 8
-	Msgtick = 9
-	HeroNamePlayer = 10
-	PlayerGameID = 11
+	NamePlayer = 3
+	OwnerKey = 4
 	-------------------
 	CourDataInfo = {}
 	AliveKey = 12
@@ -307,11 +263,7 @@ function ZChatWar.init()
 	DeadTimeFlae = 17
 	MyTeamCuer = 18
 	-------------------
-	WhoKillFBName = nil
-	WhoKillFBNick = nil
-	WhoKillFBMyFreiend = nil
-	WhoDeadFBName = nil
-	WhoDeadFBNick = nil
+	AllChat = "DOTAChannelType_GameAll"
 	TimeStreak = 18
 	FBDead = {}
 	FBKill = {}
