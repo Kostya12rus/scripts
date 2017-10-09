@@ -5,7 +5,7 @@ ZChatWar.optionEnable = Menu.AddOption({"Kostya12rus","Chat War"}, "Activate", "
 -- ZChatWar.NickAndItemseKey =     Menu.AddKeyOption({"Kostya12rus","MultiCheat",  "4 Nick And Items"}, "Fuck Key",Enum.ButtonCode.KEY_P)
 
 --[[
-Herotable = 
+HeroDataInfo[NPC.GetUnitName(NA_Unit)] = 
 {
 	NameKey =        Ник Игрока
 	TeamKey =        Тригер на каманду в которой находиться игрок
@@ -17,6 +17,7 @@ Herotable =
 	Killtick =       Количество быстрых убийств подряд 
 	Msgtick =        Тригер для вывода сообщения в чат
 	HeroNamePlayer = Имя героя на котором играет игрок
+	PlayerGameID =   Игровой ID игрока
 }
 
 
@@ -35,8 +36,8 @@ function ZChatWar.OnUpdate()
 	local NeedX = 1000
 	local NeedY = 500
 	local NeedX1 = 1000
-	MyCour = 0
-	EnCour = 0
+	local KillTeam = 0
+	local KillEnem = 0
 	for i=1,NPCs.Count() do
 		NA_Unit = NPCs.Get(i)
 		if Entity.IsHero(NA_Unit) and Entity.IsPlayer(Entity.GetOwner(NA_Unit)) and not NPC.IsIllusion(NA_Unit) then
@@ -115,6 +116,7 @@ function ZChatWar.OnUpdate()
 				Herotable[TimeTick]=Herotable[TimeTick]+1
 			end
 		end
+		
 		if NPC.IsCourier(NA_Unit) then
 			if CourDataInfo[Entity.GetTeamNum(NA_Unit)] == nil then CourDataInfo[Entity.GetTeamNum(NA_Unit)] = {} end
 			CourTable = CourDataInfo[Entity.GetTeamNum(NA_Unit)]
@@ -122,8 +124,6 @@ function ZChatWar.OnUpdate()
 			if CourTable[DeadValue] == nil then CourTable[DeadValue] = 0 end
 			if CourTable[DeadTime] == nil then CourTable[DeadTime] = 0 end
 			if CourTable[DeadTimeFlae] == nil then CourTable[DeadTimeFlae] = 0 end
-			if CourTable[MyCour] == nil then CourTable[MyCour] = 0 end
-			if CourTable[EnCour] == nil then CourTable[EnCour] = 0 end
 			if CourTable[MyTeamCuer] == nil then CourTable[MyTeamCuer] = Entity.IsSameTeam(myHero, NA_Unit) end
 			if Courier.IsFlyingCourier(NA_Unit) then
 				if not Entity.IsAlive(NA_Unit) and (CourTable[DeadTimeFlae] <= GameRules.GetGameTime() or CourTable[DeadTimeFlae] < Courier.GetRespawnTime(NA_Unit)) and not Entity.IsDormant(NA_Unit) then
@@ -152,7 +152,7 @@ function ZChatWar.OnUpdate()
 					for iteamconsole,nameitem in pairs(ItemNameTable) do
 						if iteamname == iteamconsole then
 							if itemrecept then
-								CourTable[ItemKey] = CourTable[ItemKey] ..", рецепт от ".. nameitem
+								CourTable[ItemKey] = CourTable[ItemKey] ..", рецепт ".. nameitem
 								itemrecept = false
 							else
 								CourTable[ItemKey] = CourTable[ItemKey] ..", ".. nameitem
@@ -172,7 +172,7 @@ function ZChatWar.OnUpdate()
 --[[]]		if CourTable[MyTeamCuer] then
 --[[]]			if CourTable[DeadValue] == 1 then
 --[[]]				if CourTable[ItemTrig] then
---[[]]					Engine.ExecuteCommand("say Зачем вы убили куру там были" .. CourTable[ItemKey])
+--[[]]					Engine.ExecuteCommand("say Зачем вы убили куру? Там были" .. CourTable[ItemKey])
 --[[]]				else
 --[[]]					Engine.ExecuteCommand("say Мне кажестся или мы проебали куру?")
 --[[]]				end
@@ -204,7 +204,7 @@ function ZChatWar.OnUpdate()
 --[[]]				end
 --[[]]			elseif CourTable[DeadValue] == 2 then
 --[[]]				if CourTable[ItemTrig] then
---[[]]					Engine.ExecuteCommand("say Ваша кура мерла с" .. CourTable[ItemKey])
+--[[]]					Engine.ExecuteCommand("say Ваша кура умерла с" .. CourTable[ItemKey])
 --[[]]				else
 --[[]]					Engine.ExecuteCommand("say Вы заметили, что у вас кура сдохла?")
 --[[]]				end
@@ -212,7 +212,7 @@ function ZChatWar.OnUpdate()
 --[[]]				if CourTable[ItemTrig] then
 --[[]]					Engine.ExecuteCommand("say Кура не донесла" .. CourTable[ItemKey])
 --[[]]				else
---[[]]					Engine.ExecuteCommand("say Скажите куре пока на 3 минуты")
+--[[]]					Engine.ExecuteCommand("say Скажите куре 'пока на 3 минуты'")
 --[[]]				end
 --[[]]			elseif CourTable[DeadValue] >= 4 then
 --[[]]				if CourTable[ItemTrig] then
@@ -226,13 +226,62 @@ function ZChatWar.OnUpdate()
 --[[]]		end
 --[[]]	end
 --[[---------------------------------------------------]]
+		
+		if i == NPCs.Count() then
+		
+		end
 	end
-	-- for index,names in pairs(CourDataInfo) do
-		-- if CourDataInfo[index] ~= nil then
-			-- itemincor = CourDataInfo[index][ItemKey]
-			-- Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 200, index .." | ".. names , 1)
-		-- end
-	-- end
+end
+
+function ZChatWar.OnChatEvent(chatEvent)
+	InfoPlayer_1 = chatEvent.players[1]
+	InfoPlayer_2 = chatEvent.players[2]
+	if chatEvent.type == 5 then	
+		for NameHero,tabls in pairs(HeroDataInfo) do
+			if HeroDataInfo[NameHero][PlayerGameID] == InfoPlayer_1 then
+				WhoKillFBName = HeroDataInfo[NameHero][HeroNamePlayer]
+				WhoKillFBNick = HeroDataInfo[NameHero][NameKey]
+				WhoKillFBMyFreiend = HeroDataInfo[NameHero][TeamKey]
+			end
+			if HeroDataInfo[NameHero][PlayerGameID] == InfoPlayer_2 then
+				WhoDeadFBName = HeroDataInfo[NameHero][HeroNamePlayer]
+				WhoDeadFBNick = HeroDataInfo[NameHero][NameKey]
+			end
+			if WhoKillFBName and WhoDeadFBName then
+				if WhoKillFBNick == Player.GetName(Players.GetLocal()) then
+					Engine.ExecuteCommand("say Да я охуеннен, это бионгодлайк, мне лайк, бомж "..WhoDeadFBNick)
+				end
+				if WhoDeadFBNick == Player.GetName(Players.GetLocal()) then
+					Engine.ExecuteCommand("say Ну вообще пиздато ноль хелпы. "..WhoKillFBNick..", ты вообще черт ебучий")
+				end
+				if WhoDeadFBNick ~= Player.GetName(Players.GetLocal()) and WhoKillFBNick ~= Player.GetName(Players.GetLocal()) then
+					if not WhoKillFBMyFreiend then
+						Engine.ExecuteCommand("say Ой "..WhoDeadFBName.." даун. Давайте его зарепортим, чтобы он больше ФБ не отдавал!!!")
+					else
+						Engine.ExecuteCommand("say "..WhoKillFBNick.." красава, пиздато играешь")
+					end
+				end
+			end
+		end
+	end	
+	PlaerChat = chatEvent.players
+	TypeChat = chatEvent.type
+	ValueChat = chatEvent.value
+end
+
+function ZChatWar.OnDraw()
+	Renderer.SetDrawColor(255,255,255,255)
+	local y = 460
+	Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 400, TypeChat, 1)
+	Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 420, ValueChat, 1)
+	for key,name in pairs(PlaerChat) do
+		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, y, key .." | ".. name , 1)
+		y=y+20
+	end
+	if WhoKillFBNick and WhoDeadFBNick then
+		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 360, WhoKillFBNick, 1)
+		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 380, WhoDeadFBNick, 1)
+	end
 end
 
 function ZChatWar.init()
@@ -258,8 +307,14 @@ function ZChatWar.init()
 	DeadTimeFlae = 17
 	MyTeamCuer = 18
 	-------------------
+	WhoKillFBName = nil
+	WhoKillFBNick = nil
+	WhoKillFBMyFreiend = nil
+	WhoDeadFBName = nil
+	WhoDeadFBNick = nil
 	TimeStreak = 18
-	RespawnCourer = 181
+	FBDead = {}
+	FBKill = {}
 	kill2 = true
 	kill3 = true
 	kill4 = true
