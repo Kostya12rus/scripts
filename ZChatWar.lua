@@ -147,7 +147,6 @@ function ZChatWar.OnUpdate()
 --[[]]		end
 --[[]]	end
 --[[---------------------------------------------------]]
-		
 		if i == NPCs.Count() then
 		end
 	end
@@ -227,27 +226,60 @@ function ZChatWar.OnChatEvent(chatEvent)
 			end
 		end
 	end
+	if chatEvent.type == 3 then -- снесли Башню
+		-- chatEvent.value == 2 снесли башню тьме
+		-- chatEvent.value == 3 снесли башню свету
+		-- chatEvent.players[1] == кто снес
+	end
+	if chatEvent.type == 2 then -- снесли бараки
+		-- chatEvent.value == 1 снесли барак милишников тмы
+		-- chatEvent.value == 2 снесли барак ренживиков тмы
+		-- chatEvent.value == 512 снесли барак ренживиков света
+		-- chatEvent.value == 256 снесли барак ренживиков света
+		-- chatEvent.players[1] == кто снес
+	end
+	if chatEvent.type == 4 then -- Денай строение
+		-- chatEvent.value == 60 Денай башню 
+		-- chatEvent.players == кто заденаил
+	end
+	if chatEvent.type == 8 then -- Взяли аегис
+		-- chatEvent.players[1] == кто взял
+	end
+	if chatEvent.type == 0 then -- Убили крипы
+		-- chatEvent.value == 0 
+		-- chatEvent.players == кто умер
+	end
+	if chatEvent.type == 0 then -- Убили крипы
+		-- chatEvent.value == 7
+		-- chatEvent.players == кто умер
+	end
 	PlaerChat = chatEvent.players
 	TypeChat = chatEvent.type
 	ValueChat = chatEvent.value
 end
 
 function ZChatWar.OnDraw()
+	if not Menu.IsEnabled(ZChatWar.optionEnable) then return end
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+	
 	Renderer.SetDrawColor(255,255,255,255)
 	local y = 460
-	Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 400, TypeChat, 1)
-	Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 420, ValueChat, 1)
-	for key,name in pairs(PlaerChat) do
-		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, y, key .." | ".. name , 1)
-		y=y+20
+	if TypeChat and ValueChat and PlaerChat then
+		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 400, "Type - "..TypeChat, 1)
+		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 420, "Value - "..ValueChat, 1)
+		for key,name in pairs(PlaerChat) do
+			Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, y, key .." | ".. name , 1)
+			y=y+20
+		end
 	end
-	-- if HeroDataInfo[InfoPlayer_1][NickKey] and HeroDataInfo[InfoPlayer_2][NickKey] then
-		-- Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 360, HeroDataInfo[InfoPlayer_1][NickKey], 1)
-		-- Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 380, HeroDataInfo[InfoPlayer_2][NickKey], 1)
-	-- end
 end
 
 function ZChatWar.init()
+	if not Menu.IsEnabled(ZChatWar.optionEnable) then return end
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+	
 	HeroDataInfo = {}
 	NickKey = 1
 	TeamKey = 2
