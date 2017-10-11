@@ -2,7 +2,7 @@
 local ZChatWar = {}
 ZChatWar.Font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 ZChatWar.optionEnable = Menu.AddOption({"Kostya12rus","Chat War"}, "Activate", "")
--- ZChatWar.NickAndItemseKey =     Menu.AddKeyOption({"Kostya12rus","MultiCheat",  "4 Nick And Items"}, "Fuck Key",Enum.ButtonCode.KEY_P)
+ZChatWar.Key = Menu.AddKeyOption({"Kostya12rus","Chat War"}, "Chat Key",Enum.ButtonCode.KEY_P)
 
 --[[
 HeroDataInfo[NPC.GetUnitName(NA_Unit)] = 
@@ -18,6 +18,9 @@ function ZChatWar.OnUpdate()
 	if not Menu.IsEnabled(ZChatWar.optionEnable) then return end
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
+	if Menu.IsKeyDownOnce(ZChatWar.Key) then
+		Chat.Print(AllChat,"Видно данное сообщение?")
+	end 
 	local NeedX = 1000
 	local NeedY = 500
 	local NeedX1 = 1000
@@ -166,7 +169,7 @@ function ZChatWar.OnChatEvent(chatEvent)
 			Engine.ExecuteCommand("say Ну вообще пиздато ноль хелпы. "..HeroDataInfo[InfoPlayer_1][NickKey]..", ты вообще черт ебучий")
 		end
 		if HeroDataInfo[InfoPlayer_2][NickKey] ~= Player.GetName(Players.GetLocal()) and HeroDataInfo[InfoPlayer_1][NickKey] ~= Player.GetName(Players.GetLocal()) then
-			if HeroDataInfo[InfoPlayer_1][TeamKey] then
+			if not HeroDataInfo[InfoPlayer_1][TeamKey] then
 				Engine.ExecuteCommand("say Ой "..HeroDataInfo[InfoPlayer_2][NickKey].." даун. Давайте его зарепортим, чтобы он больше ФБ не отдавал!!!")
 			else
 				Engine.ExecuteCommand("say "..HeroDataInfo[InfoPlayer_1][NickKey].." красава, пиздато играешь")
@@ -240,18 +243,22 @@ function ZChatWar.OnChatEvent(chatEvent)
 	end
 	if chatEvent.type == 4 then -- Денай строение
 		-- chatEvent.value == 60 Денай башню 
-		-- chatEvent.players == кто заденаил
+		-- chatEvent.players[1] == кто заденаил
 	end
 	if chatEvent.type == 8 then -- Взяли аегис
 		-- chatEvent.players[1] == кто взял
 	end
 	if chatEvent.type == 0 then -- Убили крипы
 		-- chatEvent.value == 0 
-		-- chatEvent.players == кто умер
+		-- chatEvent.players[1] == кто умер
 	end
 	if chatEvent.type == 0 then -- Убили крипы
 		-- chatEvent.value == 7
-		-- chatEvent.players == кто умер
+		-- chatEvent.players[1] == кто умер
+	end
+	if chatEvent.type == 51 then -- Денай аегиса
+		-- chatEvent.value == 0
+		-- chatEvent.players[1] == кто сломал
 	end
 	PlaerChat = chatEvent.players
 	TypeChat = chatEvent.type
@@ -276,10 +283,6 @@ function ZChatWar.OnDraw()
 end
 
 function ZChatWar.init()
-	if not Menu.IsEnabled(ZChatWar.optionEnable) then return end
-	local myHero = Heroes.GetLocal()
-	if not myHero then return end
-	
 	HeroDataInfo = {}
 	NickKey = 1
 	TeamKey = 2
