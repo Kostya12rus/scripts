@@ -91,65 +91,64 @@ function ZChatWar.OnUpdate()
 					end
 				end
 			end
---[[     Сообщения о мертвой куре	]]
---[[]]	if CouerDead then
---[[]]		if CourTable[MyTeamCuer] then
---[[]]			if CourTable[DeadValue] == 1 then
---[[]]				if CourTable[ItemTrig] then
---[[]]					Engine.ExecuteCommand("say Зачем вы убили куру? Там были" .. CourTable[ItemKey])
---[[]]				else
---[[]]					Engine.ExecuteCommand("say Мне кажестся или мы проебали куру?")
---[[]]				end
---[[]]			elseif CourTable[DeadValue] == 2 then
---[[]]				if CourTable[ItemTrig] then
---[[]]					Engine.ExecuteCommand("say Сново кура умерла с нашими шмотками" .. CourTable[ItemKey])
---[[]]				else
---[[]]					Engine.ExecuteCommand("say Как у нас так получаеться проебывать куру?")
---[[]]				end
---[[]]			elseif CourTable[DeadValue] == 3 then
---[[]]				if CourTable[ItemTrig] then
---[[]]					Engine.ExecuteCommand("say Он сливает куру когда она несет" .. CourTable[ItemKey])
---[[]]				else
---[[]]					Engine.ExecuteCommand("say Кажеться пора кидать репорт, он ещё раз слил куру")
---[[]]				end
---[[]]			elseif CourTable[DeadValue] >= 4 then
---[[]]				if CourTable[ItemTrig] then
---[[]]					Engine.ExecuteCommand("say Пиздец.. В куре были" .. CourTable[ItemKey])
---[[]]				else
---[[]]					Engine.ExecuteCommand("say Блять, этот далбоеб просто фидит курами, репорт")
---[[]]				end
---[[]]			end
---[[]]		else
---[[]]			if CourTable[DeadValue] == 1 then
---[[]]				if CourTable[ItemTrig] then
---[[]]					Engine.ExecuteCommand("say Кажеться кура умерла и кто то потерял" .. CourTable[ItemKey])
---[[]]				else
---[[]]					Engine.ExecuteCommand("say Научитесь управлять курой")
---[[]]				end
---[[]]			elseif CourTable[DeadValue] == 2 then
---[[]]				if CourTable[ItemTrig] then
---[[]]					Engine.ExecuteCommand("say Ваша кура умерла с" .. CourTable[ItemKey])
---[[]]				else
---[[]]					Engine.ExecuteCommand("say Вы заметили, что у вас кура сдохла?")
---[[]]				end
---[[]]			elseif CourTable[DeadValue] == 3 then
---[[]]				if CourTable[ItemTrig] then
---[[]]					Engine.ExecuteCommand("say Кура не донесла" .. CourTable[ItemKey])
---[[]]				else
---[[]]					Engine.ExecuteCommand("say Скажите куре 'пока на 3 минуты'")
---[[]]				end
---[[]]			elseif CourTable[DeadValue] >= 4 then
---[[]]				if CourTable[ItemTrig] then
---[[]]					Engine.ExecuteCommand("say Вы что фидить начали? Хоть выложите" .. CourTable[ItemKey])
---[[]]				else
---[[]]					Engine.ExecuteCommand("say Ещё больше курьеров ... ")
---[[]]				end
---[[]]			end
---[[]]		end
---[[]]			CouerDead = false
---[[]]		end
---[[]]	end
---[[---------------------------------------------------]]
+			
+			if CouerDead then
+				if CourTable[MyTeamCuer] then
+					if CourTable[DeadValue] == 1 then
+						if CourTable[ItemTrig] then
+							Engine.ExecuteCommand("say Зачем вы убили куру? Там были" .. CourTable[ItemKey])
+						else
+							Engine.ExecuteCommand("say Мне кажестся или мы проебали куру?")
+						end
+					elseif CourTable[DeadValue] == 2 then
+						if CourTable[ItemTrig] then
+							Engine.ExecuteCommand("say Сново кура умерла с нашими шмотками" .. CourTable[ItemKey])
+						else
+							Engine.ExecuteCommand("say Как у нас так получаеться проебывать куру?")
+						end
+					elseif CourTable[DeadValue] == 3 then
+						if CourTable[ItemTrig] then
+							Engine.ExecuteCommand("say Он сливает куру когда она несет" .. CourTable[ItemKey])
+						else
+							Engine.ExecuteCommand("say Кажеться пора кидать репорт, он ещё раз слил куру")
+						end
+					elseif CourTable[DeadValue] >= 4 then
+						if CourTable[ItemTrig] then
+							Engine.ExecuteCommand("say Пиздец.. В куре были" .. CourTable[ItemKey])
+						else
+							Engine.ExecuteCommand("say Блять, этот далбоеб просто фидит курами, репорт")
+						end
+					end
+				else
+					if CourTable[DeadValue] == 1 then
+						if CourTable[ItemTrig] then
+							Engine.ExecuteCommand("say Кажеться кура умерла и кто то потерял" .. CourTable[ItemKey])
+						else
+							Engine.ExecuteCommand("say Научитесь управлять курой")
+						end
+					elseif CourTable[DeadValue] == 2 then
+						if CourTable[ItemTrig] then
+							Engine.ExecuteCommand("say Ваша кура умерла с" .. CourTable[ItemKey])
+						else
+							Engine.ExecuteCommand("say Вы заметили, что у вас кура сдохла?")
+						end
+					elseif CourTable[DeadValue] == 3 then
+						if CourTable[ItemTrig] then
+							Engine.ExecuteCommand("say Кура не донесла" .. CourTable[ItemKey])
+						else
+							Engine.ExecuteCommand("say Скажите куре 'пока на 3 минуты'")
+						end
+					elseif CourTable[DeadValue] >= 4 then
+						if CourTable[ItemTrig] then
+							Engine.ExecuteCommand("say Вы что фидить начали? Хоть выложите" .. CourTable[ItemKey])
+						else
+							Engine.ExecuteCommand("say Ещё больше курьеров ... ")
+						end
+					end
+				end
+					CouerDead = false
+			end
+		end
 		if i == NPCs.Count() then
 		end
 	end
@@ -172,14 +171,14 @@ function ZChatWar.OnChatEvent(chatEvent)
 			if not HeroDataInfo[InfoPlayer_1][TeamKey] then
 				Engine.ExecuteCommand("say Ой "..HeroDataInfo[InfoPlayer_2][NickKey].." даун. Давайте его зарепортим, чтобы он больше ФБ не отдавал!!!")
 			else
-				Engine.ExecuteCommand("say "..HeroDataInfo[InfoPlayer_1][NickKey].." красава, пиздато играешь")
+				Engine.ExecuteCommand("say "..HeroDataInfo[InfoPlayer_1][NickKey].." красава, пиздато ссыграл")
 			end
 		end
 	end	
 	if chatEvent.type == 6 then
 		if HeroDataInfo[InfoPlayer_1][NickKey] == Player.GetName(Players.GetLocal()) then
 			if InfoPlayer_3 == 2 then
-				Chat.Say(AllChat,"Пацаны да я охуенен")
+				Chat.Say(AllChat,"Вырубил "..HeroDataInfo[InfoPlayer_2][NickKey]..", другого для прикола вырубил")
 			end
 			if InfoPlayer_3 == 3 then
 				Chat.Say(AllChat,"ЕЕЕЕ BOY, да я просто кибер катлет")
