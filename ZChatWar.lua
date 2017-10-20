@@ -150,6 +150,7 @@ function ZChatWar.OnChatEvent(chatEvent)
 	InfoPlayer_3 = chatEvent.players[3]
 	InfoPlayer_4 = chatEvent.players[4]
 	InfoPlayer_5 = chatEvent.players[5]
+
 	if chatEvent.type == 5 then	
 		if HeroDataInfo[InfoPlayer_1][NickKey] == Player.GetName(Players.GetLocal()) then
 			Engine.ExecuteCommand("say Да я охуеннен, это бионгодлайк, мне лайк, бомж "..HeroDataInfo[InfoPlayer_2][NickKey])
@@ -288,14 +289,6 @@ function ZChatWar.init()
 	MyTeamCuer = 18
 	-------------------
 	AllChat = "DOTAChannelType_GameAll"
-	TimeStreak = 18
-	FBDead = {}
-	FBKill = {}
-	kill2 = true
-	kill3 = true
-	kill4 = true
-	kill5 = true
-	kill6 = true
 	CouerDead = false
 	HeroNameTable = {
  npc_dota_hero_abaddon = "Abaddon"

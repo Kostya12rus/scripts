@@ -1,6 +1,8 @@
 local SkyWrathHake = {}
 
 SkyWrathHake.IsToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Enabled", "")
+SkyWrathHake.IsTargetParticleEnabled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Target indicator", "Draws particle for current target")
+SkyWrathHake.IsConcShotParticleEnabled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Concussive shot indicator", "Draws concussive shot particle if enemy is in range of cast")
 SkyWrathHake.combokey = Menu.AddKeyOption({"Hero Specific", "SkyWrathHake"}, "Combo Key", Enum.ButtonCode.KEY_F)
 SkyWrathHake.harraskey = Menu.AddKeyOption({"Hero Specific", "SkyWrathHake"}, "Harras Key", Enum.ButtonCode.KEY_D)
 SkyWrathHake.enemyInRange = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Closest to mouse range", "Range that makes assembly checking for enemy in selected range.", 100, 600, 100)
@@ -29,37 +31,115 @@ SkyWrathHake.IsBlinkToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, 
 SkyWrathHake.IsEZKChecked = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Check for EZ Kill", "Check if an enemy is ez-killable (low-mana costs and the fastest way to slay an enemy).")
 SkyWrathHake.IsDoubleUltiToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Double ulti mode", "Casts double ulti with aghanim scepter item/buff equiped.")
 
-SkyWrathHake.Modifiers = {[0] = "modifier_medusa_stone_gaze_stone", [1] = "modifier_winter_wyvern_winters_curse", [2] = "modifier_item_lotus_orb_active"}
+SkyWrathHake.Modifiers = {[0] = "modifier_medusa_stone_gaze_stone",[1] = "modifier_winter_wyvern_winters_curse",[2] = "modifier_item_lotus_orb_active"}
 SkyWrathHake.sleepers = {}
 
-SkyWrathHake.atoSleep = 0
+SkyWrathHake.particleNextTime = 0
+SkyWrathHake.targetParticle = 0
+SkyWrathHake.cshotParticle = 0
+SkyWrathHake.cshotParticleEnemy = nil
+
 SkyWrathHake.isezkillable = false
-SkyWrathHake.FarPredict = 390					-- custom this for fastmoving targets
-SkyWrathHake.DoubleMFRootedPredict = 610		-- custom this for double ulti with aghs
-SkyWrathHake.DoubleMFUnrootedPredict = 630		-- custom this for double ulti with aghs
-SkyWrathHake.CloseInPredict = 300				-- custom this for low movespeed targets
+SkyWrathHake.FarPredict = 390					
+SkyWrathHake.DoubleMFRootedPredict = 610		
+SkyWrathHake.DoubleMFUnrootedPredict = 630		
+SkyWrathHake.CloseInPredict = 300				
 
 function SkyWrathHake.OnUpdate()
-	--if GameRules.GetGameState()
 	if not Menu.IsEnabled(SkyWrathHake.IsToggled) then return
 	end
 	SkyWrathHake.hero = Heroes.GetLocal()
 	if NPC.GetUnitName(SkyWrathHake.hero) ~= "npc_dota_hero_skywrath_mage" or not Entity.IsAlive(SkyWrathHake.hero) then
 		return
 	end
-	SkyWrathHake.player = Players.GetLocal()	 
+	SkyWrathHake.player = Players.GetLocal()	
 	SkyWrathHake.enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(SkyWrathHake.hero), Enum.TeamType.TEAM_ENEMY)
+	 
+	if Menu.IsEnabled(SkyWrathHake.IsConcShotParticleEnabled) then	
+		SkyWrathHake.GetCshotEnemy()
+	end 
 	SkyWrathHake.PrayToDog()
 	SkyWrathHake.ArcaneHarras()
 end
 
+function SkyWrathHake.GetCshotEnemy()
+	SkyWrathHake.cshotenemy = nil
+	local cshot = NPC.GetAbilityByIndex(SkyWrathHake.hero, 1)
+	if not cshot then return end
+	local heroes = Heroes.InRadius(Entity.GetAbsOrigin(SkyWrathHake.hero), Ability.GetCastRange(cshot), Entity.GetTeamNum(SkyWrathHake.hero), Enum.TeamType.TEAM_ENEMY)
+	if not heroes then return end
+	if cshot and heroes then			
+		local compDistance = Ability.GetCastRange(cshot)
+		for k, v in pairs(heroes) do
+			local curHero = heroes[k]
+			local distance = Entity.GetAbsOrigin(curHero):Distance(Entity.GetAbsOrigin(SkyWrathHake.hero)):Length2D()
+			if distance < compDistance then
+				SkyWrathHake.cshotenemy = curHero
+				compDistance = distance
+			end			
+		end
+	end		
+end
+
+function SkyWrathHake.OnDraw()
+	local particleEnemy = SkyWrathHake.enemy
+	if Menu.IsEnabled(SkyWrathHake.IsTargetParticleEnabled) then	
+		if not particleEnemy or (not NPC.IsPositionInRange(SkyWrathHake.enemy, Input.GetWorldCursorPos(), Menu.GetValue(SkyWrathHake.enemyInRange), 0) and SkyWrathHake.targetParticle ~= 0) or SkyWrathHake.enemy ~= particleEnemy then
+			Particle.Destroy(SkyWrathHake.targetParticle)			
+			SkyWrathHake.targetParticle = 0
+			particleEnemy = SkyWrathHake.enemy
+		else
+			if SkyWrathHake.targetParticle == 0 and NPC.IsPositionInRange(SkyWrathHake.enemy, Input.GetWorldCursorPos(), Menu.GetValue(SkyWrathHake.enemyInRange), 0) then
+				SkyWrathHake.targetParticle = Particle.Create("particles/ui_mouseactions/range_finder_tower_aoe.vpcf", Enum.ParticleAttachment.PATTACH_INVALID, SkyWrathHake.enemy)				
+			end
+			if SkyWrathHake.targetParticle ~= 0 then
+				Particle.SetControlPoint(SkyWrathHake.targetParticle, 2, Entity.GetOrigin(SkyWrathHake.hero))
+				Particle.SetControlPoint(SkyWrathHake.targetParticle, 6, Vector(1, 0, 0))
+				Particle.SetControlPoint(SkyWrathHake.targetParticle, 7, Entity.GetOrigin(SkyWrathHake.enemy))
+			end
+		end
+	else 
+		if SkyWrathHake.targetParticle ~= 0 then
+			Particle.Destroy(SkyWrathHake.targetParticle)			
+			SkyWrathHake.targetParticle = 0
+		end
+	end
+
+	local cshot = NPC.GetAbilityByIndex(SkyWrathHake.hero, 1)
+	if Menu.IsEnabled(SkyWrathHake.IsConcShotParticleEnabled) then	
+		if not Ability.IsReady(cshot) or(not SkyWrathHake.cshotenemy and SkyWrathHake.cshotParticle ~= 0) or SkyWrathHake.cshotenemy ~= SkyWrathHake.cshotParticleEnemy then
+			Particle.Destroy(SkyWrathHake.cshotParticle)			
+			SkyWrathHake.cshotParticle = 0
+			SkyWrathHake.cshotParticleEnemy = SkyWrathHake.cshotenemy
+		else
+			if Ability.IsReady(cshot) and SkyWrathHake.cshotParticle == 0 and SkyWrathHake.cshotenemy then				
+				SkyWrathHake.cshotParticle = Particle.Create("particles/units/heroes/hero_skywrath_mage/skywrath_mage_concussive_shot.vpcf")
+			end
+			if SkyWrathHake.cshotParticle ~= 0 then
+				local customOrigin = Entity.GetAbsOrigin(SkyWrathHake.cshotenemy)
+				local zOrigin = customOrigin:GetZ()
+				customOrigin:SetZ(zOrigin + 310)
+				Particle.SetControlPoint(SkyWrathHake.cshotParticle, 0, customOrigin)
+				Particle.SetControlPoint(SkyWrathHake.cshotParticle, 1, customOrigin)
+				Particle.SetControlPoint(SkyWrathHake.cshotParticle, 2, Vector(500, 0, 0))					
+			end
+		end
+	else 
+		if SkyWrathHake.cshotParticle ~= 0 then
+			Particle.Destroy(SkyWrathHake.cshotParticle)			
+			SkyWrathHake.cshotParticle = 0
+		end
+	end
+end
+
 function SkyWrathHake.PrayToDog()
+	SkyWrathHake.isFullDebuffed = SkyWrathHake.IsFullDebuffed()
 	if not Menu.IsKeyDown(SkyWrathHake.combokey) then return end
 	
 	if not SkyWrathHake.enemy or not NPC.IsPositionInRange(SkyWrathHake.enemy, Input.GetWorldCursorPos(), Menu.GetValue(SkyWrathHake.enemyInRange), 0) then
 		return
 	end
-	SkyWrathHake.enemyPos = NPC.GetAbsOrigin(SkyWrathHake.enemy)
+	SkyWrathHake.enemyPos = Entity.GetAbsOrigin(SkyWrathHake.enemy)
 
 	if not NPC.HasState(SkyWrathHake.enemy, Enum.ModifierState.MODIFIER_STATE_ATTACK_IMMUNE) and not SkyWrathHake.SleepCheck(0.05, "combosleep") then	
 		Player.AttackTarget(SkyWrathHake.player, SkyWrathHake.hero, SkyWrathHake.enemy, false)
@@ -95,7 +175,9 @@ function SkyWrathHake.PrayToDog()
 		if not SkyWrathHake.SleepCheck(0.05, "combosleep") or NPC.IsLinkensProtected(SkyWrathHake.enemy) then return end		
 		if NPC.IsEntityInRange(SkyWrathHake.hero, SkyWrathHake.enemy, 700) then			                    
 			SkyWrathHake.isezkillable = SkyWrathHake.IsEzKillable()   
-		end	
+		end
+		
+
 		local soulring = NPC.GetItem(SkyWrathHake.hero, "item_soul_ring", true)
 		if soulring and Menu.IsEnabled(SkyWrathHake.IsSRToggled) and Ability.IsReady(soulring) and Ability.IsCastable(soulring, Ability.GetManaCost(soulring)) then
 			Ability.CastNoTarget(soulring)
@@ -129,7 +211,7 @@ function SkyWrathHake.ArcaneHarras()
 	if not SkyWrathHake.enemy or not NPC.IsPositionInRange(SkyWrathHake.enemy, Input.GetWorldCursorPos(), Menu.GetValue(SkyWrathHake.enemyInRange), 0) then
 		return
 	end
-	SkyWrathHake.enemyPos = NPC.GetAbsOrigin(SkyWrathHake.enemy)
+	SkyWrathHake.enemyPos = Entity.GetAbsOrigin(SkyWrathHake.enemy)
 
 	if not NPC.HasState(SkyWrathHake.enemy, Enum.ModifierState.MODIFIER_STATE_ATTACK_IMMUNE) then	
 		Player.AttackTarget(SkyWrathHake.player, SkyWrathHake.hero, SkyWrathHake.enemy, false)
@@ -225,7 +307,7 @@ function SkyWrathHake.CastAbility(ability, optionID)
 			return
 		end		
 		if ability == SkyWrathHake.ulti then
-			if SkyWrathHake.IsFullDebuffed() and not SkyWrathHake.isezkillable then		
+			if SkyWrathHake.isFullDebuffed and not SkyWrathHake.isezkillable then		
 				SkyWrathHake.CastToPrediction() 
 			end
 		else Ability.CastTarget(ability, SkyWrathHake.enemy)
@@ -236,7 +318,6 @@ end
 function SkyWrathHake.CastToPrediction()
 	local agh = NPC.GetItem(SkyWrathHake.hero, "item_ultimate_scepter", true)
 	local aghBuff = NPC.HasModifier(SkyWrathHake.hero, "modifier_item_ultimate_scepter_consumed")
-	if not SkyWrathHake.SleepCheck(SkyWrathHake.atoSleep, "atossleep") then return end
 	SkyWrathHake.atoSleep = 0
 	if(agh or aghBuff) and Menu.IsEnabled(SkyWrathHake.IsDoubleUltiToggled) then
 		if NPC.HasState(SkyWrathHake.enemy, Enum.ModifierState.MODIFIER_STATE_ROOTED) or NPC.HasState(SkyWrathHake.enemy, Enum.ModifierState.MODIFIER_STATE_STUNNED) then
@@ -277,18 +358,12 @@ function SkyWrathHake.UseItem(item, optionID)
 			Ability.CastNoTarget(item)
 			return
 		end
-		if item == SkyWrathHake.dagon and SkyWrathHake.IsFullDebuffed() then
+		if item == SkyWrathHake.dagon and SkyWrathHake.isFullDebuffed then
 			Ability.CastTarget(item, SkyWrathHake.enemy)
 			return
 		end
 		if item == SkyWrathHake.veil then
 			Ability.CastPosition(item, SkyWrathHake.enemyPos)
-			return
-		end
-		if item == SkyWrathHake.atos then
-			Ability.CastTarget(item, SkyWrathHake.enemy)
-			SkyWrathHake.atoSleep = SkyWrathHake.enemyPos:Distance(NPC.GetAbsOrigin(SkyWrathHake.hero)):Length2D() / 1500
-			SkyWrathHake.Sleep(SkyWrathHake.atoSleep, "atossleep")
 			return
 		end
 		if item ~= SkyWrathHake.dagon then
@@ -305,7 +380,7 @@ function SkyWrathHake.UseBlink()
     
 		if NPC.IsEntityInRange(SkyWrathHake.hero, SkyWrathHake.enemy, 600) then return end
 
-		local myloc = NPC.GetAbsOrigin(SkyWrathHake.hero)
+		local myloc = Entity.GetAbsOrigin(SkyWrathHake.hero)
 		local distance = SkyWrathHake.enemyPos - myloc
 
 		distance:SetZ(0)
@@ -319,15 +394,13 @@ function SkyWrathHake.UseBlink()
 end
 
 function SkyWrathHake.IsFullDebuffed()
-	if(SkyWrathHake.atos and Ability.IsReady(SkyWrathHake.atos) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["atos"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_item_rod_of_atos")) or
-	(SkyWrathHake.veil and Ability.IsReady(SkyWrathHake.veil) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["veil"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_item_veil_of_discord")) or
-	(SkyWrathHake.silence and Ability.IsReady(SkyWrathHake.silence) and Menu.IsEnabled(SkyWrathHake.AbilitiesOptionID["silence"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_skywrath_mage_ancient_seal")) or
-	(SkyWrathHake.orchid and Ability.IsReady(SkyWrathHake.orchid) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["orchid"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_item_orchid_malevolence")) or
-	(SkyWrathHake.eblade and Ability.IsReady(SkyWrathHake.eblade) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["eblade"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_item_ethereal_blade_slow")) or
-	(SkyWrathHake.blood and Ability.IsReady(SkyWrathHake.blood) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["blood"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_item_bloodthorn")) or
-	(SkyWrathHake.slow and Ability.IsReady(SkyWrathHake.slow) and Menu.IsEnabled(SkyWrathHake.AbilitiesOptionID["slow"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_skywrath_mage_concussive_shot_slow")) then
-		return false
-	end
+	if SkyWrathHake.atos and Ability.IsReady(SkyWrathHake.atos) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["atos"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_item_rod_of_atos") then return false end
+	if SkyWrathHake.veil and Ability.IsReady(SkyWrathHake.veil) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["veil"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_item_veil_of_discord") then return false end
+	if SkyWrathHake.silence and Ability.IsReady(SkyWrathHake.silence) and Menu.IsEnabled(SkyWrathHake.AbilitiesOptionID["silence"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_skywrath_mage_ancient_seal") then return false end
+	if SkyWrathHake.orchid and Ability.IsReady(SkyWrathHake.orchid) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["orchid"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_item_orchid_malevolence") then return false end
+	if SkyWrathHake.eblade and Ability.IsReady(SkyWrathHake.eblade) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["eblade"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_item_ethereal_blade_slow") then return false end
+	if SkyWrathHake.blood and Ability.IsReady(SkyWrathHake.blood) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["blood"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_item_bloodthorn") then return false end
+	if SkyWrathHake.slow and Ability.IsReady(SkyWrathHake.slow) and Menu.IsEnabled(SkyWrathHake.AbilitiesOptionID["slow"]) and not NPC.HasModifier(SkyWrathHake.enemy, "modifier_skywrath_mage_concussive_shot_slow") then return false end
 	return true
 end
 
