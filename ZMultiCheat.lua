@@ -22,6 +22,8 @@ MultiCheat.CsGoESPBox  =             Menu.AddOption({"Kostya12rus","MultiCheat",
 MultiCheat.CsGoESPSize =             Menu.AddOption({"Kostya12rus","MultiCheat",  "7 CsGO 3D ESP"}, "CsGo ESP Size", "", 3, 360, 1)
 MultiCheat.Test =                    Menu.AddOption({"Kostya12rus","MultiCheat"}, "Test", "")
 
+--local utilitu = require("Kostya12rusUtil/MiniMapHelper")
+
 function MultiCheat.Init()
   NeedTime = 0
   AnimTable = {}
@@ -93,29 +95,8 @@ end
 -- end
 
 function MultiCheat.test() -- RangeSpeel
-	local NotNeedSkill = {"invoker_empty1","invoker_empty2"}
-	local myHero = Heroes.GetLocal()
-	local X = 500
-	local Y = 500
-	local Y1 = Y+30
-	local ImgSize = 32
-	for i = 0,24 do
-		local ability = NPC.GetAbilityByIndex(myHero,i)
-		if Entity.IsAbility(ability) then
-			if not Ability.IsAttributes(ability) and not Ability.IsHidden(ability)then
-				local abilityName = Ability.GetName(ability)
-				local imageHandle = ImgSpeelRange[abilityName]
-				if imageHandle == nil then
-					imageHandle = Renderer.LoadImage("resource/flash3/images/spellicons/" .. abilityName .. ".png")
-					ImgSpeelRange[abilityName] = imageHandle
-				end	 
-				Renderer.DrawImage(imageHandle,X,Y,ImgSize,ImgSize)
-				Renderer.DrawText(MultiCheat.Font,X,Y1,abilityName,1)
-				X = X + ImgSize
-				Y1 = Y1 + 20
-			end
-		end
-	end
+
+
 end
 
 function MultiCheat.CsGoESP()
