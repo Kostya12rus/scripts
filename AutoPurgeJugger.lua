@@ -14,6 +14,7 @@ function AutoPurge.Combo()
     local myHero = Heroes.GetLocal()
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_juggernaut" then return end
     local hero = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+	if not hero then return end
 	local heroPos = Entity.GetAbsOrigin(hero)
 	local myMana = NPC.GetMana(myHero)
 			

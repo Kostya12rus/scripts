@@ -61,10 +61,6 @@ function MultiCheat.OnUnitAnimation(animation)
     table.insert(AnimTable, animation.sequenceName)
     table.insert(HeroTable, NPC.GetUnitName(animation.unit))
     table.insert(castpoint, animation.playbackRate)
-	if animation.unit ~= Heroes.GetLocal() then return end
-	if (animation.activity == Enum.GameActivity.ACT_DOTA_RUN or animation.activity == Enum.GameActivity.ACT_DOTA_IDLE_RARE) then
-		Renderer.DrawTextCenteredX(MultiCheat.Font, 1000, 500, "true", 1)
-	end
 end
 
 function MultiCheat.OnDraw()

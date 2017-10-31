@@ -1133,7 +1133,6 @@ end
 -- Callbacks
 --
 function AbilityAlert2.OnParticleCreate(particle)
-    Log.Write(particle.name .. ",=")
 
     if not Menu.IsEnabled(AbilityAlert2.option) then return end
 
@@ -1142,7 +1141,6 @@ function AbilityAlert2.OnParticleCreate(particle)
     end
 end
 function AbilityAlert2.OnParticleUpdateEntity(particle)
-    Log.Write("position"..particle.position:__tostring())
     for k, alert in ipairs(AbilityAlert2.alerts) do
 	
         if particle.index == alert.index then
@@ -1151,7 +1149,6 @@ function AbilityAlert2.OnParticleUpdateEntity(particle)
     end
 end 
 function AbilityAlert2.OnParticleUpdate(particle)
-    Log.Write("position"..particle.position:__tostring())
     if particle.controlPoint ~= 0 then return end
     for k, alert in ipairs(AbilityAlert2.alerts) do
 	
@@ -1215,14 +1212,6 @@ function AbilityAlert2.DrawMiniHero(x, y, heroName)
     local size = Menu.GetValue(AbilityAlert2.boxSizeOption)
     Renderer.DrawImage(imageHandle, x-math.floor(size/2), y-math.floor(size/2), size, size)
 end
---function AbilityAlert2.OnEntityCreate(ent)
-    --Log.Write(NPC.GetAbsOrigin(ent):__tostring())
---end 
-
---function AbilityAlert2.OnUnitAnimation(animation)
-
-     --Log.Write(NPC.GetAbsOrigin(animation.unit):__tostring())
---end 
 
 function AbilityAlert2.drawMiniHeroOnMap(x,y,enemyName)
     if not enemyName then return end
@@ -1270,8 +1259,6 @@ function AbilityAlert2.drawPosition(pos,enemyName)
 
     local newX = math.floor((x -x0)/(ratio+ratioOffset/10))
     local newY = math.floor((y -y0)/(ratio+ratioOffset/10))
-    --Log.Write('x'..newX)
-    --Log.Write('y'..newY)
     Renderer.SetDrawColor(0, 255, 127)
     Renderer.DrawTextCentered(AbilityAlert2.mapFont, 15+newX +xOffset , (h-315-newY-yOffset) , enemyName, 1)
 end

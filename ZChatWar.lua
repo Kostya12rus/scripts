@@ -4,6 +4,19 @@ ZChatWar.Font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 ZChatWar.optionEnable = Menu.AddOption({"Kostya12rus","Chat War"}, "Activate", "")
 ZChatWar.Key = Menu.AddKeyOption({"Kostya12rus","Chat War"}, "Chat Key",Enum.ButtonCode.KEY_P)
 
+
+
+--------------Leave Player---------------
+leave_teamate = {
+	 "Давайте подожем <NICK_DEAD> он нам игру сделает"
+	,"Жмем все паузу, <NICK_DEAD> уже заходит"
+}
+leave_enemy = {
+	 "Пока <NICK_DEAD>, ты все равно был никчемный"
+	,"<NICK_DEAD> выходи и не возвращайся"
+	,"<NICK_DEAD> пока ебаная труха"
+	,"Ваш друг ливнул, ну и хуй с ним"
+}
 --------------First blood---------------
 fb_i_killed = {
 	 "Да я охуеннен, это бионгодлайк, мне лайк, бомж <NICK_DEAD>"
@@ -185,6 +198,13 @@ function ZChatWar.OnChatEvent(chatEvent)
 	InfoPlayer_3 = chatEvent.players[3]
 	InfoPlayer_4 = chatEvent.players[4]
 	InfoPlayer_5 = chatEvent.players[5]
+	if chatEvent.type == 15 and GameRules.GetGameState() ~= 6 then
+		if Entity.IsSameTeam(HeroDataInfo[InfoPlayer_1][OwnerKey],Heroes.GetLocal()) then
+			Chat.Say(AllChat,leave_teamate[math.random(1,#leave_teamate)]:gsub("<NICK_DEAD>",""..HeroDataInfo[InfoPlayer_1][NickKey]..""):gsub("<HERO_NAME_DEAD>",""..HeroDataInfo[InfoPlayer_1][NamePlayer]..""))
+		else 
+			Chat.Say(AllChat,leave_enemy[math.random(1,#leave_enemy)]:gsub("<NICK_DEAD>",""..HeroDataInfo[InfoPlayer_1][NickKey]..""):gsub("<HERO_NAME_DEAD>",""..HeroDataInfo[InfoPlayer_1][NamePlayer]..""))
+		end
+	end
 	if chatEvent.type == 5 then	
 		if HeroDataInfo[InfoPlayer_1][NickKey] == Player.GetName(Players.GetLocal()) then
 			Chat.Say(AllChat,fb_i_killed[math.random(1,#fb_i_killed)]:gsub("<NICK_DEAD>",""..HeroDataInfo[InfoPlayer_2][NickKey]..""):gsub("<HERO_NAME_DEAD>",""..HeroDataInfo[InfoPlayer_2][NamePlayer]..""):gsub("<NICK_KILLER>",""..HeroDataInfo[InfoPlayer_1][NickKey]..""):gsub("<HERO_NAME_KILLER>",""..HeroDataInfo[InfoPlayer_1][NamePlayer]..""))
@@ -193,7 +213,7 @@ function ZChatWar.OnChatEvent(chatEvent)
 			Chat.Say(AllChat,fb_i_died[math.random(1,#fb_i_died)]:gsub("<NICK_DEAD>",""..HeroDataInfo[InfoPlayer_2][NickKey]..""):gsub("<HERO_NAME_DEAD>",""..HeroDataInfo[InfoPlayer_2][NamePlayer]..""):gsub("<NICK_KILLER>",""..HeroDataInfo[InfoPlayer_1][NickKey]..""):gsub("<HERO_NAME_KILLER>",""..HeroDataInfo[InfoPlayer_1][NamePlayer]..""))
 		end
 		if HeroDataInfo[InfoPlayer_2][NickKey] ~= Player.GetName(Players.GetLocal()) and HeroDataInfo[InfoPlayer_1][NickKey] ~= Player.GetName(Players.GetLocal()) then
-			if not HeroDataInfo[InfoPlayer_1][TeamKey] then
+			if HeroDataInfo[InfoPlayer_1][TeamKey] then
 				Chat.Say(AllChat,fb_my_teammate_killed[math.random(1,#fb_my_teammate_killed)]:gsub("<NICK_DEAD>",""..HeroDataInfo[InfoPlayer_2][NickKey]..""):gsub("<HERO_NAME_DEAD>",""..HeroDataInfo[InfoPlayer_2][NamePlayer]..""):gsub("<NICK_KILLER>",""..HeroDataInfo[InfoPlayer_1][NickKey]..""):gsub("<HERO_NAME_KILLER>",""..HeroDataInfo[InfoPlayer_1][NamePlayer]..""))
 			else
 				Chat.Say(AllChat,fb_my_teammate_died[math.random(1,#fb_my_teammate_died)]:gsub("<NICK_DEAD>",""..HeroDataInfo[InfoPlayer_2][NickKey]..""):gsub("<HERO_NAME_DEAD>",""..HeroDataInfo[InfoPlayer_2][NamePlayer]..""):gsub("<NICK_KILLER>",""..HeroDataInfo[InfoPlayer_1][NickKey]..""):gsub("<HERO_NAME_KILLER>",""..HeroDataInfo[InfoPlayer_1][NamePlayer]..""))
