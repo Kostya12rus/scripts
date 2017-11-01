@@ -6,8 +6,8 @@ TechiesHUD.Locale = {
 		["english"] = "TechiesHUD"
 	},
 	["desc"] = {
-		["english"] = "TechiesHUD v1.2.1",
-		["russian"] = "TechiesHUD v1.2.1"
+		["english"] = "TechiesHUD v1.2.3",
+		["russian"] = "TechiesHUD v1.2.3"
 	},
 	["optionDetonate"] = {
 		["english"] = "Auto detonate remote mines",
@@ -705,8 +705,11 @@ function TechiesHUD.OnDraw()
 						Particle.SetControlPoint(particle.particle, 1, Vector(255, 80, 80))
 						Particle.SetControlPoint(particle.particle, 3, Vector(9, 0, 0))
 						Particle.SetControlPoint(particle.particle, 2, Vector(425, 255, 0))
-						Particle.SetControlPoint(particle.particle	, 0, Entity.GetAbsOrigin(Unit))
+						Particle.SetControlPoint(particle.particle, 0, Entity.GetAbsOrigin(Unit))
 						TechiesHUDParticleList[Unit] = particle
+					else
+						local particle = TechiesHUDParticleList[Unit]
+						Particle.SetControlPoint(particle.particle, 0, Entity.GetAbsOrigin(Unit))
 					end
 				else
 					TechiesHUD.DrawCircle(UnitPos, 400)
@@ -714,7 +717,7 @@ function TechiesHUD.OnDraw()
 			end
 			if GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_land_mine")) < 1.75 then
 				local x, y, visible = Renderer.WorldToScreen(UnitPos)
-				if visible then
+				if visible == 1 then
 					Renderer.DrawText(TechiesHUD.font, x, y, math.floor((1.75 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_land_mine")))) * 100) / 100, 0)
 				end
 			else
@@ -726,7 +729,7 @@ function TechiesHUD.OnDraw()
 					end
 					if 1.6 - (GameRules.GetGameTime() - mines_time[Entity.GetIndex(Unit)]) > 0 then
 						local x, y, visible = Renderer.WorldToScreen(UnitPos)
-						if visible then
+						if visible == 1 then
 							Renderer.SetDrawColor(255, 255, 255, 255)
 							Renderer.DrawText(TechiesHUD.font, x, y, math.floor((1.6 - (GameRules.GetGameTime() - mines_time[Entity.GetIndex(Unit)])) * 100) / 100, 0)
 						end
@@ -759,6 +762,10 @@ function TechiesHUD.OnDraw()
 						Particle.SetControlPoint(particle.particle2, 2, Vector(630, 255, 0))
 						Particle.SetControlPoint(particle.particle2	, 0, Entity.GetAbsOrigin(Unit))
 						TechiesHUDParticleList[Unit] = particle
+					else
+						local particle = TechiesHUDParticleList[Unit]
+						Particle.SetControlPoint(particle.particle , 0, Entity.GetAbsOrigin(Unit))
+						Particle.SetControlPoint(particle.particle2	, 0, Entity.GetAbsOrigin(Unit))
 					end
 				else
 					TechiesHUD.DrawCircle(UnitPos, 600)
@@ -769,7 +776,7 @@ function TechiesHUD.OnDraw()
 			if NPC.GetModifier(Unit, "modifier_techies_stasis_trap") ~= nil
 			and GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_stasis_trap")) < 2 then
 				local x, y, visible = Renderer.WorldToScreen(UnitPos)
-				if visible then
+				if visible == 1 then
 					Renderer.DrawText(TechiesHUD.font, x, y, math.floor((2 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_stasis_trap")))) * 100)/100, 0)
 				end
 			end
@@ -797,6 +804,9 @@ function TechiesHUD.OnDraw()
 							Particle.SetControlPoint(particle.particle, 2, Vector(455, 255, 0))
 							Particle.SetControlPoint(particle.particle	, 0, Entity.GetAbsOrigin(Unit))
 							TechiesHUDParticleList[Unit] = particle
+						else
+							local particle = TechiesHUDParticleList[Unit]
+							Particle.SetControlPoint(particle.particle , 0, Entity.GetAbsOrigin(Unit))
 						end
 					else
 						Renderer.SetDrawColor(0, 255, 0, 255)
@@ -823,7 +833,7 @@ function TechiesHUD.OnDraw()
 			if mines_num[i] == 1 then
 				if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil then
 					local x, y, visible = Renderer.WorldToScreen(UnitPos)
-					if visible then
+					if visible == 1 then
 						local num_mines = 0
 						local num_mines_1_lvl = 0
 						local num_mines_2_lvl = 0
@@ -1051,7 +1061,7 @@ function TechiesHUD.OnDraw()
 
 				if optionDetonate and hero_time[Entity.GetIndex(Unit)] ~= nil and GameRules.GetGameTime() - hero_time[Entity.GetIndex(Unit)] < optionDelay / 1000 + 0.3 then -- remote delay draw
 					local x, y, visible = Renderer.WorldToScreen(UnitPos)
-					if visible then
+					if visible == 1 then
 						Renderer.SetDrawColor(255, 255, 255, 255)
 						Renderer.DrawText(TechiesHUD.font, x, y - 15, math.floor(((optionDelay / 1000) + 0.3 - (GameRules.GetGameTime() - hero_time[Entity.GetIndex(Unit)])) * 100) / 100, 0)
 					end
@@ -1059,7 +1069,7 @@ function TechiesHUD.OnDraw()
 
 				if optionForceDrawLine and force ~= nil then -- force stuff line
 					local x, y, visible = Renderer.WorldToScreen(UnitPos)
-					if visible then
+					if visible == 1 then
 						Renderer.SetDrawColor(255, 255, 255, 255)
 						local rotate = Entity.GetAbsRotation(Unit):GetYaw()
 						local x4 = 600 * math.cos(rotate / 57.3) - 0 * math.sin(rotate / 57.3)
@@ -1122,7 +1132,7 @@ function TechiesHUD.OnDraw()
 					Hp_all = Hp_all + 400 / (remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0))
 				end
 				local x, y, visible = Renderer.WorldToScreen(UnitPos)
-				if visible and Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing and optionAltInfoEnemyNumRemote and not Entity.IsDormant(Unit) then
+				if visible == 1 and Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing and optionAltInfoEnemyNumRemote and not Entity.IsDormant(Unit) then
 					Renderer.SetDrawColor(255, 255, 255, 255)
 					Renderer.DrawText(TechiesHUD.font, x, y - 20, math.ceil(Hp * 10) / 10, 0)
 				end
@@ -1427,7 +1437,7 @@ function TechiesHUD.OnUpdate()
 			end
 			if hero_pos ~= nil then
 				local x, y = Renderer.WorldToScreen(hero_pos)
-				if x < 0 or x > size_x or y < 0 or y > size_y then
+				if optionDetonateCam and (x < 0 or x > size_x or y < 0 or y > size_y) then
 					Engine.ExecuteCommand("dota_camera_set_lookatpos " .. hero_pos:GetX() .. " " .. hero_pos:GetY())
 					hero_cam_first_pos = Entity.GetAbsOrigin(myHero)
 					hero_cam_time = GameRules.GetGameTime()
