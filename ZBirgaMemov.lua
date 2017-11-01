@@ -2,6 +2,9 @@ local BirgaMemof = {}
 BirgaMemof.Enable = Menu.AddOption({"Kostya12rus","Биржа Мемов Мультихак"}, "Активировация", "")
 BirgaMemof.Font = Renderer.LoadFont("Tahoma", 14, Enum.FontWeight.EXTRABOLD)
 
+local attacparticle = {}
+imageHandlepar = Renderer.LoadImage("resource/flash3/images/broadcast/statpop_exclaim.png")
+
 function BirgaMemof.OnUpdate()
 	if not Menu.IsEnabled(BirgaMemof.Enable) then return end
 	if GameRules.GetGameMode() ~= 15 then return end
@@ -40,14 +43,20 @@ function BirgaMemof.OnProjectile(projectile)
 		local baldezh = NPC.GetItem(myHero, "item_baldezh", true)
 		local cosmobaldezh = NPC.GetItem(myHero, "item_cosmobaldezh", true)
 		local superbaldezh = NPC.GetItem(myHero, "item_superbaldezh", true)
-		
-			if baldezh and Ability.IsReady(baldezh) then                                   		
-				Ability.CastNoTarget(baldezh)                                              		-- if projectile.name == "sniper_assassinate" then
-				return                                                                     			-- if EUL or Ability.IsReady(EUL) then
-			elseif cosmobaldezh and Ability.IsReady(cosmobaldezh) then                     				-- Ability.CastTarget(EUL,myHero)	
-				Ability.CastNoTarget(cosmobaldezh)                                         			-- end
-				return                                                                     		-- end
-			elseif superbaldezh and Ability.IsReady(superbaldezh) then                     		-- if projectile.name == "alchemist_unstable_concoction_projectile"  then
+
+		if projectile.name == "sniper_assassinate" then
+			if EUL or Ability.IsReady(EUL) then
+				Ability.CastTarget(EUL,myHero)
+				return
+			end
+		else
+			if baldezh and Ability.IsReady(baldezh) then
+				Ability.CastNoTarget(baldezh)
+				return
+			elseif cosmobaldezh and Ability.IsReady(cosmobaldezh) then
+				Ability.CastNoTarget(cosmobaldezh)
+				return
+			elseif superbaldezh and Ability.IsReady(superbaldezh) then
 				Ability.CastNoTarget(superbaldezh)
 				return
 			elseif linka and Ability.IsReady(linka) then
@@ -57,10 +66,10 @@ function BirgaMemof.OnProjectile(projectile)
 				Ability.CastTarget(lotus,myHero)
 				return
 			elseif EUL and Ability.IsReady(EUL) then
-				--Ability.CastTarget(EUL,myHero)	
-				--return
+				--Ability.CastTarget(EUL,myHero)
+				--
 			end
-		-- end
+		end
 	end
 end
 
@@ -78,9 +87,22 @@ function BirgaMemof.OnUnitAnimation(animation)
 	end
 end
 
+function BirgaMemof.OnParticleCreate(particle)
+	if particle.name == "damage_flash" and Entity.IsDormant(particle.entity) then
+		attacparticle[particle.index] = {}
+		table.insert(attacparticle[particle.index],particle.entity)
+		table.insert(attacparticle[particle.index],GameRules.GetGameTime())
+	end
+end
+
+function BirgaMemof.OnParticleUpdateEntity(particle)
+	if attacparticle[particle.index] then
+		table.insert(attacparticle[particle.index],particle.position)
+	end
+end
+
 function BirgaMemof.OnDraw()
 	if not Menu.IsEnabled(BirgaMemof.Enable) then return end
-	if GameRules.GetGameMode() ~= 15 then return end
 	localx = 500
 	localy = 200
 	local mouse = Input.GetWorldCursorPos()
@@ -88,7 +110,21 @@ function BirgaMemof.OnDraw()
 	local mouseY = math.floor(mouse:GetY())
 	local mouseZ = math.floor(mouse:GetZ())
 	Renderer.SetDrawColor(255,0,0,255)
-	Renderer.DrawText(BirgaMemof.Font, localx, localy, mouseX .. "|" .. mouseY .. "|" .. mouseZ, 1)
+	--Renderer.DrawText(BirgaMemof.Font, localx, localy, mouseX .. "|" .. mouseY .. "|" .. mouseZ  .. "|" .. GameRules.GetGameMode(), 1)
+	for i,j in pairs(attacparticle) do
+		--ent =   j[1]
+		--timea = j[2]
+		--vect =  j[3]
+		local xposs,yposs,vis = Renderer.WorldToScreen(j[3])
+		
+		Renderer.SetDrawColor(255,255,255,255)
+		if vis then
+			Renderer.DrawImage(imageHandlepar,xposs,yposs,32,32)
+		end
+		if j[2] + 5 <= GameRules.GetGameTime() then
+			attacparticle[i] = nil
+		end
+	end
 end
 
 return BirgaMemof

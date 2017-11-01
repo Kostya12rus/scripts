@@ -2,7 +2,7 @@ local PatrikleTEst = {}
 PatrikleTEst.Enable = Menu.AddOption({"Kostya12rus","Запись Партиклей"}, "Активация", "")
 PatrikleTEst.Font = Renderer.LoadFont("Tahoma", 14, Enum.FontWeight.EXTRABOLD)
 local timetick = 0 
-
+local attacpart = {}
 function PatrikleTEst.OnUpdate()
 	if not Menu.IsEnabled(PatrikleTEst.Enable) then return end
 	if timetick <= GameRules.GetGameTime() then
@@ -138,7 +138,12 @@ function PatrikleTEst.OnDraw()
 	local mouseX = math.floor(mouse:GetX())
 	local mouseY = math.floor(mouse:GetY())
 	local mouseZ = math.floor(mouse:GetZ())
-	Renderer.DrawText(PatrikleTEst.Font, localx, localy,Entity.GetOrigin(Heroes.GetLocal()):__tostring() , 1)
+	--Renderer.DrawText(PatrikleTEst.Font, localx, localy,Entity.GetOrigin(Heroes.GetLocal()):__tostring() , 1)
+	
+	for i,key in pairs(attacpart) do
+		Renderer.DrawText(PatrikleTEst.Font, localx, localy,tostring(i) .."|"..tostring(key), 1)
+		localy = localy + 10
+	end
 end
 
 return PatrikleTEst

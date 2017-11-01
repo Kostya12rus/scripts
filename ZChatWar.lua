@@ -2,6 +2,7 @@
 local ZChatWar = {}
 ZChatWar.Font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 ZChatWar.optionEnable = Menu.AddOption({"Kostya12rus","Chat War"}, "Activate", "")
+ZChatWar.optionEnabledraw = Menu.AddOption({"Kostya12rus","Chat War"}, "Activate draw", "")
 ZChatWar.Key = Menu.AddKeyOption({"Kostya12rus","Chat War"}, "Chat Key",Enum.ButtonCode.KEY_P)
 
 
@@ -316,12 +317,14 @@ function ZChatWar.OnDraw()
 	
 	Renderer.SetDrawColor(255,255,255,255)
 	local y = 460
-	if TypeChat and ValueChat and PlaerChat then
-		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 400, "Type - "..TypeChat, 1)
-		Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 420, "Value - "..ValueChat, 1)
-		for key,name in pairs(PlaerChat) do
-			Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, y, key .." | ".. name , 1)
-			y=y+20
+	if Menu.IsEnabled(ZChatWar.optionEnabledraw) then
+		if TypeChat and ValueChat and PlaerChat then
+			Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 400, "Type - "..TypeChat, 1)
+			Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, 420, "Value - "..ValueChat, 1)
+			for key,name in pairs(PlaerChat) do
+				Renderer.DrawTextCenteredX(ZChatWar.Font, 1000, y, key .." | ".. name , 1)
+				y=y+20
+			end
 		end
 	end
 end
@@ -458,6 +461,8 @@ function ZChatWar.init()
 ,npc_dota_hero_wisp = "Io"
 ,npc_dota_hero_witch_doctor = "Witch Doctor"
 ,npc_dota_hero_zuus = "Zeus"
+,npc_dota_hero_dark_willow = "Dark Willow"
+,npc_dota_hero_pangolier = "Pangolier"
 }
 	ItemNameTable = 
 {
