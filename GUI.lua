@@ -1765,8 +1765,6 @@ GUI.HeroesList["npc_dota_hero_winter_wyvern"] = "Winter Wyvern"
 GUI.HeroesList["npc_dota_hero_witch_doctor"] = "Witch Doctor"
 GUI.HeroesList["npc_dota_hero_skeleton_king"] = "Wraith King"
 GUI.HeroesList["npc_dota_hero_zuus"] = "Zeus"
-GUI.HeroesList["npc_dota_hero_dark_willow"] = "Dark Willow"
-GUI.HeroesList["npc_dota_hero_pangolier"] = "Pangolier"
 
 -----------------------------------------------------------------------------------------------------------
 function GUI.Set(key, value)

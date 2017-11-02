@@ -59,7 +59,7 @@ function DarkWillowSimple.OnDraw()
       for key,modif in pairs(NPC.GetModifiers(DarkWillowSimple.enemy)) do
         if Modifier.GetName(modif) == "modifier_eul_cyclone" and (Modifier.GetDieTime(modif) - GameRules.GetGameTime()) < 1.5 then
           if Ability.IsReady(Bramble_Maze) then 
-            local position = Entity.GetAbsOrigin(DarkWillowSimple.enemy):__add(Vector(200,0,0))
+            local position = Entity.GetAbsOrigin(DarkWillowSimple.enemy):__add(Vector(180,0,0))
             Ability.CastPosition(Bramble_Maze,position)
             Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, Heroes.GetLocal(), Entity.GetAbsOrigin(DarkWillowSimple.enemy), nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY)
             bloodtorntriger = true

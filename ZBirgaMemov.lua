@@ -12,15 +12,15 @@ function BirgaMemof.OnUpdate()
 	if not myHero then return end
 	local superboots = NPC.GetItem(myHero, "item_imba_phase_boots_2", true)
 	local superagnim = NPC.GetItem(myHero, "item_ultimate_mem", true)
-	if superboots and Ability.IsReady(superboots) and NPC.IsRunning(myHero) and not NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then
-		Ability.CastNoTarget(superboots)
-		return
-	end
-	if superagnim then
-		Ability.CastNoTarget(superagnim)
-		return
-	end
-	if Entity.IsAlive(myHero) then
+	if Entity.IsAlive(myHero) then	
+		if superboots and Ability.IsReady(superboots) and NPC.IsRunning(myHero) and not NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then
+			Ability.CastNoTarget(superboots)
+			return
+		end
+		if superagnim then
+			Ability.CastNoTarget(superagnim)
+			return
+		end
 		local EUL = NPC.GetItem(myHero, "item_cyclone", true)
 		snip_ult = NPC.GetModifier(myHero, "modifier_sniper_assassinate")
 		if snip_ult and (Modifier.GetDieTime(snip_ult) - GameRules.GetGameTime()) <= 2.1 then

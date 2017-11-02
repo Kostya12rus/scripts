@@ -214,7 +214,7 @@ function ZChatWar.OnChatEvent(chatEvent)
 			Chat.Say(AllChat,fb_i_died[math.random(1,#fb_i_died)]:gsub("<NICK_DEAD>",""..HeroDataInfo[InfoPlayer_2][NickKey]..""):gsub("<HERO_NAME_DEAD>",""..HeroDataInfo[InfoPlayer_2][NamePlayer]..""):gsub("<NICK_KILLER>",""..HeroDataInfo[InfoPlayer_1][NickKey]..""):gsub("<HERO_NAME_KILLER>",""..HeroDataInfo[InfoPlayer_1][NamePlayer]..""))
 		end
 		if HeroDataInfo[InfoPlayer_2][NickKey] ~= Player.GetName(Players.GetLocal()) and HeroDataInfo[InfoPlayer_1][NickKey] ~= Player.GetName(Players.GetLocal()) then
-			if HeroDataInfo[InfoPlayer_1][TeamKey] then
+			if Entity.IsSameTeam(HeroDataInfo[InfoPlayer_1][OwnerKey],Heroes.GetLocal()) then
 				Chat.Say(AllChat,fb_my_teammate_killed[math.random(1,#fb_my_teammate_killed)]:gsub("<NICK_DEAD>",""..HeroDataInfo[InfoPlayer_2][NickKey]..""):gsub("<HERO_NAME_DEAD>",""..HeroDataInfo[InfoPlayer_2][NamePlayer]..""):gsub("<NICK_KILLER>",""..HeroDataInfo[InfoPlayer_1][NickKey]..""):gsub("<HERO_NAME_KILLER>",""..HeroDataInfo[InfoPlayer_1][NamePlayer]..""))
 			else
 				Chat.Say(AllChat,fb_my_teammate_died[math.random(1,#fb_my_teammate_died)]:gsub("<NICK_DEAD>",""..HeroDataInfo[InfoPlayer_2][NickKey]..""):gsub("<HERO_NAME_DEAD>",""..HeroDataInfo[InfoPlayer_2][NamePlayer]..""):gsub("<NICK_KILLER>",""..HeroDataInfo[InfoPlayer_1][NickKey]..""):gsub("<HERO_NAME_KILLER>",""..HeroDataInfo[InfoPlayer_1][NamePlayer]..""))
