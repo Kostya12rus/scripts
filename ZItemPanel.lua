@@ -203,6 +203,7 @@ zItemPanel.items["item_hoverboard"] = "Hoverboard"
 zItemPanel.items["item_boots_of_invisibility"] = "Boots Of Invisibility" 
 zItemPanel.items["item_imba_phase_boots_2"] = "Abibas" 
 zItemPanel.items["item_memolator2"] = "Memolator2"  
+zItemPanel.items["item_memolator3"] = "Memolator3"  
 zItemPanel.items["item_baldezh"] = "Baldezh"
 zItemPanel.items["item_cosmobaldezh"] = "Cosmobaldezh"
 zItemPanel.items["item_superbaldezh"] = "Superbaldezh"
@@ -222,6 +223,7 @@ zItemPanel.items["item_ultimate_mem"] = "Aganim Mem"
 zItemPanel.items["item_tar2"] = "Tar2"
 zItemPanel.items["item_butter2"] = "Bf2"
 zItemPanel.items["item_divine_rapier_lapka"] = "Ultra Rapier"
+zItemPanel.items["item_pt_mem"] = "Kostil"
 
 zItemPanel.OnAir = false
 local offsetPosX = 0

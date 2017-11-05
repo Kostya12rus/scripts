@@ -40,7 +40,7 @@ function Detect.OnParticleCreate(particle)
     
     particleInfo[particle.index] = particle.name
 
-    if particle.entity and Entity.IsNPC(particle.entity) then 
+    if particle.entity and Entity.IsNPC(particle.entity) then
         particleHero[particle.index] = NPC.GetUnitName(particle.entity)
     end
 end

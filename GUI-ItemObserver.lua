@@ -61,6 +61,21 @@ ItemObs.Locale = {
 		["russian"] = "Смещением предметов",
 		["chinese"] = "对象的位移"
 	},
+	["opacity"] = {
+		["english"] = "Opacity",
+		["russian"] = "Непрозрачность",
+		["chinese"] = "不透明度"
+	},
+	["removeopacity"] = {
+		["english"] = "Make opaque on mouseover",
+		["russian"] = "Сделать непрозрачным при наведении курсора мыши",
+		["chinese"] = "使鼠标悬停不透明"
+	},
+	["itemalert"] = {
+		["english"] = "Ping item when click",
+		["russian"] = "Пинговать предмет по клику",
+		["chinese"] = "Ping项目点击"
+	},
 	["width"] = {
 		["english"] = 240,
 		["russian"] = 300,
@@ -271,8 +286,10 @@ function ItemObs.OnDraw()
 		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "charges", ItemObs.Locale["charges"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "above", ItemObs.Locale["above"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "aboveoffset", ItemObs.Locale["aboveoffset"], GUI.MenuType.Slider, 25, 200, 55)
+		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "opacity", ItemObs.Locale["opacity"], GUI.MenuType.Slider, 1, 100, 100)
+		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "itemalert", ItemObs.Locale["itemalert"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(ItemObs.Identity, ItemObs.Identity .. "removeopacity", ItemObs.Locale["removeopacity"], GUI.MenuType.CheckBox, 1)
 
-			
 		if (locx == "" or locx == nil) then GUI.Set(ItemObs.Identity .. "locx", 10) locx = 10 end
 		if (locy == "" or locy == nil) then GUI.Set(ItemObs.Identity .. "locy", 150) locy = 150 end
 	end
@@ -284,18 +301,25 @@ function ItemObs.OnDraw()
 		if tonumber(GUI.Get(ItemObs.Identity .. "locx")) < 1 then GUI.Set(ItemObs.Identity .. "locx", 1) end
 		if tonumber(GUI.Get(ItemObs.Identity .. "locy")) < 1 then GUI.Set(ItemObs.Identity .. "locy", 1) end
 	end
+
+	local opsett = GUI.Get(ItemObs.Identity .. "opacity")
+	local isping = GUI.IsEnabled(ItemObs.Identity .. "itemalert")
+
+	local opcolor = math.floor( ( 255 / 100 ) * opsett )
+	local opcolor_less = math.floor( ( 200 / 100 ) * opsett )
 	
-	Renderer.SetDrawColor(255, 255, 255, 255)
     if not GUI.IsEnabled(ItemObs.Identity) then return true end
 	local myHero = Heroes.GetLocal()
 	if myHero == nil then return end
-	
-	if GUI.SelectedLanguage == nil then return end
 
-	local ypos = locy
+	if GUI.SelectedLanguage == nil then return end
+	
+	local show = GUI.IsEnabled(ItemObs.Identity .. "show")
+	local isremop = GUI.IsEnabled(ItemObs.Identity .. "removeopacity")
 	local size = GUI.Get(ItemObs.Identity .. "size")
-	local aboveoffset = GUI.Get(ItemObs.Identity .. "aboveoffset")
 	local defx, xpos = math.floor(size * 128 / 72)
+	local ypos = locy
+	local aboveoffset = GUI.Get(ItemObs.Identity .. "aboveoffset")
 	local iscd = GUI.IsEnabled(ItemObs.Identity .. "cd")
 	local iscrg = GUI.IsEnabled(ItemObs.Identity .. "charges")
 	local isnotify = GUI.IsEnabled(ItemObs.Identity .. "notify")
@@ -303,14 +327,18 @@ function ItemObs.OnDraw()
 	local tts = GUI.Get(ItemObs.Identity .. "time")
 	local title = ItemObs.Locale["bought"][GUI.SelectedLanguage]
 	local width = ItemObs.Locale["width"][GUI.SelectedLanguage]
-	local show = GUI.IsEnabled(ItemObs.Identity .. "show")
 	local above = GUI.IsEnabled(ItemObs.Identity .. "above")
+
 
 	for k, hero in pairs(Heroes.GetAll()) do
 		if hero ~= nil and not NPC.IsIllusion(hero) and Entity.IsHero(hero) and not Entity.IsSameTeam(myHero, hero) then
 			ypos = ypos + size
 			xpos = defx + locx + 5
 			
+			local top = opcolor
+			local top_less = opcolor_less
+			Renderer.SetDrawColor(255, 255, 255, opcolor)
+
 			local tempHeroName = NPC.GetUnitName(hero):gsub("npc_dota_hero_", "")
 			local heroImageHandle = ItemObs.HeroIcons[tempHeroName]
 			if heroImageHandle == nil then
@@ -326,13 +354,22 @@ function ItemObs.OnDraw()
 			heroX = heroX - math.floor((size + 8) * 3)
 			local drawHeroY = heroY - size - aboveoffset
 			local isAbove = false
+			
+			if isremop then
+				if Input.IsCursorInRect(locx, ypos, ((size + 8) * 6) + 5 + defx, size ) then
+					top = 255
+					top_less = 200
+					Renderer.SetDrawColor(255, 255, 255, 255)
+				end
+			end
+			
 			if above and heroV and not Entity.IsDormant(hero) and Entity.IsAlive(hero) then
 				isAbove = true
-				Renderer.SetDrawColor(0, 0, 0, 200)
+				Renderer.SetDrawColor(0, 0, 0, opcolor_less)
 				Renderer.DrawFilledRect(heroX - 2, drawHeroY - 2, math.floor((size + 8) * 6) + 4, size + 4)
-				Renderer.SetDrawColor(255, 255, 255, 255)
+				Renderer.SetDrawColor(255, 255, 255, top)
 			end
-
+			
 			for i = 0, 5 do 
 				local item = NPC.GetItemByIndex(hero, i)
 				if item ~= nil and Entity.IsAbility(item) then
@@ -349,15 +386,17 @@ function ItemObs.OnDraw()
 					end
 					
 					if show then
+						Renderer.SetDrawColor(255, 255, 255, top)
 						Renderer.DrawImage(imageHandle, xpos, ypos, size + 8, size)
 					end
 					
 					if isAbove then
+						Renderer.SetDrawColor(255, 255, 255, opcolor)
 						Renderer.DrawImage(imageHandle, heroX, drawHeroY, size + 8, size)
 					end
 					
 					if (show and Input.IsCursorInRect(xpos, ypos, size + 8, size)) or (isAbove and Input.IsCursorInRect(heroX, drawHeroY, size + 8, size)) then
-						if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then 
+						if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) and isping then 
 							Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_PING_ABILITY, 0, Vector(), item, 0, nil)
 						end
 					end
@@ -365,24 +404,26 @@ function ItemObs.OnDraw()
 					local cd = math.ceil(Ability.GetCooldown(item))
 					local crg = Item.GetCurrentCharges(item)
 					if (crg > 0 and iscrg) or (cd > 0 and iscd) then
-						Renderer.SetDrawColor(0, 0, 0, 200)
 						if show then
+							Renderer.SetDrawColor(0, 0, 0, top_less)
 							Renderer.DrawFilledRect(xpos, ypos, size + 8, size)
 						end
 						
 						if isAbove then
+							Renderer.SetDrawColor(0, 0, 0, opcolor_less)
 							Renderer.DrawFilledRect(heroX, drawHeroY, size + 8, size)
 						end
 						
-						Renderer.SetDrawColor(255, 255, 255, 255)
 						local d = crg
 						if cd > 0 and iscd then d = cd end
 						
 						if show then
+							Renderer.SetDrawColor(255, 255, 255, top)
 							Renderer.DrawTextCentered(GUI.Font.ContentBold, xpos + math.ceil((size + 8) / 2), ypos + math.ceil(size / 2), d, true)
 						end
 						
 						if isAbove then
+							Renderer.SetDrawColor(255, 255, 255, opcolor)
 							Renderer.DrawTextCentered(GUI.Font.ContentBold, heroX + math.ceil((size + 8) / 2), drawHeroY + math.ceil(size / 2), d, true)
 						end
 					end
@@ -402,7 +443,7 @@ function ItemObs.OnDraw()
 						if ItemObs.OnAir then ItemObs.OnAir = false else ItemObs.OnAir = true end
 					end
 				end
-				
+				Renderer.SetDrawColor(255, 255, 255, top)
 				Renderer.DrawImage(heroImageHandle, locx, ypos, defx, size )
 			end
 		end
