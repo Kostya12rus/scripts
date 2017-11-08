@@ -1,13 +1,13 @@
 -- foosAIO.lua
--- Version: beta.0.98.03f
+-- Version: beta.0.98.03g
 -- Author: foo0oo
 -- Release Date: 2017/05/03
--- Last Update: 2017/11/03
+-- Last Update: 2017/11/07
 
 local fooAllInOne = {}
 -- Menu Items
 	-- general Menu
-fooAllInOne.versionNumber = Menu.AddOption({ "Utility","foos AllInOne" }, "0. Version Number: beta.0.98.03f", "Release date: 2017/11/03", 0, 0, 0)
+fooAllInOne.versionNumber = Menu.AddOption({ "Utility","foos AllInOne" }, "0. Version Number: beta.0.98.03g", "Release date: 2017/11/07", 0, 0, 0)
 Menu.SetValueName(fooAllInOne.versionNumber, 0, '')
 
 fooAllInOne.optionEnable = Menu.AddOption({ "Utility","foos AllInOne" }, "1. Overall enabled {{overall}}", "Helpers helper")
@@ -4071,7 +4071,6 @@ function fooAllInOne.GenericMainAttack(myHero, attackType, target, position)
 	if not myHero then return end
 	if not target and not position then return end
 
-	if fooAllInOne.IsHeroInvisible(myHero) == true then return end
 	if fooAllInOne.isHeroChannelling(myHero) == true then return end
 	if fooAllInOne.heroCanCastItems(myHero) == false then return end
 
@@ -7809,7 +7808,7 @@ function fooAllInOne.axeCombo(myHero, enemy)
 
 	local call = NPC.GetAbilityByIndex(myHero, 0)
 	local hunger = NPC.GetAbilityByIndex(myHero, 1)
-	local culling = NPC.GetAbilityByIndex(myHero, 3)
+	local culling = NPC.GetAbility(myHero, "axe_culling_blade")
 
 	local Blademail = NPC.GetItem(myHero, "item_blade_mail", true)
 	local blink = NPC.GetItem(myHero, "item_blink", true)
@@ -7954,7 +7953,7 @@ function fooAllInOne.clockwerkCombo(myHero, enemy)
 	local BatteryAssault = NPC.GetAbilityByIndex(myHero, 0)
 	local PowerCogs = NPC.GetAbilityByIndex(myHero, 1)
 	local RocketFlair = NPC.GetAbilityByIndex(myHero, 2)
-	local HookShot = NPC.GetAbilityByIndex(myHero, 3)
+	local HookShot = NPC.GetAbility(myHero, "rattletrap_hookshot")
 
 	local Blademail = NPC.GetItem(myHero, "item_blade_mail", true)
 	local myMana = NPC.GetMana(myHero)
@@ -8063,7 +8062,7 @@ function fooAllInOne.huskarCombo(myHero, enemy)
 
 	local burningspear = NPC.GetAbilityByIndex(myHero, 1)
 	local innerVitality = NPC.GetAbilityByIndex(myHero, 0)
-	local lifeBreak = NPC.GetAbilityByIndex(myHero, 3)
+	local lifeBreak = NPC.GetAbility(myHero, "huskar_life_break")
 
 	local myMana = NPC.GetMana(myHero)
 
@@ -8189,7 +8188,7 @@ function fooAllInOne.skywrathCombo(myHero, enemy)
 	local arcaneBolt = NPC.GetAbilityByIndex(myHero, 0)
     	local concussiveShot = NPC.GetAbilityByIndex(myHero, 1)
     	local ancientSeal = NPC.GetAbilityByIndex(myHero, 2)
-    	local mysticFlare = NPC.GetAbilityByIndex(myHero, 3)
+    	local mysticFlare = NPC.GetAbility(myHero, "skywrath_mage_mystic_flare")
 	local myMana = NPC.GetMana(myHero)
 
 	local blink = NPC.GetItem(myHero, "item_blink", true)
@@ -8570,7 +8569,7 @@ function fooAllInOne.magnusCombo(myHero, enemy)
 	local shockwave = NPC.GetAbilityByIndex(myHero, 0)
     	local empower = NPC.GetAbilityByIndex(myHero, 1)
     	local skewer = NPC.GetAbilityByIndex(myHero, 2)
-	local reversePolarity = NPC.GetAbilityByIndex(myHero, 3)
+	local reversePolarity = NPC.GetAbility(myHero, "magnataur_reverse_polarity")
 
 	local myMana = NPC.GetMana(myHero)
 	local blink = NPC.GetItem(myHero, "item_blink", true)
@@ -8977,7 +8976,7 @@ function fooAllInOne.DazzleHelper(myHero, enemy)
 	local poisonTouch = NPC.GetAbilityByIndex(myHero, 0)
     	local grave = NPC.GetAbilityByIndex(myHero, 1)
     	local shadowWave = NPC.GetAbilityByIndex(myHero, 2)
-	local weave = NPC.GetAbilityByIndex(myHero, 3)
+	local weave = NPC.GetAbility(myHero, "dazzle_weave")
 
 	local myMana = NPC.GetMana(myHero)
 	local blink = NPC.GetItem(myHero, "item_blink", true)
@@ -9671,7 +9670,7 @@ function fooAllInOne.SilencerCombo(myHero, enemy)
 	local arcaneCurse = NPC.GetAbilityByIndex(myHero, 0)
     	local glaives = NPC.GetAbilityByIndex(myHero, 1)
 	local lastWord = NPC.GetAbilityByIndex(myHero, 2)
-    	local globalSilence = NPC.GetAbilityByIndex(myHero, 3)
+    	local globalSilence = NPC.GetAbility(myHero, "silencer_global_silence")
 
 	local myMana = NPC.GetMana(myHero)
 
@@ -9833,7 +9832,7 @@ function fooAllInOne.ODCombo(myHero, enemy)
 
 	local arcaneOrb = NPC.GetAbilityByIndex(myHero, 0)
     	local astralPrison = NPC.GetAbilityByIndex(myHero, 1)
-    	local sanityEclipse = NPC.GetAbilityByIndex(myHero, 3)
+    	local sanityEclipse = NPC.GetAbility(myHero, "obsidian_destroyer_sanity_eclipse")
 	local myMana = NPC.GetMana(myHero)
 
 	local blink = NPC.GetItem(myHero, "item_blink", true)
@@ -10103,7 +10102,7 @@ function fooAllInOne.NecroCombo(myHero, enemy)
 
 	local deathPulse = NPC.GetAbilityByIndex(myHero, 0)
     	local ghostShroud = NPC.GetAbilityByIndex(myHero, 1)
-    	local reapersScythe = NPC.GetAbilityByIndex(myHero, 3)
+    	local reapersScythe = NPC.GetAbility(myHero, "necrolyte_reapers_scythe")
 	local myMana = NPC.GetMana(myHero)
 
 	local blink = NPC.GetItem(myHero, "item_blink", true)
@@ -10612,7 +10611,7 @@ function fooAllInOne.AntiMageCombo(myHero, enemy)
 	if not NPC.IsEntityInRange(myHero, enemy, 3000)	then return end
 
 	local AMblink = NPC.GetAbilityByIndex(myHero, 1)
-    	local manaVoid = NPC.GetAbilityByIndex(myHero, 3)
+    	local manaVoid = NPC.GetAbility(myHero, "antimage_mana_void")
     	
 	local myMana = NPC.GetMana(myHero)
 
@@ -10744,7 +10743,7 @@ function fooAllInOne.WindRunnerCombo(myHero, enemy)
 
 	local shackleShot = NPC.GetAbilityByIndex(myHero, 0)
 	local windRun = NPC.GetAbilityByIndex(myHero, 2)
-	local focusFire = NPC.GetAbilityByIndex(myHero, 3)
+	local focusFire = NPC.GetAbility(myHero, "windrunner_focusfire")
 	local myMana = NPC.GetMana(myHero)
 	
 	local branch = NPC.GetItem(myHero, "item_branches", true)
@@ -11088,7 +11087,7 @@ function fooAllInOne.EmberCombo(myHero, enemy)
 	local chains = NPC.GetAbility(myHero, "ember_spirit_searing_chains")
 	local fist = NPC.GetAbility(myHero, "ember_spirit_sleight_of_fist")
 	local flameGuard = NPC.GetAbility(myHero, "ember_spirit_flame_guard")
-	local activeRemnant = NPC.GetAbilityByIndex(myHero, 3)
+	local activeRemnant = NPC.GetAbility(myHero, "ember_spirit_activate_fire_remnant")
 	local remnant = NPC.GetAbility(myHero, "ember_spirit_fire_remnant")
 	local blink = NPC.GetItem(myHero, "item_blink", true)
 
@@ -11189,7 +11188,7 @@ function fooAllInOne.UrsaCombo(myHero, enemy)
 
 	local earthShock = NPC.GetAbilityByIndex(myHero, 0)
 	local overPower = NPC.GetAbilityByIndex(myHero, 1)
-	local enrage = NPC.GetAbilityByIndex(myHero, 3)
+	local enrage = NPC.GetAbility(myHero, "ursa_enrage")
 
 	local blink = NPC.GetItem(myHero, "item_blink", true)
 
@@ -11244,8 +11243,8 @@ function fooAllInOne.TACombo(myHero, enemy)
 
 	local refraction = NPC.GetAbilityByIndex(myHero, 0)
 	local meld = NPC.GetAbilityByIndex(myHero, 1)
-	local psionicTrap = NPC.GetAbilityByIndex(myHero, 4)
-	local trap = NPC.GetAbilityByIndex(myHero, 3)
+	local psionicTrap = NPC.GetAbility(myHero, "templar_assassin_psionic_trap")
+	local trap = NPC.GetAbility(myHero, "templar_assassin_trap")
 
 	local blink = NPC.GetItem(myHero, "item_blink", true)
 
@@ -11450,7 +11449,7 @@ function fooAllInOne.LegionCombo(myHero, enemy)
 
 	local odds = NPC.GetAbilityByIndex(myHero, 0)
 	local pressTheAttack = NPC.GetAbilityByIndex(myHero, 1)
-    	local duel = NPC.GetAbilityByIndex(myHero, 3)
+    	local duel = NPC.GetAbility(myHero, "legion_commander_duel")
 
 	local Blademail = NPC.GetItem(myHero, "item_blade_mail", true)
 	local blink = NPC.GetItem(myHero, "item_blink", true)
@@ -11595,7 +11594,7 @@ function fooAllInOne.SlardarCombo(myHero, enemy)
 
 	local sprint = NPC.GetAbilityByIndex(myHero, 0)
 	local crush = NPC.GetAbilityByIndex(myHero, 1)
-	local haze = NPC.GetAbilityByIndex(myHero, 3)
+	local haze = NPC.GetAbility(myHero, "slardar_amplify_damage")
 
 	local blink = NPC.GetItem(myHero, "item_blink", true)
 
@@ -11674,7 +11673,7 @@ function fooAllInOne.ClinkzCombo(myHero, enemy)
 	local strafe = NPC.GetAbilityByIndex(myHero, 0)
 	local searingArrows = NPC.GetAbilityByIndex(myHero, 1)
 	local skeletonWalk = NPC.GetAbilityByIndex(myHero, 2)
-	local deathPact = NPC.GetAbilityByIndex(myHero, 3)
+	local deathPact = NPC.GetAbility(myHero, "clinkz_death_pact")
 
 	local myMana = NPC.GetMana(myHero)
 	local hurricanePike = NPC.GetItem(myHero, "item_hurricane_pike", true)
@@ -11708,6 +11707,7 @@ function fooAllInOne.ClinkzCombo(myHero, enemy)
 		if NPC.IsEntityInRange(myHero, enemy, clinkzAttackRange) then
 			if strafe and Ability.IsCastable(strafe, myMana) and fooAllInOne.heroCanCastSpells(myHero) == true then
 				Ability.CastNoTarget(strafe)
+				return
 			end
 		end
 	fooAllInOne.GenericMainAttack(myHero, "Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET", enemy, nil)
@@ -11785,7 +11785,7 @@ function fooAllInOne.ClinkzAutoUlt(myHero)
 	
 	local myMana = NPC.GetMana(myHero)
 
-	local deathPact = NPC.GetAbilityByIndex(myHero, 3)
+	local deathPact = NPC.GetAbility(myHero, "clinkz_death_pact")
 		if not deathPact then return end
 		if not Ability.IsCastable(deathPact, myMana) then return end
 
@@ -11825,7 +11825,7 @@ function fooAllInOne.QoPCombo(myHero, enemy)
 	local shadowStrike = NPC.GetAbilityByIndex(myHero, 0)
 	local qopBlink = NPC.GetAbilityByIndex(myHero, 1)
 	local screamOfPain = NPC.GetAbilityByIndex(myHero, 2)
-	local sonicWave = NPC.GetAbilityByIndex(myHero, 3)
+	local sonicWave = NPC.GetAbility(myHero, "queenofpain_sonic_wave")
 
 	local aghanims = NPC.GetItem(myHero, "item_ultimate_scepter", true)
 
@@ -11921,7 +11921,7 @@ function fooAllInOne.SvenCombo(myHero, enemy)
 
 	local stormHammer = NPC.GetAbilityByIndex(myHero, 0)
 	local warCry = NPC.GetAbilityByIndex(myHero, 2)
-	local godsStrength = NPC.GetAbilityByIndex(myHero, 3)
+	local godsStrength = NPC.GetAbility(myHero, "sven_gods_strength")
 
 	local blink = NPC.GetItem(myHero, "item_blink", true)
 	local maskOfMadness = NPC.GetItem(myHero, "item_mask_of_madness", true)
@@ -12008,7 +12008,7 @@ function fooAllInOne.VisageCombo(myHero, enemy)
 			soulStackCounter = Modifier.GetStackCount(soulModifier)
 		end
 	
-	local familiars = NPC.GetAbilityByIndex(myHero, 3)
+	local familiars = NPC.GetAbility(myHero, "visage_summon_familiars")
 	local familiarsLevel = Ability.GetLevel(familiars)
 
 	if Menu.IsKeyDown(fooAllInOne.optionHeroVisageInstStunKey) then
@@ -12391,7 +12391,7 @@ function fooAllInOne.ArcWardenCombo(myHero, enemy)
 	local flux = NPC.GetAbilityByIndex(myHero, 0)
 	local magneticField = NPC.GetAbilityByIndex(myHero, 1)
 	local sparkWraith = NPC.GetAbilityByIndex(myHero, 2)
-	local tempestDouble = NPC.GetAbilityByIndex(myHero, 3)
+	local tempestDouble = NPC.GetAbility(myHero, "arc_warden_tempest_double")
 
 	local dragonLance = NPC.GetItem(myHero, "item_dragon_lance", true)
 	local hurricanePike = NPC.GetItem(myHero, "item_hurricane_pike", true)
@@ -13797,8 +13797,8 @@ function fooAllInOne.ZuusCombo(myHero, enemy)
   	local arc = NPC.GetAbilityByIndex(myHero, 0)
  	local bolt = NPC.GetAbilityByIndex(myHero, 1)
  	local static = NPC.GetAbilityByIndex(myHero, 2)
- 	local wrath = NPC.GetAbilityByIndex(myHero, 4)
-	local nimbus = NPC.GetAbilityByIndex(myHero, 3)
+ 	local wrath = NPC.GetAbility(myHero, "zuus_thundergods_wrath")
+	local nimbus = NPC.GetAbility(myHero, "zuus_cloud")
 
 	local lens = NPC.GetItem(myHero, "item_aether_lens", true)
 	local refresher = NPC.GetItem(myHero, "item_refresher", true)

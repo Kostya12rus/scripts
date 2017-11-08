@@ -104,6 +104,12 @@ function PatrikleTEst.OnParticleDestroy(particle)
 	Log.Write("OnParticleDestroy: index = "..tostring(particle.index)..", destroyImmediately = "..tostring(particle.destroyImmediately))
 end
 
+function PatrikleTEst.OnSayText(textEvent)
+	if not Menu.IsEnabled(PatrikleTEst.Enable) then return end
+	Log.Write("OnSayText: entity = "..tostring(textEvent.entity)..", chat = "..tostring(textEvent.chat)..", messageName = "..tostring(textEvent.messageName)
+	..", params[1] = "..tostring(textEvent.params[1])..", params[2] = "..tostring(textEvent.params[2]))
+end
+
 function PatrikleTEst.OnEntityCreate(ent)
 	if not Menu.IsEnabled(PatrikleTEst.Enable) then return end
 	-- if Entity.IsNPC(ent) then
@@ -122,12 +128,14 @@ function PatrikleTEst.OnEntityDestroy(ent)
 	-- end
 end
 
--- function PatrikleTEst.OnPrepareUnitOrders(orders)
-	-- Config.WriteString("OnPrepareUnitOrders",OnPrepareUnitOrderskey,"OnPrepareUnitOrders: "..tostring(orders.player)..", "..tostring(orders.order)..", "..tostring(orders.target)
-	-- ..", "..tostring(orders.position)..", "..tostring(orders.ability)..", "..tostring(orders.orderIssuer)..", "..tostring(orders.npc)..", "..tostring(orders.queue)
-	-- ..", "..tostring(orders.showEffects))
-	-- OnPrepareUnitOrderskey=OnPrepareUnitOrderskey+1
--- end
+
+function PatrikleTEst.OnPrepareUnitOrders(orders)
+	Log.Write("OnPrepareUnitOrders: "..tostring(orders.player)..", "..tostring(orders.order)..", "..tostring(orders.target)
+	..", "..tostring(orders.position)..", "..tostring(orders.ability)..", "..tostring(orders.orderIssuer)..", "..tostring(orders.npc)..", "..tostring(orders.queue)
+	..", "..tostring(orders.showEffects))
+	return false
+end
+
 
 function PatrikleTEst.OnDraw()
 	if not Menu.IsEnabled(PatrikleTEst.Enable) then return end

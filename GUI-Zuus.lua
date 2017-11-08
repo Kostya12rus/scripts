@@ -22,8 +22,12 @@ BTW.Locale = {
 		["russian"] = "Стил героев первыми двумя способностями"
 	},
 	["stealcloud"] = {
-		["english"] = "Auto steal by Nimbus",
+		["english"] = "Auto steal by cloud",
 		["russian"] = "Стил героев облачком"
+	},
+	["stealult"] = {
+		["english"] = "Auto steal by ult",
+		["russian"] = "Стил героев ультом"
 	},
 	["order"] = {
 		["english"] = "Combo order",
@@ -59,6 +63,9 @@ BTW.CastTypes  = {
 	["zuus_lightning_bolt"] = 2,
 	["zuus_static_field"] = 0,
 	["special_bonus_unique_zeus"] = 0,
+	["special_bonus_unique_zeus_2"] = 0,
+	["special_bonus_unique_zeus_3"] = 0,
+	["item_octarine_core"] = 0,
 	["zuus_cloud"] = 3,
 	["zuus_thundergods_wrath"] = 1,
 	["item_dagon"] = 2,
@@ -88,27 +95,33 @@ BTW.Items  = {
 }
 
 BTW.Abilitys = {}
+BTW.ArcDMG = 0
+BTW.BoltDMG = 0
+BTW.StaticDMG = 0
+BTW.UltDMG = 0
 
 function BTW.OnDraw()
 	if GUI == nil then return end
 	if not GUI.Exist(BTW.Identity) then
 		GUI.Initialize(BTW.Identity, GUI.Category.Heroes, BTW.Locale["name"], BTW.Locale["desc"], "paroxysm", "npc_dota_hero_zuus")
+
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "farm", BTW.Locale["farm"], GUI.MenuType.Key, "F", BTW.Farm, 0)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "spam", BTW.Locale["spam"], GUI.MenuType.Key, "T", BTW.Spam, 0)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "steal", BTW.Locale["steal"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "stealcloud", BTW.Locale["stealcloud"], GUI.MenuType.CheckBox, 0)
+		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "stealult", BTW.Locale["stealult"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "ordercombo", BTW.Locale["order"], 
 			GUI.MenuType.OrderBox, BTW.Items, "", "item_", 36, 36)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "combo", BTW.Locale["combo"], GUI.MenuType.Key, "K", BTW.Combo, 0)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "orbwalker", BTW.Locale["orbwalker"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "closest", BTW.Locale["slider"], GUI.MenuType.Slider, 100, 1500, 200)
+
 	end
 	
 	BTW.Initialize()
 	if	BTW.Enabled 
 	then
-		if GUI.IsEnabled(BTW.Identity .. "steal") then BTW.Steal() end
-		if GUI.IsEnabled(BTW.Identity .. "stealcloud") then BTW.StealCloud() end
+		BTW.Steal()
 	end
 	
 end
@@ -120,7 +133,6 @@ function BTW.Combo()
 	local ordercast = GUI.Get(BTW.Identity .. "ordercombo", 1)
 	if ordercast == nil then return end
     local position = Entity.GetAbsOrigin(enemy)   
-    local manapoint = NPC.GetMana(BTW.Hero)
 	
 	local prevcast = nil
 	for i = 1, Length(ordercast) do
@@ -134,67 +146,64 @@ end
 
 function BTW.Steal()
 	if not BTW.Enabled then return end
-	local staticdmg = 0
-	if Ability.GetLevel(BTW.Abilitys['zuus_static_field']) > 0 then
-		staticdmg = 2 + (2 * Ability.GetLevel(BTW.Abilitys['zuus_static_field']))
-		if Ability.GetLevel(BTW.Abilitys['special_bonus_unique_zeus']) == 1 then
-			staticdmg = staticdmg + 1.5
-		end
-	end
 		
-	for n, npc in pairs(NPC.GetHeroesInRadius(BTW.Hero, Ability.GetCastRange(BTW.Abilitys['zuus_lightning_bolt']), Enum.TeamType.TEAM_ENEMY)) do	
+	local isSteal = GUI.IsEnabled(BTW.Identity .. "steal")
+	local isCloud = GUI.IsEnabled(BTW.Identity .. "stealcloud")
+	local isUlt = GUI.IsEnabled(BTW.Identity .. "stealult")
 	
-		if Entity.IsHero(npc) and not NPC.IsIllusion(npc) and not Entity.IsDormant(npc) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
-			local boltdmg = Ability.GetDamage(BTW.Abilitys['zuus_lightning_bolt'])
-			local lightdmg = Ability.GetDamage(BTW.Abilitys['zuus_arc_lightning'])
-			
+	for n, npc in pairs(Heroes.GetAll()) do	
+	
+		if not Entity.IsDormant(npc) and Entity.IsAlive(npc) and not NPC.IsIllusion(npc) and not Entity.IsSameTeam(BTW.Hero, npc) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+		
+			local boltdmg = BTW.BoltDMG
+			local lightdmg = BTW.ArcDMG
+			local ultdmg = BTW.UltDMG
+
 			if Ability.GetLevel(BTW.Abilitys['zuus_static_field']) > 0 then
-				boltdmg  = boltdmg + (Entity.GetHealth(npc) * (staticdmg / 100) )
-				lightdmg = lightdmg + (Entity.GetHealth(npc) * (staticdmg / 100) )
+				boltdmg  = boltdmg + (Entity.GetHealth(npc) * (BTW.StaticDMG / 100) )
+				lightdmg = lightdmg + (Entity.GetHealth(npc) * (BTW.StaticDMG / 100) )
+				ultdmg = ultdmg + (Entity.GetHealth(npc) * (BTW.StaticDMG / 100) )
 			end
 			
 			boltdmg = NPC.GetMagicalArmorDamageMultiplier(npc) * boltdmg
 			lightdmg = NPC.GetMagicalArmorDamageMultiplier(npc) * lightdmg
-			
-			if	Entity.GetHealth(npc) < lightdmg 
-			then
+			ultdmg = NPC.GetMagicalArmorDamageMultiplier(npc) * ultdmg
+
+			if	isSteal
+				and Entity.GetHealth(npc) < lightdmg 
+				and NPC.IsEntityInRange(BTW.Hero, npc, Ability.GetCastRange(BTW.Abilitys['zuus_arc_lightning']))
+				and Ability.IsCastable(BTW.Abilitys['zuus_arc_lightning'], BTW.MP)
+				then
 				BTW.Cast('zuus_arc_lightning', BTW.Hero, npc, nil, BTW.MP)
-			elseif	Entity.GetHealth(npc) < boltdmg
+			elseif	isSteal
+				and Entity.GetHealth(npc) < boltdmg
+				and NPC.IsEntityInRange(BTW.Hero, npc, Ability.GetCastRange(BTW.Abilitys['zuus_lightning_bolt']))
+				and Ability.IsCastable(BTW.Abilitys['zuus_lightning_bolt'], BTW.MP)
 				then
 				BTW.Cast('zuus_lightning_bolt', BTW.Hero, npc, nil, BTW.MP)
-			return end
-		end
-		
-	end
-end
-
-function BTW.StealCloud()
-	if not BTW.Enabled then return end
-	local staticdmg = 0
-	if Ability.GetLevel(BTW.Abilitys['zuus_static_field']) > 0 then
-		staticdmg = 2 + (2 * Ability.GetLevel(BTW.Abilitys['zuus_static_field']))
-		if Ability.GetLevel(BTW.Abilitys['special_bonus_unique_zeus']) == 1 then
-			staticdmg = staticdmg + 1.5
-		end
-	end
-		
-	for n, npc in pairs(Heroes.GetAll()) do	
-		if not Entity.IsDormant(npc) and Entity.IsAlive(npc) and not NPC.IsIllusion(npc) and not Entity.IsSameTeam(BTW.Hero, npc) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
-			local boltdmg = Ability.GetDamage(BTW.Abilitys['zuus_lightning_bolt'])
-		
-			if Ability.GetLevel(BTW.Abilitys['zuus_static_field']) > 0 then
-				boltdmg  = boltdmg + (Entity.GetHealth(npc) * (staticdmg / 100) )
-			end
-			
-			boltdmg = NPC.GetMagicalArmorDamageMultiplier(npc) * boltdmg
-		
-			if	Entity.GetHealth(npc) < boltdmg
-			then
+			elseif	isCloud
+				and Entity.GetHealth(npc) < boltdmg
+				and Ability.IsCastable(BTW.Abilitys['zuus_cloud'], BTW.MP)
+				then
 				BTW.Cast('zuus_cloud', BTW.Hero, npc, NPC.GetAbsOrigin(npc), BTW.MP)
+			elseif	isUlt
+				and Entity.GetHealth(npc) < ultdmg
+				and Ability.IsCastable(BTW.Abilitys['zuus_thundergods_wrath'], BTW.MP)
+				then
+				BTW.Cast('zuus_thundergods_wrath', BTW.Hero, nil, nil, BTW.MP)
+			elseif isUlt
+				and isCloud
+				and Entity.GetHealth(npc) < (boltdmg + ultdmg)
+				and Ability.IsCastable(BTW.Abilitys['zuus_cloud'], BTW.MP)
+				and Ability.IsCastable(BTW.Abilitys['zuus_thundergods_wrath'], BTW.MP)
+				then
+				BTW.Cast('zuus_cloud', BTW.Hero, npc, NPC.GetAbsOrigin(npc), BTW.MP)
+				BTW.Cast('zuus_thundergods_wrath', BTW.Hero, nil, nil, BTW.MP)
 			return end
 		end
 		
 	end
+	
 end
 
 function BTW.InitAbility(name)
@@ -225,13 +234,30 @@ function BTW.Initialize()
 	for k, v in pairs(BTW.CastTypes) do
 		BTW.InitAbility(k)
 	end
+	
+	BTW.ArcDMG = Ability.GetLevelSpecialValueFor(BTW.Abilitys['zuus_arc_lightning'], 'arc_damage')
+	BTW.BoltDMG = Ability.GetDamage(BTW.Abilitys['zuus_lightning_bolt'])
+	BTW.UltDMG = Ability.GetLevelSpecialValueFor(BTW.Abilitys['zuus_thundergods_wrath'], 'damage')
+	BTW.StaticDMG = 0
+	if Ability.GetLevel(BTW.Abilitys['zuus_static_field']) > 0 then
+		BTW.StaticDMG = Ability.GetLevelSpecialValueFor(BTW.Abilitys['zuus_static_field'], 'damage_health_pct')
+		if Ability.GetLevel(BTW.Abilitys['special_bonus_unique_zeus']) == 1 then
+			BTW.StaticDMG = BTW.StaticDMG + 1
+		end
+	end
+	
+	if Ability.GetLevel(BTW.Abilitys['special_bonus_unique_zeus_2']) == 1 then
+		BTW.ArcDMG = BTW.ArcDMG + 170
+	end
 end
 
 function BTW.Farm()
 	if not BTW.Enabled then return end
 	for n, npc in pairs(NPC.GetUnitsInRadius(BTW.Hero, Ability.GetCastRange(BTW.Abilitys['zuus_arc_lightning']), Enum.TeamType.TEAM_ENEMY)) do	
+		local lightdmg = BTW.ArcDMG + (Entity.GetHealth(npc) * (BTW.StaticDMG / 100) )
+		
 		if	not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
-			and (Entity.GetHealth(npc) < (Ability.GetDamage(BTW.Abilitys['zuus_arc_lightning']) * NPC.GetMagicalArmorDamageMultiplier(npc)))
+			and (Entity.GetHealth(npc) < (lightdmg * NPC.GetMagicalArmorDamageMultiplier(npc)))
 		then
 			BTW.Cast('zuus_arc_lightning', BTW.Hero, npc, nil, BTW.MP)
 		end
@@ -246,6 +272,17 @@ function BTW.Spam()
 			BTW.Cast('zuus_arc_lightning', BTW.Hero, npc, nil, BTW.MP)
 		return end
 	end
+end
+
+function BTW.OnGameEnd()
+	BTW.Hero = nil
+	BTW.Enabled = false
+	BTW.MP = 0
+	BTW.Abilitys = {}
+	BTW.ArcDMG = 0
+	BTW.BoltDMG = 0
+	BTW.StaticDMG = 0
+	BTW.UltDMG = 0
 end
 
 function BTW.Cast(name, self, npc, position, manapoint)
