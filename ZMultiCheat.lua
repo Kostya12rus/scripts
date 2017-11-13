@@ -47,30 +47,13 @@ function MultiCheat.OnGameEnd()
   MultiCheat.Init()
 end
 
-function MultiCheat.OnUnitAnimation(animation)
-    if #AnimTable >= 10 then
-        for j=1,9 do
-            AnimTable[j] = AnimTable[j + 1] 
-            HeroTable[j] = HeroTable[j + 1] 
-            castpoint[j] = castpoint[j + 1] 
-        end
-        table.remove(AnimTable)
-        table.remove(HeroTable)
-        table.remove(castpoint)
-    end
-    table.insert(AnimTable, animation.sequenceName)
-    table.insert(HeroTable, NPC.GetUnitName(animation.unit))
-    table.insert(castpoint, animation.playbackRate)
-end
-
 function MultiCheat.OnDraw()
 	if not Menu.IsEnabled(MultiCheat.optionEnable) then return end
-	local myHero = Heroes.GetLocal()
-	if not myHero then return end 
+	if not Heroes.GetLocal() then return end 
 	if Menu.IsEnabled(MultiCheat.Draw_Item) then MultiCheat.DrawOwerItem() end
 	if Menu.IsEnabled(MultiCheat.NickAndItems) then MultiCheat.NickAndItem() end
 	if Menu.IsEnabled(MultiCheat.CsGoESPbole) then MultiCheat.CsGoESP() end
-	
+    --Renderer.DrawTextCenteredX(MultiCheat.Font, 1000, 500, NPC.GetArmorDamageMultiplier(Heroes.GetLocal()), 1) 
 	if Menu.IsEnabled(MultiCheat.Test) then MultiCheat.test() end
 end
 

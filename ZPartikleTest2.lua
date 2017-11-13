@@ -129,12 +129,12 @@ function PatrikleTEst.OnEntityDestroy(ent)
 end
 
 
-function PatrikleTEst.OnPrepareUnitOrders(orders)
-	Log.Write("OnPrepareUnitOrders: "..tostring(orders.player)..", "..tostring(orders.order)..", "..tostring(orders.target)
-	..", "..tostring(orders.position)..", "..tostring(orders.ability)..", "..tostring(orders.orderIssuer)..", "..tostring(orders.npc)..", "..tostring(orders.queue)
-	..", "..tostring(orders.showEffects))
-	return false
-end
+-- function PatrikleTEst.OnPrepareUnitOrders(orders)
+	-- Log.Write("OnPrepareUnitOrders: "..tostring(orders.player)..", "..tostring(orders.order)..", "..tostring(orders.target)
+	-- ..", "..tostring(orders.position)..", "..tostring(orders.ability)..", "..tostring(orders.orderIssuer)..", "..tostring(orders.npc)..", "..tostring(orders.queue)
+	-- ..", "..tostring(orders.showEffects))
+	-- return false
+-- end
 
 
 function PatrikleTEst.OnDraw()

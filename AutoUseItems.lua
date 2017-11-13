@@ -126,7 +126,7 @@ function AutoUseItems.item_hand_of_midas(myHero)
     local item = NPC.GetItem(myHero, "item_hand_of_midas", true)
     if not item or not Ability.IsCastable(item, 0) then return end
 
-    local range = 600
+    local range = Ability.GetCastRange(item) -- 600
     local XP_threshold = 88
     local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, npc in ipairs(creeps) do
@@ -150,7 +150,7 @@ function AutoUseItems.deward(myHero)
     if item3 and Ability.IsCastable(item3, 0) then item = item3 end
     if not item then return end
 
-    local range = 450
+    local range = Ability.GetCastRange(item) -- 450
     local wards = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, npc in ipairs(wards) do
         if NPC.GetUnitName(npc) == "npc_dota_observer_wards" or NPC.GetUnitName(npc) == "npc_dota_sentry_wards" then
@@ -166,7 +166,7 @@ function AutoUseItems.item_iron_talon(myHero)
     if not item or not Ability.IsCastable(item, 0) then return end
 
     local HpThreshold = 550
-    local range = 350
+    local range = Ability.GetCastRange(item) -- 350
     local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 
     for i, npc in ipairs(creeps) do
@@ -201,14 +201,15 @@ function AutoUseItems.item_sheepstick(myHero)
     local item = NPC.GetItem(myHero, "item_sheepstick", true)
     if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-    local range = 800
+    local range = Ability.GetCastRange(item) -- 800
     local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 
     local minDistance = 99999
     local target = nil
     for i, enemy in ipairs(enemyAround) do
         if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
-            and Utility.CanCastSpellOn(enemy) and not Utility.IsLotusProtected(enemy) then
+            and Utility.CanCastSpellOn(enemy) and not NPC.IsLinkensProtected(enemy)
+            and not Utility.IsLotusProtected(enemy) then
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             if dis < minDistance then
                 minDistance = dis
@@ -232,7 +233,7 @@ function AutoUseItems.item_orchid(myHero)
     if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then item = item2 end
     if not item then return end
 
-    local range = 900
+    local range = Ability.GetCastRange(item)
     local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 
     local minDistance = 99999
@@ -258,7 +259,7 @@ function AutoUseItems.item_rod_of_atos(myHero)
     local item = NPC.GetItem(myHero, "item_rod_of_atos", true)
     if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-    local range = 1150
+    local range = Ability.GetCastRange(item)
     local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 
     local minDistance = 99999
@@ -286,13 +287,14 @@ function AutoUseItems.item_abyssal_blade(myHero)
     local item = NPC.GetItem(myHero, "item_abyssal_blade", true)
     if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-    local range = 140
+    local range = Ability.GetCastRange(item)
     local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 
     local minDistance = 99999
     local target = nil
     for i, enemy in ipairs(enemyAround) do
-        if not NPC.IsIllusion(enemy) and not NPC.IsStunned(enemy) and not Utility.IsLotusProtected(enemy) then
+        if not NPC.IsIllusion(enemy) and not NPC.IsStunned(enemy)
+        and not Utility.IsLotusProtected(enemy) and not NPC.IsLinkensProtected(enemy) then
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             if dis < minDistance then
                 minDistance = dis
@@ -321,7 +323,7 @@ function AutoUseItems.item_dagon(myHero)
 
     if not item then return end
 
-    local range = 600 + 50 * (level - 1)
+    local range = Ability.GetCastRange(item) -- 600 + 50 * (level - 1)
     local magic_damage = 400 + 100 * (level - 1)
 
     local target
@@ -347,7 +349,7 @@ function AutoUseItems.item_veil_of_discord(myHero)
     local item = NPC.GetItem(myHero, "item_veil_of_discord", true)
     if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-    local range = 1000
+    local range = Ability.GetCastRange(item) -- 1000
     local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     if not enemyHeroes or #enemyHeroes <= 0 then return end
 
@@ -365,7 +367,7 @@ function AutoUseItems.item_lotus_orb(myHero)
     -- cast on self first if needed
     if Utility.NeedToBeSaved(myHero) then Ability.CastTarget(item, myHero); return end
 
-    local range = 900
+    local range = Ability.GetCastRange(item) -- 900
     local allyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
     if not allyAround or #allyAround <= 0 then return end
 
@@ -407,7 +409,7 @@ function AutoUseItems.item_solar_crest(myHero)
 
     if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-    local range = 1000
+    local range = Ability.GetCastRange(item) -- 1000
     local allyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
     if not allyAround or #allyAround <= 0 then return end
 
@@ -428,7 +430,7 @@ function AutoUseItems.item_glimmer_cape(myHero)
         Ability.CastTarget(item, myHero)
     end
 
-    local range = 1050
+    local range = Ability.GetCastRange(item) -- 1050
     local allyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
     if not allyAround or #allyAround <= 0 then return end
 
