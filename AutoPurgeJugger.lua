@@ -18,7 +18,6 @@ function AutoPurge.Combo()
 	local heroPos = Entity.GetAbsOrigin(hero)
 	local myMana = NPC.GetMana(myHero)
 			
-	if not hero then return end
 	
 	local Omnislash = NPC.GetAbility(myHero, "juggernaut_omni_slash")
 	local Diffus = NPC.GetItem(myHero, "item_diffusal_blade", true)

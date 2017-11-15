@@ -67,11 +67,9 @@ function MultiCheat.OnUpdate()
   
   if NPC.GetUnitName(myHero) == "npc_dota_hero_furion" then MultiCheat.Furion()
   elseif NPC.GetUnitName(myHero) == "npc_dota_hero_shadow_shaman" then MultiCheat.Shadowshaman()
+  elseif NPC.GetUnitName(myHero) == "npc_dota_hero_bristleback" then MultiCheat.Bristleback()
   else return end
 end
-
--- function MultiCheat.test()
--- end
 
 function MultiCheat.test() -- RangeSpeel
 
@@ -169,25 +167,7 @@ function MultiCheat.NickAndItem()
 			end
 		end
 	end	
-	if Menu.IsKeyDownOnce(MultiCheat.NickAndItemseKey) then
-		Key1 = true
-	end
-	if Key1 then
-		Engine.ExecuteCommand("say "..msgMyTeam.. "жесткие пидарасы")
-		Key1 = false
-		Key2 = true
-		tick = GameRules.GetGameTime() + 1 
-	end
-	if Key2 and tick <= GameRules.GetGameTime() then
-		Engine.ExecuteCommand("say "..msgEnemy.. "а вы вообще ущербы!!")
-		Key2 = false
-		Key3 = true
-		tick = GameRules.GetGameTime() + 1 
-	end
-	if Key3 and tick <= GameRules.GetGameTime()then
-		Engine.ExecuteCommand("say Все идите нахуй")
-		Key3 = false
-	end
+	
 	local myHero = Heroes.GetLocal()
 	local x1 = 1000
 	local y1 = 100
@@ -325,6 +305,35 @@ function MultiCheat.DrawOwerItem()
   end
 end
 
+function MultiCheat.Bristleback()
+	local myHero = Heroes.GetLocal()
+	local myheroPos = Entity.GetAbsOrigin(myHero)
+	local HeroInRadius = 0
+	local quill_spray = NPC.GetAbility(myHero,"bristleback_quill_spray")
+	local viscous_nasal_goo = NPC.GetAbility(myHero,"bristleback_viscous_nasal_goo")
+	local distanse_quill_spray = Ability.GetCastRange(quill_spray)
+	local distanse_viscous_nasal_goo = Ability.GetCastRange(viscous_nasal_goo)
+	local aganim = NPC.GetItem(myHero, "item_ultimate_scepter", true)
+	if MultiCheat.HeroInRadius(distanse_quill_spray) > 1 then
+		if Ability.IsReady(quill_spray) and NPC.GetMana(myHero) >= Ability.GetManaCost(quill_spray) then
+			Ability.CastNoTarget(quill_spray)
+			return
+		end
+	end
+	if MultiCheat.HeroInRadius(distanse_viscous_nasal_goo) > 1 then
+		if aganim and Ability.IsReady(viscous_nasal_goo) and NPC.GetMana(myHero) >= Ability.GetManaCost(viscous_nasal_goo) then
+			Ability.CastNoTarget(viscous_nasal_goo)
+			return
+		end
+	end
+	-- local ypos = 100
+	-- for i=1, Abilities.Count() do
+	-- local abb = Abilities.Get(i)
+		-- Renderer.DrawText(MultiCheat.FontSkill, 1000, ypos, Ability.GetName(abb), 1) 
+		-- ypos = ypos + 14
+	-- end
+end
+
 function MultiCheat.Furion()
   local myHero = Heroes.GetLocal()
   local myheroPos = Entity.GetAbsOrigin(myHero)
@@ -338,29 +347,19 @@ function MultiCheat.Furion()
   local callforce = NPC.GetAbilityByIndex(myHero, 2)
   local lvlcallforce = Ability.GetLevel(callforce)
   local RodOfAtos = NPC.GetItem(myHero, "item_rod_of_atos", true)
-  local need_mana_for_cast = 0
-  if Ability.IsReady(callforce) then
-    need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(callforce)
-    if RodOfAtos and Ability.IsCastable(RodOfAtos, NPC.GetMana(myHero)) then
-      need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(RodOfAtos)
-      if Ability.IsReady(sprout) then
-        need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(sprout)
-      end
-    elseif Ability.IsReady(sprout) then
-      need_mana_for_cast = need_mana_for_cast + Ability.GetManaCost(sprout)
-    end
-  end
-  if Menu.IsKeyDown(MultiCheat.BlockKey) and MyAndEnemyDistanse <= distanse_sprout and Ability.IsReady(callforce) and lvlcallforce == 4 and NPC.GetMana(myHero) >= need_mana_for_cast then
-    if RodOfAtos and Ability.IsCastable(RodOfAtos, NPC.GetMana(myHero)) then Ability.CastTarget(RodOfAtos, enemy) end
+  
+  if Menu.IsKeyDown(MultiCheat.BlockKey) and MyAndEnemyDistanse <= distanse_sprout and Ability.IsReady(callforce) and lvlcallforce == 4 then
+    if RodOfAtos and Ability.IsCastable(RodOfAtos, NPC.GetMana(myHero)) then 
+		Ability.CastTarget(RodOfAtos, enemy) 
+		return 
+	end
     if Ability.IsReady(sprout) and #trees < 5 then
         Ability.CastTarget(sprout, enemy)
+		return
     end
-    if #trees >= 5 or NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
-      if Ability.GetCooldown(RodOfAtos) <= 15 then
-        Ability.CastPosition(callforce, enemyPos)
-      elseif not RodOfAtos then
-        Ability.CastPosition(callforce, enemyPos)
-      end
+    if NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_ROOTED) or not NPC.IsRunning(enemy) then
+	  Ability.CastPosition(callforce, enemyPos)
+	  return
     end
   end
 end
@@ -429,6 +428,25 @@ function MultiCheat.toint(n)
         return n
     end
 end
+-- Количество героев в радиусе
+function MultiCheat.HeroInRadius(radius)
+	local myHero = Heroes.GetLocal()
+	local myheroPos = Entity.GetAbsOrigin(myHero)
+	heroradius = 0
+	for i = 1, NPCs.Count() do
+		local entity = NPCs.Get(i) 
+		if entity and Entity.IsHero(entity) and not NPC.IsIllusion(entity) and not Entity.IsSameTeam(myHero,entity) and not Entity.IsDormant(entity) then
+			if Entity.IsAlive(entity) then
+				local enemyPos = Entity.GetAbsOrigin(entity)
+				local MyAndEnemyDistanse = myheroPos:Distance(enemyPos):Length2D()
+				if MyAndEnemyDistanse <= radius then
+					heroradius = heroradius + 1
+				end
+			end
+		end 
+	end
+	return heroradius
+end 
 
 --Загрузить картинку вещи
 function MultiCheat.ItemImage(item)
