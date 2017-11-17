@@ -33,8 +33,8 @@ GUI.Font.Search = Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
 GUI.Font.Footer = Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.GameState = -2
 GUI.Config = "GUI"
-GUI.Version = 170930
-GUI.TextVersion = 'v 17.09.30'
+GUI.Version = 171116
+GUI.TextVersion = 'v 17.11.16'
 
 GUI.GameStates = {}
 GUI.GameStates.OnGameMenu = -1
@@ -314,24 +314,28 @@ function CheckKeys()
 	local current_key = ""
 	local down_type = 0
 	GUI.CurrentKey = ""
+	local skip_array = {55,57,58,59,60,61}
 	
-	for i = 5, 40 do
-		if Input.IsKeyDown(i) then
-			local alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-			current_key = string.sub(alphabet, i - 4, i - 4)
-		end
-		if Input.IsKeyDownOnce(i) then
-			local alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-			current_key = string.sub(alphabet, i - 4, i - 4)
-			down_type = 1
-			GUI.CurrentKey = current_key
+	local alphabet = '    0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/*-+ .     ~'
+
+	for i = 5, 62 do
+		if not hasValue(skip_array, i) then
+			if Input.IsKeyDown(i) then
+				current_key = string.sub(alphabet, i, i)
+			end
+			if Input.IsKeyDownOnce(i) then
+				current_key = string.sub(alphabet, i, i)
+				down_type = 1
+				GUI.CurrentKey = current_key
+			end
 		end
 	end
-		
-	if Input.IsKeyDownOnce(70) then
+	
+	if Input.IsKeyDown(70) or Input.IsKeyDownOnce(70) then
 		GUI.CurrentKey = " "
+		current_key = " "
 	end
-	
+
 	if Input.IsKeyDownOnce(71) then
 		GUI.CurrentKey = "backspace"
 	end
