@@ -326,12 +326,6 @@ function MultiCheat.Bristleback()
 			return
 		end
 	end
-	-- local ypos = 100
-	-- for i=1, Abilities.Count() do
-	-- local abb = Abilities.Get(i)
-		-- Renderer.DrawText(MultiCheat.FontSkill, 1000, ypos, Ability.GetName(abb), 1) 
-		-- ypos = ypos + 14
-	-- end
 end
 
 function MultiCheat.Furion()
