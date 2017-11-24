@@ -13,15 +13,16 @@ local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker Extension
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
 local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Spell Protection", "Protect uncast spell by moving casted spell to second slot")
+local optionDefend = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Defend", "If enemies are too close, auto cast (1) tornado, (2) blast, (3) cold snap, or (4) ghost walk to escape.")
+local optionIceWallHelper = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Ice Wall Helper", "Auto cast ice wall if it can affect an enemy.")
 
-local isInvokingSpell = false
-local lastInvokeTime = 0
+local currentInstances
+local timer = GameRules.GetGameTime()
+local gap = 0.1
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
-
-    Invoker.UpdateInvokingStatus(myHero)
 
     if Menu.IsKeyDownOnce(keyGhostWalk) then
         Invoker.CastGhostWalk(myHero)
@@ -41,8 +42,8 @@ function Invoker.OnPrepareUnitOrders(orders)
     if Menu.IsEnabled(optionRightClickCombo) and orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
         Invoker.RightClickCombo(myHero, orders.target)
     end
-    
-    if Menu.IsEnabled(optionInstanceHelper) and not isInvokingSpell then
+
+    if Menu.IsEnabled(optionInstanceHelper) then
         Invoker.InstanceHelper(myHero, orders.order)
     end
 
@@ -53,22 +54,6 @@ function Invoker.OnPrepareUnitOrders(orders)
     return true
 end
 
--- update invoking status
--- check whether is invoking spell to avoid miss switch instance.
-function Invoker.UpdateInvokingStatus(myHero)
-    -- if one of Q, W, E, R, D, F or F5(ghost walk) is pressed
-    if Input.IsKeyDown(Enum.ButtonCode.KEY_F5) or Input.IsKeyDown(Enum.ButtonCode.KEY_Q) or Input.IsKeyDown(Enum.ButtonCode.KEY_W) or Input.IsKeyDown(Enum.ButtonCode.KEY_E) or Input.IsKeyDown(Enum.ButtonCode.KEY_R) or Input.IsKeyDown(Enum.ButtonCode.KEY_D) or Input.IsKeyDown(Enum.ButtonCode.KEY_F) then
-        lastInvokeTime = GameRules.GetGameTime()
-    end
-
-    local elapse_time = 1
-    if math.abs(GameRules.GetGameTime() - lastInvokeTime) > elapse_time then
-        isInvokingSpell = false
-    else
-        isInvokingSpell = true
-    end
-end
-
 -- deal all iteration related features, for efficiency
 function Invoker.Iteration(myHero)
     if not myHero then return end
@@ -77,18 +62,22 @@ function Invoker.Iteration(myHero)
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) then
-            
-            if Menu.IsEnabled(optionKillSteal) and Invoker.KillSteal(myHero, enemy) then return end
 
-            if Menu.IsEnabled(optionInterrupt) and Invoker.Interrupt(myHero, enemy) then return end
+            if Menu.IsEnabled(optionDefend) then Invoker.Defend(myHero, enemy) end
 
-            if Menu.IsEnabled(optionFixedPositionCombo) and Invoker.FixedPositionCombo(myHero, enemy) then return end
+            if Menu.IsEnabled(optionIceWallHelper) then Invoker.CastIceWall(myHero, enemy) end
 
-            if Menu.IsEnabled(optionMeteorBlastCombo) and Invoker.MeteorBlastCombo(myHero, enemy) then return end
+            if Menu.IsEnabled(optionKillSteal) then Invoker.KillSteal(myHero, enemy) end
 
-            if Menu.IsEnabled(optionTornadoCombo) and Invoker.TornadoCombo(myHero, enemy) then return end
+            if Menu.IsEnabled(optionInterrupt) then Invoker.Interrupt(myHero, enemy) end
 
-            if Menu.IsEnabled(optionColdSnapCombo) and Invoker.ColdSnapCombo(myHero, enemy) then return end
+            if Menu.IsEnabled(optionFixedPositionCombo) then Invoker.FixedPositionCombo(myHero, enemy) end
+
+            if Menu.IsEnabled(optionMeteorBlastCombo) then Invoker.MeteorBlastCombo(myHero, enemy) end
+
+            if Menu.IsEnabled(optionTornadoCombo) then Invoker.TornadoCombo(myHero, enemy) end
+
+            if Menu.IsEnabled(optionColdSnapCombo) then Invoker.ColdSnapCombo(myHero, enemy) end
         end
     end
 end
@@ -97,23 +86,25 @@ function Invoker.InstanceHelper(myHero, order)
     if not myHero or not order then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
 
-    -- if about to move
-    if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET then
-        if Entity.GetHealth(myHero) < Entity.GetMaxHealth(myHero) then
-            Invoker.PressKey(myHero, "QQQ")
-        else
-            Invoker.PressKey(myHero, "WWW")
-        end
+    local pattern = "WWW"
+    local E = NPC.GetAbility(myHero, "invoker_exort")
+    if E and Ability.IsCastable(E, 0) then pattern = "EEE" end
+
+    if Invoker.GetInstances(myHero) ~= pattern then
+        currentInstances = Invoker.GetInstances(myHero)
+    end
+
+    -- if about to move or press STOP
+    if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION
+    or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET
+    or order == Enum.UnitOrder.DOTA_UNIT_ORDER_HOLD_POSITION
+    or order == Enum.UnitOrder.DOTA_UNIT_ORDER_STOP then
+        Invoker.PressKey(myHero, currentInstances)
     end
 
     -- if about to attack
     if order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
-        local E = NPC.GetAbility(myHero, "invoker_exort")
-        if E and Ability.IsCastable(E, 0) then
-            Invoker.PressKey(myHero, "EEE")
-        else
-            Invoker.PressKey(myHero, "WWW")
-        end
+        Invoker.PressKey(myHero, pattern)
     end
 end
 
@@ -136,7 +127,7 @@ function Invoker.RightClickCombo(myHero, target)
     end
 
     if NPC.IsHero(target) or NPC.IsRoshan(target) or NPC.IsStructure(target) or Utility.IsAncientCreep(target) or (NPC.IsCreep(target) and not NPC.IsLaneCreep(target)) then
-    
+
         -- combo: right click -> alacrity
         if Invoker.CastAlacrity(myHero, myHero) then return end
 
@@ -147,7 +138,7 @@ function Invoker.RightClickCombo(myHero, target)
 end
 
 -- tornado/eul combo
--- priority: ice wall -> sun strike -> chaos meteor -> emp 
+-- priority: ice wall -> sun strike -> chaos meteor -> emp
 function Invoker.TornadoCombo(myHero, enemy)
     if not myHero or not enemy then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
@@ -165,20 +156,31 @@ function Invoker.TornadoCombo(myHero, enemy)
 
     if not mod then return false end
 
-    local pos =  Entity.GetAbsOrigin(enemy)
+    local pos = Entity.GetAbsOrigin(enemy)
     local time_left = math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
 
-    -- 1. cast ice wall
-    if Invoker.CastIceWall(myHero, enemy) then return true end
+    -- -- 1. cast ice wall
+    -- if Invoker.CastIceWall(myHero, enemy) then return true end
 
     -- 2. cast sun strike
-    if time_left >= 1 and time_left < 1.7 and Invoker.CastSunStrike(myHero, pos) then return true end
+    -- delay: 1.7, cast point: 0.05, radius: 175, window: 175/400 = 0.4375
+    if 1.75 - 0.4375 < time_left and time_left < 1.75 and Invoker.CastSunStrike(myHero, pos) then return true end
 
     -- 3. cast chaos meteor
-    if time_left >= 0.5 and time_left < 1.3 and Invoker.CastChaosMeteor(myHero, pos) then return true end
+    -- delay: 1.3, cast point: 0.05, affect radius: 275
+    -- meteors speed: 300, cast range: 700
+    local dir = (pos - Entity.GetAbsOrigin(myHero)):Normalized()
+    local land_pos = pos + dir:Scaled(300 * (time_left - 1.35 - 0.3))
+    local wex_level = Ability.GetLevel(NPC.GetAbility(myHero, "invoker_wex"))
+    local travel_distance = 315  + 150 * wex_level
+    local cast_range = 700
+    if (land_pos - Entity.GetAbsOrigin(myHero)):Length2D() <= cast_range
+    and (land_pos - pos):Length2D() <= travel_distance
+    and Invoker.CastChaosMeteor(myHero, land_pos) then return true end
 
     -- 4. cast EMP
-    if time_left >= 1 and time_left < 2.9 and Invoker.CastEMP(myHero, pos) then return true end
+    -- delay: 2.9, cast point: 0.05, radius: 675, window: 675/400 = 1.6875
+    if 2.95 - 1.6875 < time_left and time_left < 2.95 and Invoker.CastEMP(myHero, pos) then return true end
 
     return false
 end
@@ -205,6 +207,12 @@ function Invoker.ColdSnapCombo(myHero, enemy)
 
     if not Utility.IsAffectedByDoT(enemy) then return false end
 
+    -- avoid confliction with chaos meteors combo
+    if NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then
+        local meteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
+        if meteor and Ability.IsCastable(meteor, NPC.GetMana(myHero)) then return false end
+    end
+
     if Invoker.CastColdSnap(myHero, enemy) then return true end
 
     return false
@@ -225,7 +233,7 @@ function Invoker.KillSteal(myHero, enemy)
     local W_level = Ability.GetLevel(W)
     local E_level = Ability.GetLevel(E)
 
-    if NPC.HasItem(myHero, "item_ultimate_scepter", true) then 
+    if NPC.HasItem(myHero, "item_ultimate_scepter", true) then
         Q_level = Q_level + 1
         W_level = W_level + 1
         E_level = E_level + 1
@@ -234,7 +242,7 @@ function Invoker.KillSteal(myHero, enemy)
     local damage_tornado = 45 * W_level
     local damage_deafening_blast = 40 * E_level
     local damage_sun_strike = 100 + 62.5 * (E_level - 1)
-   
+
     local enemyHp = Entity.GetHealth(enemy)
     local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
     local multiplier = NPC.GetMagicalArmorDamageMultiplier(enemy)
@@ -268,32 +276,32 @@ end
 -- according to info given by particle effects
 -- cast sun strike when enemy is (1) tping; (2) farming neutral creep; (3) roshing
 -- interrupt enemy's tp by tornado
-function Invoker.MapHack(pos, particleName)
-    local myHero = Heroes.GetLocal()
-    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
-    if not Utility.IsSuitableToCastSpell(myHero) then return end
-
-    -- have to make sure these particles are not from teammate
-    if not pos or Map.IsAlly(myHero, pos) then return end
-
-    -- tp effects
-    if particleName == "teleport_start" then
-        -- interrupt tp with tornado
-        if Invoker.CastTornado(myHero, pos) then return end
-        -- sun strike on tping enemy. dont sun strike if enemy is tping in fountain (that would be so obvious)
-        if not Map.InFountain(pos) and Invoker.CastSunStrike(myHero, pos) then return end
-    end
-
-    -- -- sun strike when enemy is farming neutral camp
-    -- if Map.InNeutralCamp(pos) then
-    --     if Invoker.CastSunStrike(myHero, pos) then return end
-    -- end
-
-    -- sun strike when enemy is roshing
-    if Map.InRoshan(pos) then
-        if Invoker.CastSunStrike(myHero, pos) then return end
-    end
-end
+-- function Invoker.MapHack(pos, particleName)
+--     local myHero = Heroes.GetLocal()
+--     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
+--     if not Utility.IsSuitableToCastSpell(myHero) then return end
+--
+--     -- have to make sure these particles are not from teammate
+--     if not pos or Map.IsAlly(myHero, pos) then return end
+--
+--     -- tp effects
+--     if particleName == "teleport_start" then
+--         -- interrupt tp with tornado
+--         if Invoker.CastTornado(myHero, pos) then return end
+--         -- sun strike on tping enemy. dont sun strike if enemy is tping in fountain (that would be so obvious)
+--         if not Map.InFountain(pos) and Invoker.CastSunStrike(myHero, pos) then return end
+--     end
+--
+--     -- -- sun strike when enemy is farming neutral camp
+--     -- if Map.InNeutralCamp(pos) then
+--     --     if Invoker.CastSunStrike(myHero, pos) then return end
+--     -- end
+--
+--     -- sun strike when enemy is roshing
+--     if Map.InRoshan(pos) then
+--         if Invoker.CastSunStrike(myHero, pos) then return end
+--     end
+-- end
 
 -- Auto interrupt enemy's tp or channelling spell with tornado or cold snap
 function Invoker.Interrupt(myHero, enemy)
@@ -311,7 +319,7 @@ function Invoker.Interrupt(myHero, enemy)
 
     if NPC.HasModifier(enemy, "modifier_teleporting") then
         -- cast cold snap to interrupt
-        if Invoker.CastColdSnap(myHero, enemy) then return true end    	
+        if Invoker.CastColdSnap(myHero, enemy) then return true end
 
         -- Using tornado to cancel TP has been moved to MapHack() part
     end
@@ -359,27 +367,32 @@ function Invoker.FixedPositionCombo(myHero, enemy)
 end
 
 -- define defensive actions
--- priority: tornado -> blast -> cold snap -> ice wall -> EMP
-function Invoker.Defend(myHero, source)
-    if not myHero or not source then return end
-    if not Utility.IsSuitableToCastSpell(myHero) then return end    
+-- priority: tornado -> blast -> cold snap -> ghost walk
+function Invoker.Defend(myHero, enemy)
+    if not myHero or not enemy then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
 
     -- 1. use tornado to defend if available
-    if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(source)) then return end
+    if NPC.IsEntityInRange(myHero, enemy, 350)
+    and Utility.CanCastSpellOn(enemy)
+    and Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return end
 
     -- 2. use deafening blast to defend if available
-    if Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(source)) then return end
+    if NPC.IsEntityInRange(myHero, enemy, 200)
+    and Utility.CanCastSpellOn(enemy)
+    and Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return end
 
     -- 3. use cold snap to defend if available
-    if Invoker.CastColdSnap(myHero, source) then return end
+    if NPC.IsEntityInRange(myHero, enemy, 350)
+    and Invoker.CastColdSnap(myHero, enemy) then return end
 
-    -- 4. use ice wall to defend if available
-    if Invoker.CastIceWall(myHero, source) then return end
+    -- 4. use ghost walk to escape
+    if NPC.IsEntityInRange(myHero, enemy, 200)
+    and Invoker.CastGhostWalk(myHero) then return end
 
-    -- 5. use EMP to defend if available
-    local mid = (Entity.GetAbsOrigin(myHero) + Entity.GetAbsOrigin(source)):Scaled(0.5)
-    if Invoker.CastEMP(myHero, mid) then return end
-
+    -- -- 5. use EMP to defend if available
+    -- local mid = (Entity.GetAbsOrigin(myHero) + Entity.GetAbsOrigin(enemy)):Scaled(0.5)
+    -- if Invoker.CastEMP(myHero, mid) then return end
 end
 
 -- return true if successfully cast, false otherwise
@@ -392,7 +405,7 @@ function Invoker.CastTornado(myHero, pos)
 
     local tornado = NPC.GetAbility(myHero, "invoker_tornado")
     if not tornado or not Ability.IsCastable(tornado, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
-    
+
     local W = NPC.GetAbility(myHero, "invoker_wex")
     if not W or not Ability.IsCastable(W, 0) then return false end
 
@@ -402,7 +415,7 @@ function Invoker.CastTornado(myHero, pos)
 
     local dir = pos - Entity.GetAbsOrigin(myHero)
     local dis = dir:Length()
-    
+
     if dis > travel_distance then return false end
     if dis > range then pos = Entity.GetAbsOrigin(myHero) + dir:Scaled(range/dis) end
 
@@ -450,7 +463,7 @@ function Invoker.CastColdSnap(myHero, target)
 
     local cold_snap = NPC.GetAbility(myHero, "invoker_cold_snap")
     if not cold_snap or not Ability.IsCastable(cold_snap, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
-        
+
     local range = 1000
     local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(target)):Length()
     if dis > range then return false end
@@ -464,40 +477,40 @@ function Invoker.CastColdSnap(myHero, target)
     return false
 end
 
--- return true if successfully cast, false otherwise
--- input: target, can be nil
-function Invoker.CastIceWall(myHero, target)
-    if not myHero then return false end
-    if not Utility.IsSuitableToCastSpell(myHero) then return false end
-
-    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
-    if not invoke then return false end
-
-    local ice_wall = NPC.GetAbility(myHero, "invoker_ice_wall")
-    if not ice_wall or not Ability.IsCastable(ice_wall, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
-    
-    local range = 300
-    if target and not NPC.IsEntityInRange(myHero, target, range) then return false end
-
-    local angel = 90
-    local dir = (Entity.GetAbsOrigin(target) - Entity.GetAbsOrigin(myHero)):Rotated(Angle(0,angel,0))
-    local pos = Entity.GetAbsOrigin(myHero) + dir
-
-    if Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER") then
-        
-        -- turn to direction first
-        if target then
-            Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION, nil, pos, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY , myHero)
-        end
-
-        Ability.CastNoTarget(ice_wall)
-        Invoker.ProtectSpell(myHero, ice_wall)
-        return true
-    end
-
-
-    return false
-end
+-- -- return true if successfully cast, false otherwise
+-- -- input: target, can be nil
+-- function Invoker.CastIceWall(myHero, target)
+--     if not myHero then return false end
+--     if not Utility.IsSuitableToCastSpell(myHero) then return false end
+--
+--     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+--     if not invoke then return false end
+--
+--     local ice_wall = NPC.GetAbility(myHero, "invoker_ice_wall")
+--     if not ice_wall or not Ability.IsCastable(ice_wall, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
+--
+--     local range = 300
+--     if target and not NPC.IsEntityInRange(myHero, target, range) then return false end
+--
+--     local angel = 90
+--     local dir = (Entity.GetAbsOrigin(target) - Entity.GetAbsOrigin(myHero)):Rotated(Angle(0,angel,0))
+--     local pos = Entity.GetAbsOrigin(myHero) + dir
+--
+--     if Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER") then
+--
+--         -- turn to direction first
+--         if target then
+--             Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION, nil, pos, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY , myHero)
+--         end
+--
+--         Ability.CastNoTarget(ice_wall)
+--         Invoker.ProtectSpell(myHero, ice_wall)
+--         return true
+--     end
+--
+--
+--     return false
+-- end
 
 -- return true if successfully cast, false otherwise
 function Invoker.CastEMP(myHero, pos)
@@ -513,7 +526,7 @@ function Invoker.CastEMP(myHero, pos)
     local range = 950
     local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
     if dis > range then return false end
-        
+
     if Invoker.HasInvoked(myHero, emp) or Invoker.PressKey(myHero, "WWWR") then
         Ability.CastPosition(emp, pos)
         Invoker.ProtectSpell(myHero, emp)
@@ -535,7 +548,7 @@ function Invoker.CastAlacrity(myHero, target)
 
     local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
     if not alacrity or not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
-        
+
     if Invoker.HasInvoked(myHero, alacrity) or Invoker.PressKey(myHero, "WWER") then
         Ability.CastTarget(alacrity, myHero)
         Invoker.ProtectSpell(myHero, alacrity)
@@ -555,7 +568,7 @@ function Invoker.CastForgeSpirit(myHero)
 
     local forge_spirit = NPC.GetAbility(myHero, "invoker_forge_spirit")
     if not forge_spirit or not Ability.IsCastable(forge_spirit, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
-        
+
     if Invoker.HasInvoked(myHero, forge_spirit) or Invoker.PressKey(myHero, "QEER") then
         Ability.CastNoTarget(forge_spirit)
         Invoker.ProtectSpell(myHero, forge_spirit)
@@ -572,7 +585,7 @@ function Invoker.CastSunStrike(myHero, pos)
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
-    
+
     local sun_strike = NPC.GetAbility(myHero, "invoker_sun_strike")
     if not sun_strike or not Ability.IsCastable(sun_strike, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
 
@@ -597,7 +610,7 @@ function Invoker.CastChaosMeteor(myHero, pos)
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
-    
+
     local meteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
     if not meteor or not Ability.IsCastable(meteor, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
 
@@ -621,7 +634,7 @@ function Invoker.CastGhostWalk(myHero)
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
-    
+
     local ghost_walk = NPC.GetAbility(myHero, "invoker_ghost_walk")
     if not ghost_walk or not Ability.IsCastable(ghost_walk, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
 
@@ -640,11 +653,47 @@ function Invoker.CastGhostWalk(myHero)
     return false
 end
 
+-- return true if successfully cast, false otherwise
+function Invoker.CastIceWall(myHero, enemy)
+    if not myHero then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    -- if Entity.IsTurning(myHero) then return false end
+
+    if not Utility.CanCastSpellOn(enemy)
+    and not NPC.HasModifier(enemy, "modifier_invoker_tornado")
+    and not NPC.HasModifier(enemy, "modifier_eul_cyclone")
+    and not NPC.HasModifier(enemy, "modifier_brewmaster_storm_cyclone")
+    then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+
+    local ice_wall = NPC.GetAbility(myHero, "invoker_ice_wall")
+    if not ice_wall or not Ability.IsCastable(ice_wall, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
+
+    local distance = 200
+    local dir = Entity.GetAbsRotation(myHero):GetForward():Normalized()
+    local mid_point = Entity.GetAbsOrigin(myHero) + dir:Scaled(distance)
+    local vec = Entity.GetAbsOrigin(enemy) - mid_point
+    local w_sqrt = dir:Dot2D(vec) * dir:Dot2D(vec)
+    local l_sqrt = vec:Length2DSqr() - w_sqrt
+
+    -- wall_length: 1120, wall_width: 105
+    if w_sqrt > 55 * 55 or l_sqrt > 560 * 560 then return false end
+
+    if Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER") then
+        Ability.CastNoTarget(ice_wall)
+        return true
+    end
+
+    return false
+end
+
 -- return current instances ("QWE", "QQQ", "EEE", etc)
 function Invoker.GetInstances(myHero)
     local modTable = NPC.GetModifiers(myHero)
     local Q_num, W_num, E_num = 0, 0, 0
-    
+
     for i, mod in ipairs(modTable) do
         if Modifier.GetName(mod) == "modifier_invoker_quas_instance" then
             Q_num = Q_num + 1
@@ -665,11 +714,11 @@ end
 
 -- return whether a spell has been invoked.
 function Invoker.HasInvoked(myHero, spell)
-    if not myHero or not spell then return false end 
-    
+    if not myHero or not spell then return false end
+
     local name = Ability.GetName(spell)
     local spell_1 = NPC.GetAbilityByIndex(myHero, 3)
-    local spell_2 = NPC.GetAbilityByIndex(myHero, 4)    
+    local spell_2 = NPC.GetAbilityByIndex(myHero, 4)
 
     if spell_2 and name == Ability.GetName(spell_2) then return true end
     if spell_1 and name == Ability.GetName(spell_1) then return true end
@@ -677,7 +726,7 @@ function Invoker.HasInvoked(myHero, spell)
     return false
 end
 
--- After casting a spell , move this spell to second slot 
+-- After casting a spell , move this spell to second slot
 -- so as to protect another spell
 function Invoker.ProtectSpell(myHero, spell)
 	-- temporarily disable spell protection to avoid miss switch
@@ -712,6 +761,7 @@ function Invoker.PressKey(myHero, keys)
     if not myHero or not keys then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
     if Invoker.GetInstances(myHero) == keys then return true end
+    if GameRules.GetGameTime() - timer <= gap then return false end
 
     local Q = NPC.GetAbility(myHero, "invoker_quas")
     local W = NPC.GetAbility(myHero, "invoker_wex")
@@ -719,7 +769,7 @@ function Invoker.PressKey(myHero, keys)
     local R = NPC.GetAbility(myHero, "invoker_invoke")
 
     for i = 1, #keys do
-        local key = keys:sub(i,i)   
+        local key = keys:sub(i,i)
         if key == "Q" and (not Q or not Ability.IsCastable(Q, 0)) then return false end
         if key == "W" and (not W or not Ability.IsCastable(W, 0)) then return false end
         if key == "E" and (not E or not Ability.IsCastable(E, 0)) then return false end
@@ -727,13 +777,14 @@ function Invoker.PressKey(myHero, keys)
     end
 
     for i = 1, #keys do
-        local key = keys:sub(i,i)    
+        local key = keys:sub(i,i)
         if key == "Q" then Ability.CastNoTarget(Q) end
         if key == "W" then Ability.CastNoTarget(W) end
         if key == "E" then Ability.CastNoTarget(E) end
         if key == "R" then Ability.CastNoTarget(R) end
     end
 
+    timer = GameRules.GetGameTime()
     return true
 end
 
