@@ -20,8 +20,8 @@ for k, v in pairs(SkyWrathHake.menuAbilities) do
 end
 
 SkyWrathHake.IsPopLinkenToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake", "Pop Linkens Items"}, "Enabled Pop Linken", "")
-SkyWrathHake.menuPopupLinkens = {cyclone = "Pop with Eul's Scepter of Divinity", atos = "Pop with Rod of Atos", hex = "Pop with Scythe of Vyse", forcestaff = "Pop with Force Staff", dagon = "Pop with Dagon", orchid = "Pop with Orchid", bloodthorn = "Pop with Bloodthorn", silence = "Pop with Ancient Seal", bolt = "Pop with Arcane Bolt", hurricane = "Pop with Hurricane Pike"}
-SkyWrathHake.PopLinkensOptionID = {cyclone, atos, hex, forcestaff, dagon, orchid, blood, silence, bolt, hurricane}
+SkyWrathHake.menuPopupLinkens = {nullifier = "Pop with Nullifier", cyclone = "Pop with Eul's Scepter of Divinity", atos = "Pop with Rod of Atos", hex = "Pop with Scythe of Vyse", forcestaff = "Pop with Force Staff", dagon = "Pop with Dagon", orchid = "Pop with Orchid", bloodthorn = "Pop with Bloodthorn", silence = "Pop with Ancient Seal", bolt = "Pop with Arcane Bolt", hurricane = "Pop with Hurricane Pike"}
+SkyWrathHake.PopLinkensOptionID = {nullifier, cyclone, atos, hex, forcestaff, dagon, orchid, blood, silence, bolt, hurricane}
 for k, v in pairs(SkyWrathHake.menuPopupLinkens) do
 	SkyWrathHake.PopLinkensOptionID[k] = Menu.AddOption({"Hero Specific", "SkyWrathHake", "Pop Linkens Items"}, SkyWrathHake.menuPopupLinkens[k], "")
 end
@@ -31,7 +31,7 @@ SkyWrathHake.IsBlinkToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, 
 SkyWrathHake.IsEZKChecked = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Check for EZ Kill", "Check if an enemy is ez-killable (low-mana costs and the fastest way to slay an enemy).")
 SkyWrathHake.IsDoubleUltiToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Double ulti mode", "Casts double ulti with aghanim scepter item/buff equiped.")
 
-SkyWrathHake.Modifiers = {[0] = "modifier_medusa_stone_gaze_stone", [1] = "modifier_winter_wyvern_winters_curse", [2] = "modifier_item_lotus_orb_active"}
+SkyWrathHake.Modifiers = {[0] = "modifier_medusa_stone_gaze_stone",[1] = "modifier_winter_wyvern_winters_curse",[2] = "modifier_item_lotus_orb_active"}
 SkyWrathHake.sleepers = {}
 
 SkyWrathHake.targetParticle = 0
@@ -58,9 +58,9 @@ function SkyWrathHake.OnUpdate()
 	if NPC.GetUnitName(SkyWrathHake.hero) ~= "npc_dota_hero_skywrath_mage" or not Entity.IsAlive(SkyWrathHake.hero) then
 		return
 	end
+
 	SkyWrathHake.player = Players.GetLocal()	
 	SkyWrathHake.enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(SkyWrathHake.hero), Enum.TeamType.TEAM_ENEMY)
-	 
 	if Menu.IsEnabled(SkyWrathHake.IsConcShotParticleEnabled) then	
 		SkyWrathHake.GetCshotEnemy()
 	end 
@@ -175,12 +175,12 @@ function SkyWrathHake.PrayToDog()
 		SkyWrathHake.PopLinkens(SkyWrathHake.forcestaff, SkyWrathHake.PopLinkensOptionID["forcestaff"])
 		SkyWrathHake.PopLinkens(SkyWrathHake.dagon, SkyWrathHake.PopLinkensOptionID["dagon"])
 		SkyWrathHake.PopLinkens(SkyWrathHake.bolt, SkyWrathHake.PopLinkensOptionID["bolt"])		
-		SkyWrathHake.PopLinkens(SkyWrathHake.hurricane, SkyWrathHake.PopLinkensOptionID["hurricane"])
 	end
 		
 	if NPC.IsLinkensProtected(SkyWrathHake.enemy) and Menu.IsEnabled(SkyWrathHake.IsPopLinkenToggled) and SkyWrathHake.SleepCheck(0.1, "poplinkensleep") then
 		SkyWrathHake.PopLinkens(SkyWrathHake.cyclone, SkyWrathHake.PopLinkensOptionID["cyclone"])
 		SkyWrathHake.PopLinkens(SkyWrathHake.forcestaff, SkyWrathHake.PopLinkensOptionID["forcestaff"])
+		SkyWrathHake.PopLinkens(SkyWrathHake.forcestaff, SkyWrathHake.PopLinkensOptionID["nullifier"])
 		SkyWrathHake.PopLinkens(SkyWrathHake.silence, SkyWrathHake.PopLinkensOptionID["silence"])
 		SkyWrathHake.PopLinkens(SkyWrathHake.bolt, SkyWrathHake.PopLinkensOptionID["bolt"])
 		SkyWrathHake.PopLinkens(SkyWrathHake.dagon, SkyWrathHake.PopLinkensOptionID["dagon"])
@@ -190,37 +190,45 @@ function SkyWrathHake.PrayToDog()
 		SkyWrathHake.PopLinkens(SkyWrathHake.blood, SkyWrathHake.PopLinkensOptionID["blood"])
 		SkyWrathHake.PopLinkens(SkyWrathHake.hurricane, SkyWrathHake.PopLinkensOptionID["hurricane"])
 		SkyWrathHake.Sleep(0.1, "poplinkensleep")	  
-	else
-		if not SkyWrathHake.SleepCheck(0.05, "combosleep") or NPC.IsLinkensProtected(SkyWrathHake.enemy) then return end		
-		if NPC.IsEntityInRange(SkyWrathHake.hero, SkyWrathHake.enemy, 700) then			                    
-			SkyWrathHake.isezkillable = SkyWrathHake.IsEzKillable()   
-		end
-		
+		return
+	end
+	if not SkyWrathHake.SleepCheck(0.05, "combosleep") or NPC.IsLinkensProtected(SkyWrathHake.enemy) then return end		
+	
+	if NPC.IsEntityInRange(SkyWrathHake.hero, SkyWrathHake.enemy, 700) then			                    
+		SkyWrathHake.isezkillable = SkyWrathHake.IsEzKillable()   
+	end
 
-		local soulring = NPC.GetItem(SkyWrathHake.hero, "item_soul_ring", true)
-		if soulring and Menu.IsEnabled(SkyWrathHake.IsSRToggled) and Ability.IsReady(soulring) and Ability.IsCastable(soulring, Ability.GetManaCost(soulring)) then
-			Ability.CastNoTarget(soulring)
-		end
+	local soulring = NPC.GetItem(SkyWrathHake.hero, "item_soul_ring", true)
+	if soulring and Menu.IsEnabled(SkyWrathHake.IsSRToggled) and Ability.IsReady(soulring) and Ability.IsCastable(soulring, Ability.GetManaCost(soulring)) then
+		Ability.CastNoTarget(soulring)
+	end
 
-		SkyWrathHake.UseBlink()
+	SkyWrathHake.UseBlink()
+	SkyWrathHake.AeonDispelling()
 
-		if not NPC.HasState(SkyWrathHake.enemy, Enum.ModifierState.MODIFIER_STATE_HEXED) and not NPC.HasState(SkyWrathHake.enemy, Enum.ModifierState.MODIFIER_STATE_STUNNED) then
-			SkyWrathHake.UseItem(SkyWrathHake.hex, SkyWrathHake.ItemsOptionID["hex"])
-		end
-		
-		SkyWrathHake.CastAbility(SkyWrathHake.slow, SkyWrathHake.AbilitiesOptionID["slow"])
-		SkyWrathHake.UseItem(SkyWrathHake.atos, SkyWrathHake.ItemsOptionID["atos"])
-		SkyWrathHake.CastAbility(SkyWrathHake.silence, SkyWrathHake.AbilitiesOptionID["silence"])
-		SkyWrathHake.UseItem(SkyWrathHake.veil, SkyWrathHake.ItemsOptionID["veil"])
-		SkyWrathHake.UseItem(SkyWrathHake.eblade, SkyWrathHake.ItemsOptionID["eblade"])
-		SkyWrathHake.CastAbility(SkyWrathHake.bolt, SkyWrathHake.AbilitiesOptionID["bolt"])
-		SkyWrathHake.CastAbility(SkyWrathHake.ulti, SkyWrathHake.AbilitiesOptionID["ulti"])				
-		SkyWrathHake.UseItem(SkyWrathHake.orchid, SkyWrathHake.ItemsOptionID["orchid"])
-		SkyWrathHake.UseItem(SkyWrathHake.dagon, SkyWrathHake.ItemsOptionID["dagon"])
-		SkyWrathHake.UseItem(SkyWrathHake.blood, SkyWrathHake.ItemsOptionID["blood"])
-		SkyWrathHake.UseItem(SkyWrathHake.shiva, SkyWrathHake.ItemsOptionID["shiva"])		
-		SkyWrathHake.Sleep(0.05, "combosleep")		
+	if not NPC.HasState(SkyWrathHake.enemy, Enum.ModifierState.MODIFIER_STATE_HEXED) and not NPC.HasState(SkyWrathHake.enemy, Enum.ModifierState.MODIFIER_STATE_STUNNED) then
+		SkyWrathHake.UseItem(SkyWrathHake.hex, SkyWrathHake.ItemsOptionID["hex"])
 	end	
+		
+	SkyWrathHake.CastAbility(SkyWrathHake.slow, SkyWrathHake.AbilitiesOptionID["slow"])
+	SkyWrathHake.UseItem(SkyWrathHake.atos, SkyWrathHake.ItemsOptionID["atos"])
+	SkyWrathHake.CastAbility(SkyWrathHake.silence, SkyWrathHake.AbilitiesOptionID["silence"])
+	SkyWrathHake.UseItem(SkyWrathHake.veil, SkyWrathHake.ItemsOptionID["veil"])
+	SkyWrathHake.UseItem(SkyWrathHake.eblade, SkyWrathHake.ItemsOptionID["eblade"])
+	SkyWrathHake.CastAbility(SkyWrathHake.bolt, SkyWrathHake.AbilitiesOptionID["bolt"])
+	SkyWrathHake.CastAbility(SkyWrathHake.ulti, SkyWrathHake.AbilitiesOptionID["ulti"])				
+	SkyWrathHake.UseItem(SkyWrathHake.orchid, SkyWrathHake.ItemsOptionID["orchid"])
+	SkyWrathHake.UseItem(SkyWrathHake.dagon, SkyWrathHake.ItemsOptionID["dagon"])
+	SkyWrathHake.UseItem(SkyWrathHake.blood, SkyWrathHake.ItemsOptionID["blood"])
+	SkyWrathHake.UseItem(SkyWrathHake.shiva, SkyWrathHake.ItemsOptionID["shiva"])		
+	SkyWrathHake.Sleep(0.05, "combosleep")		
+end
+
+function SkyWrathHake.AeonDispelling()
+	local aeonDiskBuff = NPC.GetModifier(SkyWrathHake.enemy, "modifier_item_combo_breaker_buff")
+	if(Entity.GetHealth(SkyWrathHake.enemy) / Entity.GetMaxHealth(SkyWrathHake.enemy) < 0.85 or aeonDiskBuff) and SkyWrathHake.nullifier and Ability.IsReady(SkyWrathHake.nullifier) and Ability.IsCastable(SkyWrathHake.nullifier, Ability.GetManaCost(SkyWrathHake.nullifier)) then
+		Ability.CastTarget(SkyWrathHake.nullifier, SkyWrathHake.enemy)
+	end
 end
 
 function SkyWrathHake.ArcaneHarras()
@@ -294,6 +302,7 @@ end
 function SkyWrathHake.GetItems()
 	if not SkyWrathHake.SleepCheck(1.0, "GetItems") then return end
 	SkyWrathHake.atos = NPC.GetItem(SkyWrathHake.hero, "item_rod_of_atos", true)
+	SkyWrathHake.nullifier = NPC.GetItem(SkyWrathHake.hero, "item_nullifier", true)
 	SkyWrathHake.hex = NPC.GetItem(SkyWrathHake.hero, "item_sheepstick", true)
 	SkyWrathHake.veil = NPC.GetItem(SkyWrathHake.hero, "item_veil_of_discord", true)
 	SkyWrathHake.eblade = NPC.GetItem(SkyWrathHake.hero, "item_ethereal_blade", true)
@@ -425,7 +434,7 @@ function SkyWrathHake.IsFullDebuffed()
 end
 
 function SkyWrathHake.SpellDamageTaken(magicresist)
-	local amplf =(1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy) / 100) *(1 + magicresist / 100)
+	local amplf = (1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy) / 100) * (1 + magicresist / 100)
 	return amplf
 end
 
@@ -434,10 +443,15 @@ function SkyWrathHake.IsEzKillable()
 	if not SkyWrathHake.SleepCheck(3.0, "ezkillcheck") then return true end
 	local modifamplifiers = SkyWrathHake.GetAmplifiers(SkyWrathHake.hero, SkyWrathHake.enemy)
 	local totalDamage = 0
-	local veilAmp = 0
+	local veilAmp = 0	
 	local silenceAmp = 0
+	local talentAmp = NPC.GetAbilityByIndex(SkyWrathHake.hero, 11)
+	if Ability.GetLevel(talentAmp) > 0 then
+		silenceAmp = silenceAmp + 0.15
+	end
 	local ebladeAmp = 0
 	local reqMana = 0
+	local perkAmp = Hero.GetIntellectTotal(SkyWrathHake.hero) / 100 * 0.066891
 
 	if SkyWrathHake.veil and Ability.IsReady(SkyWrathHake.veil) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["veil"]) then
 		veilAmp = 0.25
@@ -445,45 +459,41 @@ function SkyWrathHake.IsEzKillable()
 	end	
 
 	if SkyWrathHake.silence and Ability.IsReady(SkyWrathHake.silence) and Menu.IsEnabled(SkyWrathHake.AbilitiesOptionID["silence"]) then
-		silenceAmp =(Ability.GetLevel(SkyWrathHake.silence) * 5 + 30) / 100
+		silenceAmp = silenceAmp + (Ability.GetLevel(SkyWrathHake.silence) * 5 + 30) / 100
 		reqMana = reqMana + Ability.GetManaCost(SkyWrathHake.silence)
 	end
 
 	if SkyWrathHake.eblade and Ability.IsReady(SkyWrathHake.eblade) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["eblade"]) then
 		local ebladedamage = Hero.GetIntellectTotal(SkyWrathHake.hero) * 2 + 75
-		totalDamage = totalDamage +(1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy)) *(1 + silenceAmp) *(1 + veilAmp) *(1 + modifamplifiers) *(ebladedamage + ebladedamage *(Hero.GetIntellectTotal(SkyWrathHake.hero) / 14 / 100))
+		totalDamage = totalDamage + (1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy)) * (1 + silenceAmp) * (1 + veilAmp) * (1 + modifamplifiers) * (ebladedamage + ebladedamage * perkAmp)
 		ebladeAmp = 0.4
 		reqMana = reqMana + Ability.GetManaCost(SkyWrathHake.eblade)
 	end	
 
-	if SkyWrathHake.dagon and Ability.IsReady(SkyWrathHake.dagon) and Menu.IsEnabled(SkyWrathHake.ItemsOptionID["dagon"]) then
+	if SkyWrathHake.dagon and Ability.IsReady(SkyWrathHake.dagon) then
 		local dagondmg = Ability.GetLevelSpecialValueFor(SkyWrathHake.dagon, "damage")
-		totalDamage = totalDamage +(1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy)) *(1 + silenceAmp) *(1 + veilAmp) *(1 + ebladeAmp) *(1 + modifamplifiers) *(dagondmg + dagondmg *(Hero.GetIntellectTotal(SkyWrathHake.hero) / 14 / 100))
+		totalDamage = totalDamage + (1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy)) * (1 + silenceAmp) * (1 + veilAmp) * (1 + ebladeAmp) * (1 + modifamplifiers) * (dagondmg + dagondmg * perkAmp)
 		reqMana = reqMana + Ability.GetManaCost(SkyWrathHake.dagon)
 	end
                 
 	if SkyWrathHake.bolt and Ability.IsReady(SkyWrathHake.bolt) and Menu.IsEnabled(SkyWrathHake.AbilitiesOptionID["bolt"]) then
 		local boldamage = Ability.GetLevelSpecialValueFor(SkyWrathHake.bolt, "bolt_damage") + Hero.GetIntellectTotal(SkyWrathHake.hero) * 1.6
 		if Ability.GetLevel(SkyWrathHake.bolt) < 3 then
-			totalDamage = totalDamage +(1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy)) *(1 + silenceAmp) *(1 + veilAmp) *(1 + ebladeAmp) *(1 + modifamplifiers) *(boldamage + boldamage *(Hero.GetIntellectTotal(SkyWrathHake.hero) / 14 / 100))
+			totalDamage = totalDamage + (1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy)) * (1 + silenceAmp) * (1 + veilAmp) * (1 + ebladeAmp) * (1 + modifamplifiers) * (boldamage + boldamage * perkAmp)
 			reqMana = reqMana + Ability.GetManaCost(SkyWrathHake.bolt)                    
 		else
-			totalDamage = totalDamage +(1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy)) *(1 + silenceAmp) *(1 + veilAmp) *(1 + ebladeAmp) *(1 + modifamplifiers) *(boldamage + boldamage *(Hero.GetIntellectTotal(SkyWrathHake.hero) / 14 / 100)) * 2
+			totalDamage = totalDamage + (1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy)) * (1 + silenceAmp) * (1 + veilAmp) * (1 + ebladeAmp) * (1 + modifamplifiers) * (boldamage + boldamage * perkAmp) * 2
 			reqMana = reqMana + Ability.GetManaCost(SkyWrathHake.bolt) * 2
 		end
 	end
 
 	if SkyWrathHake.slow and Ability.IsReady(SkyWrathHake.slow) and Menu.IsEnabled(SkyWrathHake.AbilitiesOptionID["slow"]) then
 		local slowdamage = Ability.GetLevelSpecialValueFor(SkyWrathHake.slow, "damage")
-		totalDamage = totalDamage +(1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy)) *(1 + silenceAmp) *(1 + veilAmp) *(1 + ebladeAmp) *(1 + modifamplifiers) *(slowdamage + slowdamage *(Hero.GetIntellectTotal(SkyWrathHake.hero) / 14 / 100))
+		totalDamage = totalDamage + (1 - NPC.GetMagicalArmorValue(SkyWrathHake.enemy)) * (1 + silenceAmp) * (1 + veilAmp) * (1 + ebladeAmp) * (1 + modifamplifiers) * (slowdamage + slowdamage * perkAmp)
 		reqMana = reqMana + Ability.GetManaCost(SkyWrathHake.slow)
-	end
-                
---	if not NPC.HasState(SkyWrathHake.hero, Enum.ModifierState.MODIFIER_STATE_DISARMED) and not NPC.HasState(SkyWrathHake.enemy, Enum.ModifierState.MODIFIER_STATE_ATTACK_IMMUNE) then
---		totalDamage = totalDamage + NPC.GetTrueDamage(SkyWrathHake.hero) * NPC.GetArmorDamageMultiplier(SkyWrathHake.enemy) * 2
---	end
-	
-	if reqMana < NPC.GetMana(SkyWrathHake.hero) and Entity.GetHealth(SkyWrathHake.enemy) < totalDamage + 70 then
+	end               
+
+	if reqMana < NPC.GetMana(SkyWrathHake.hero) and Entity.GetHealth(SkyWrathHake.enemy) < totalDamage + 70 then		
 		SkyWrathHake.Sleep(3.0, "ezkillcheck")		
 		return true
 	else
@@ -498,8 +508,8 @@ function SkyWrathHake.InFront(delay)
 		adjusment = 300
 	end
 	if vec then		
-		local x = SkyWrathHake.enemyPos:GetX() + vec:GetX() * (delay / 1000) * adjusment
-		local y = SkyWrathHake.enemyPos:GetY() + vec:GetY() * (delay / 1000) * adjusment
+		local x = SkyWrathHake.enemyPos:GetX() + vec:GetX() *(delay / 1000) * adjusment
+		local y = SkyWrathHake.enemyPos:GetY() + vec:GetY() *(delay / 1000) * adjusment
 		return Vector(x, y, 0)
 	end
 end
