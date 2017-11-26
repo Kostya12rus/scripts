@@ -56,9 +56,9 @@ function MeepoHazk.OnDraw()
 		end
 	end
 	if NeedFarm then 
-		Renderer.DrawText(MeepoHazk.FontSkill, 800, 120, "Фармим", 1)
+		Renderer.DrawText(MeepoHazk.FontSkill, 800, 120, "Бот включен", 1)
 	else
-		Renderer.DrawText(MeepoHazk.FontSkill, 800, 120, "Нет управления", 1)
+		Renderer.DrawText(MeepoHazk.FontSkill, 800, 120, "Бот выключен", 1)
 	end
 end
 
@@ -68,13 +68,8 @@ function MeepoHazk.OnUpdate()
 	if not myHero then return end  
 	if Menu.IsKeyDownOnce(MeepoHazk.optionKey) then
 		NeedFarm = not NeedFarm
-		-- if NeedFarm then 
-			-- NeedFarm = false
-		-- else
-			-- NeedFarm = true
-		-- end
 	end
-	
+	if not Entity.IsAlive(myHero) then return end
 	if not NeedFarm then return end
 	if JangleSpots == nil then
 		if Entity.GetTeamNum(myHero) ~= 3 then
@@ -102,7 +97,7 @@ function MeepoHazk.OnUpdate()
 		elseif gametime < 60 then
 		end
 	end
-	if (GameRules.GetGameTime()-GameRules.GetGameStartTime()) < 60 and GameRules.GetGameState() ~= 5 then return end
+	if (GameRules.GetGameTime()-GameRules.GetGameStartTime()) < 60 or GameRules.GetGameState() ~= 5 then return end
 	for i=1,Heroes.Count() do
 		local hero = Heroes.Get(i)
 		if Entity.IsHero(hero) and Entity.IsAlive(hero) and not NPC.IsIllusion(hero) and Entity.IsSameTeam(hero,myHero) and hero ~= myHero then
@@ -120,10 +115,9 @@ function MeepoHazk.OnUpdate()
 		end
 	end
 	ycord = 100
-	if not Entity.IsAlive(myHero) then return end
-	
 	if MeepoTable then
 		for i,key in pairs(MeepoTable) do
+		if not NPC.IsChannellingAbility(MeepoTable[i].hero) then
 			local poof = NPC.GetAbility(MeepoTable[i].hero,"meepo_poof")
 			local HealthProc = Entity.GetHealth(MeepoTable[i].hero)/Entity.GetMaxHealth(MeepoTable[i].hero)*100
 			if HealthProc < 30 then
@@ -139,27 +133,41 @@ function MeepoHazk.OnUpdate()
 					MeepoTable[i].farmnum = 0
 				end
 				local Distance = (Entity.GetAbsOrigin(MeepoTable[i].hero):Distance(MeepoHazk.NeedFountan()):Length2D())
-				if Distance > 2000 then
-					local travel_boots = NPC.GetItem(MeepoTable[i].hero, "item_travel_boots", true)
-					local travel_boots_2 = NPC.GetItem(MeepoTable[i].hero, "item_travel_boots_2", true)
-					local tpBoots = nil
-					if travel_boots then
-						tpBoots = travel_boots
-					end
-					if travel_boots_2 then
-						tpBoots = travel_boots_2
-					end 
-					if Ability.IsReady(tpBoots) and Ability.IsCastable(tpBoots, NPC.GetMana(MeepoTable[i].hero)) and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(tpBoots)	then
-						Ability.CastPosition(tpBoots, MeepoHazk.NeedFountan())
+				if Distance > 2000 and not NPC.IsChannellingAbility(MeepoTable[i].hero)  then
+					if MeepoHazk.PoofToFountanMeepo(MeepoTable[i].hero,1000) and Ability.IsCastable(poof, NPC.GetMana(MeepoTable[i].hero)) and Ability.IsReady(poof) and MeepoTable[i].poofpause <= GameRules.GetGameTime() and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(poof) then
+						MeepoHazk.NeedPoof(MeepoTable[i].hero,MeepoHazk.PoofToFountanMeepo(MeepoTable[i].hero,1000),poof)
+						MeepoTable[i].poofpause = GameRules.GetGameTime() + 2
+					else					
+						local travel_boots = NPC.GetItem(MeepoTable[i].hero, "item_travel_boots", true)
+						local travel_boots_2 = NPC.GetItem(MeepoTable[i].hero, "item_travel_boots_2", true)
+						local tpBoots = nil
+						if travel_boots then
+							tpBoots = travel_boots
+						end
+						if travel_boots_2 then
+							tpBoots = travel_boots_2
+						end 
+						if tpBoots then
+							if Ability.IsReady(tpBoots) and Ability.IsCastable(tpBoots, NPC.GetMana(MeepoTable[i].hero)) and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(tpBoots) then
+								Ability.CastPosition(tpBoots, MeepoHazk.NeedFountan())
+							end
+						end
 					end
 				end
+			end
+			if MeepoHazk.FindEnemy(MeepoTable[i].hero,2000) then
+				MeepoTable[i].farmnum = 10				
+				if not NPC.IsRunning(MeepoTable[i].hero) and MeepoTable[i].poofpause - 0.5 < GameRules.GetGameTime() then
+					MeepoHazk.GoToPos(MeepoTable[i].hero,MeepoHazk.NeedFountan())
+				end
+				MeepoTable[i].free = false
 			end
 			if MeepoTable[i].farmnum >= 0 and MeepoTable[i].farmnum <= #JangleSpots then
 				if MeepoTable[i].farmnum ~= 0 then
 					if MeepoHazk.IsInSpot(MeepoTable[i].hero, MeepoTable[i].farmnum, 300) then
 						if MeepoHazk.FindNpc(Entity.GetAbsOrigin(MeepoTable[i].hero),400) then
 							MeepoTable[i].free = false
-							if Ability.IsCastable(poof, NPC.GetMana(MeepoTable[i].hero)) and Ability.IsReady(poof) and MeepoTable[i].poofpause <= GameRules.GetGameTime() then
+							if Ability.IsCastable(poof, NPC.GetMana(MeepoTable[i].hero)) and Ability.IsReady(poof) and MeepoTable[i].poofpause <= GameRules.GetGameTime() and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(poof)*2 then
 								MeepoHazk.NeedPoof(MeepoTable[i].hero,MeepoTable[i].hero,poof)
 								MeepoTable[i].poofpause = GameRules.GetGameTime() + 2
 							else
@@ -179,9 +187,9 @@ function MeepoHazk.OnUpdate()
 						end
 						local Distance = (Entity.GetAbsOrigin(MeepoTable[i].hero):Distance(JangleSpots[MeepoTable[i].farmnum].pos):Length2D())
 						if Distance > 1000 then
-							if MeepoHazk.PoofToMeepo(MeepoTable[i].hero,JangleSpots[MeepoTable[i].farmnum].pos) then
-								if Ability.IsCastable(poof, NPC.GetMana(MeepoTable[i].hero)) and Ability.IsReady(poof) and MeepoTable[i].poofpause <= GameRules.GetGameTime() then
-									MeepoHazk.NeedPoof(MeepoTable[i].hero,MeepoHazk.PoofToMeepo(MeepoTable[i].hero,JangleSpots[MeepoTable[i].farmnum].pos),poof)
+							if MeepoHazk.PoofToMeepo(MeepoTable[i].hero,JangleSpots[MeepoTable[i].farmnum].pos,1500) then
+								if Ability.IsCastable(poof, NPC.GetMana(MeepoTable[i].hero)) and Ability.IsReady(poof) and MeepoTable[i].poofpause <= GameRules.GetGameTime() and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(poof)*2 then
+									MeepoHazk.NeedPoof(MeepoTable[i].hero,MeepoHazk.PoofToMeepo(MeepoTable[i].hero,JangleSpots[MeepoTable[i].farmnum].pos,1500),poof)
 									MeepoTable[i].poofpause = GameRules.GetGameTime() + 2
 								end
 							end
@@ -191,27 +199,40 @@ function MeepoHazk.OnUpdate()
 				
 				if MeepoTable[i].free then
 					MeepoTable[i].farmnum = MeepoHazk.NeedSpot()
-					MeepoHazk.GoToPos(MeepoTable[i].hero,JangleSpots[MeepoTable[i].farmnum].pos)
+					MeepoHazk.GoToPos(MeepoTable[i].hero, JangleSpots[MeepoTable[i].farmnum].pos)
 					MeepoTable[i].free = false
 				end
 			end
 		end
+		end
 	end
 end
 
-function MeepoHazk.PoofToMeepo(Hero,NeedPos)
+function MeepoHazk.FindEnemy(hero,distance)
+	for i = 1, NPCs.Count() do
+		local unitNA = NPCs.Get(i)
+		if Entity.IsHero(unitNA) and Entity.IsAlive(unitNA) and not NPC.IsIllusion(unitNA) and not Entity.IsSameTeam(unitNA,hero) and not Entity.IsDormant(unitNA) then
+			local HeroDistance = (Entity.GetAbsOrigin(hero):Distance(Entity.GetAbsOrigin(unitNA)):Length2D())
+			if HeroDistance <= distance then
+				return true
+			end
+		end
+	end	
+	return false
+end
+
+function MeepoHazk.PoofToMeepo(Hero,NeedPos,distancemin)
 	local MinDistanse = (Entity.GetAbsOrigin(Hero):Distance(NeedPos):Length2D())
 	local MinHero = nil
 	local LocalHeroDistance = (Entity.GetAbsOrigin(Heroes.GetLocal()):Distance(NeedPos):Length2D())
-	if LocalHeroDistance + 500 <= MinDistanse then
+	if LocalHeroDistance + distancemin <= MinDistanse then
 		MinHero = Heroes.GetLocal()
 		MinDistanse = LocalHeroDistance
 	end
-	
 	for i,key in pairs(MeepoTable) do
 		if Hero ~= MeepoTable[i].hero then
 			local distanse = (Entity.GetAbsOrigin(MeepoTable[i].hero):Distance(NeedPos):Length2D())
-			if distanse + 500 <= MinDistanse then
+			if distanse + distancemin <= MinDistanse then
 				MinHero = MeepoTable[i].hero
 				MinDistanse = distanse
 			end
@@ -219,6 +240,27 @@ function MeepoHazk.PoofToMeepo(Hero,NeedPos)
 	end
 	return MinHero
 end
+
+function MeepoHazk.PoofToFountanMeepo(hero,distancemin)
+	local MinDistanse = (Entity.GetAbsOrigin(hero):Distance(MeepoHazk.NeedFountan()):Length2D())
+	local MinHero = nil
+	local LocalHeroDistance = (Entity.GetAbsOrigin(Heroes.GetLocal()):Distance(MeepoHazk.NeedFountan()):Length2D())
+	if LocalHeroDistance <= distancemin then
+		MinHero = Heroes.GetLocal()
+		MinDistanse = LocalHeroDistance
+	end
+	for i,key in pairs(MeepoTable) do
+		if hero ~= MeepoTable[i].hero then
+			local distanse = (Entity.GetAbsOrigin(MeepoTable[i].hero):Distance(MeepoHazk.NeedFountan()):Length2D())
+			if distanse <= MinDistanse and distanse <= distancemin then
+				MinHero = MeepoTable[i].hero
+				MinDistanse = distanse
+			end
+		end
+	end
+	return MinHero
+end
+
 function MeepoHazk.NeedFountan()
 	for i = 1, NPCs.Count() do
 		local unitNA = NPCs.Get(i)
@@ -228,6 +270,7 @@ function MeepoHazk.NeedFountan()
 	end	
 	return nil
 end
+
 function MeepoHazk.FindNpc(pos,NeedDistance)
 	for i = 1, NPCs.Count() do
 		local unitNA = NPCs.Get(i)
@@ -240,6 +283,7 @@ function MeepoHazk.FindNpc(pos,NeedDistance)
 	end	
 	return nil
 end
+
 function MeepoHazk.IsInSpot(Hero,Spot,NeedDistance)
 	if Spot == 0 or Spot == nil then return false end
 	if Spot < 1 or Spot > #JangleSpots then return false end
@@ -250,6 +294,7 @@ function MeepoHazk.IsInSpot(Hero,Spot,NeedDistance)
 	end
 	return false
 end
+
 function MeepoHazk.NeedSpot()
 	local FreeSpots = {}
 	local coint = 0
@@ -263,6 +308,7 @@ function MeepoHazk.NeedSpot()
 	local intrandom = math.random(1,#FreeSpots)
 	return FreeSpots[intrandom]
 end
+
 function MeepoHazk.AttackNpc(hero,target)
 	Player.AttackTarget(Players.GetLocal(),hero,target)
 end
