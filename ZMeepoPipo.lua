@@ -117,9 +117,17 @@ function MeepoHazk.OnUpdate()
 	ycord = 100
 	if MeepoTable then
 		for i,key in pairs(MeepoTable) do
-		if not NPC.IsChannellingAbility(MeepoTable[i].hero) then
 			local poof = NPC.GetAbility(MeepoTable[i].hero,"meepo_poof")
-			local HealthProc = Entity.GetHealth(MeepoTable[i].hero)/Entity.GetMaxHealth(MeepoTable[i].hero)*100
+			local HealthProc = Entity.GetHealth(MeepoTable[i].hero)/Entity.GetMaxHealth(MeepoTable[i].hero)*100					
+			local travel_boots = NPC.GetItem(MeepoTable[i].hero, "item_travel_boots", true)
+			local travel_boots_2 = NPC.GetItem(MeepoTable[i].hero, "item_travel_boots_2", true)
+			local tpBoots = nil
+			if travel_boots then
+				tpBoots = travel_boots
+			end
+			if travel_boots_2 then
+				tpBoots = travel_boots_2
+			end 
 			if HealthProc < 30 then
 				MeepoTable[i].farmnum = 10				
 				if not NPC.IsRunning(MeepoTable[i].hero) and MeepoTable[i].poofpause - 0.5 < GameRules.GetGameTime() then
@@ -128,26 +136,19 @@ function MeepoHazk.OnUpdate()
 				MeepoTable[i].free = false
 			end
 			if MeepoTable[i].farmnum == 10 then
-				if HealthProc > 90 then
-					MeepoTable[i].free = true
-					MeepoTable[i].farmnum = 0
+				if not MeepoHazk.FindEnemy(MeepoTable[i].hero,2000) then
+					if HealthProc > 90 then
+						MeepoTable[i].free = true
+						MeepoTable[i].farmnum = 0
+					end
 				end
 				local Distance = (Entity.GetAbsOrigin(MeepoTable[i].hero):Distance(MeepoHazk.NeedFountan()):Length2D())
-				if Distance > 2000 and not NPC.IsChannellingAbility(MeepoTable[i].hero)  then
+				if Distance > 2000 and not NPC.IsChannellingAbility(MeepoTable[i].hero) then
 					if MeepoHazk.PoofToFountanMeepo(MeepoTable[i].hero,1000) and Ability.IsCastable(poof, NPC.GetMana(MeepoTable[i].hero)) and Ability.IsReady(poof) and MeepoTable[i].poofpause <= GameRules.GetGameTime() and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(poof) then
 						MeepoHazk.NeedPoof(MeepoTable[i].hero,MeepoHazk.PoofToFountanMeepo(MeepoTable[i].hero,1000),poof)
 						MeepoTable[i].poofpause = GameRules.GetGameTime() + 2
-					else					
-						local travel_boots = NPC.GetItem(MeepoTable[i].hero, "item_travel_boots", true)
-						local travel_boots_2 = NPC.GetItem(MeepoTable[i].hero, "item_travel_boots_2", true)
-						local tpBoots = nil
-						if travel_boots then
-							tpBoots = travel_boots
-						end
-						if travel_boots_2 then
-							tpBoots = travel_boots_2
-						end 
-						if tpBoots then
+					else
+						if tpBoots and MeepoTable[i].poofpause - 0.4 <= GameRules.GetGameTime() then
 							if Ability.IsReady(tpBoots) and Ability.IsCastable(tpBoots, NPC.GetMana(MeepoTable[i].hero)) and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(tpBoots) then
 								Ability.CastPosition(tpBoots, MeepoHazk.NeedFountan())
 							end
@@ -203,7 +204,6 @@ function MeepoHazk.OnUpdate()
 					MeepoTable[i].free = false
 				end
 			end
-		end
 		end
 	end
 end
