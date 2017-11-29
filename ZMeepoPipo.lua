@@ -117,8 +117,10 @@ function MeepoHazk.OnUpdate()
 	ycord = 100
 	if MeepoTable then
 		for i,key in pairs(MeepoTable) do
+			if not Entity.IsAlive(MeepoTable[i].hero) then MeepoTable[i] = nil end
 			local poof = NPC.GetAbility(MeepoTable[i].hero,"meepo_poof")
-			local HealthProc = Entity.GetHealth(MeepoTable[i].hero)/Entity.GetMaxHealth(MeepoTable[i].hero)*100					
+			local HealthProc = Entity.GetHealth(MeepoTable[i].hero)/Entity.GetMaxHealth(MeepoTable[i].hero)*100	
+			local ManaProc = NPC.GetMana(MeepoTable[i].hero)/NPC.GetMaxMana(MeepoTable[i].hero)*100			
 			local travel_boots = NPC.GetItem(MeepoTable[i].hero, "item_travel_boots", true)
 			local travel_boots_2 = NPC.GetItem(MeepoTable[i].hero, "item_travel_boots_2", true)
 			local tpBoots = nil
@@ -130,27 +132,28 @@ function MeepoHazk.OnUpdate()
 			end 
 			if HealthProc < 30 then
 				MeepoTable[i].farmnum = 10				
-				if not NPC.IsRunning(MeepoTable[i].hero) and MeepoTable[i].poofpause - 0.5 < GameRules.GetGameTime() then
+				if not NPC.IsRunning(MeepoTable[i].hero) and MeepoTable[i].poofpause < GameRules.GetGameTime() then
 					MeepoHazk.GoToPos(MeepoTable[i].hero,MeepoHazk.NeedFountan())
 				end
 				MeepoTable[i].free = false
 			end
 			if MeepoTable[i].farmnum == 10 then
 				if not MeepoHazk.FindEnemy(MeepoTable[i].hero,2000) then
-					if HealthProc > 90 then
+					if HealthProc > 90 and ManaProc > 90 then
 						MeepoTable[i].free = true
 						MeepoTable[i].farmnum = 0
 					end
 				end
 				local Distance = (Entity.GetAbsOrigin(MeepoTable[i].hero):Distance(MeepoHazk.NeedFountan()):Length2D())
-				if Distance > 2000 and not NPC.IsChannellingAbility(MeepoTable[i].hero) then
-					if MeepoHazk.PoofToFountanMeepo(MeepoTable[i].hero,1000) and Ability.IsCastable(poof, NPC.GetMana(MeepoTable[i].hero)) and Ability.IsReady(poof) and MeepoTable[i].poofpause <= GameRules.GetGameTime() and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(poof) then
+				if Distance > 2000 and MeepoTable[i].poofpause <= GameRules.GetGameTime() then
+					if MeepoHazk.PoofToFountanMeepo(MeepoTable[i].hero,1000) and MeepoHazk.IsPoofReady(MeepoTable[i].hero,MeepoTable[i].poofpause,true) then
 						MeepoHazk.NeedPoof(MeepoTable[i].hero,MeepoHazk.PoofToFountanMeepo(MeepoTable[i].hero,1000),poof)
-						MeepoTable[i].poofpause = GameRules.GetGameTime() + 2
+						MeepoTable[i].poofpause = GameRules.GetGameTime() + 1.6
 					else
-						if tpBoots and MeepoTable[i].poofpause - 0.4 <= GameRules.GetGameTime() then
+						if tpBoots and MeepoTable[i].poofpause <= GameRules.GetGameTime() then
 							if Ability.IsReady(tpBoots) and Ability.IsCastable(tpBoots, NPC.GetMana(MeepoTable[i].hero)) and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(tpBoots) then
 								Ability.CastPosition(tpBoots, MeepoHazk.NeedFountan())
+								MeepoTable[i].poofpause = GameRules.GetGameTime() + 3.1
 							end
 						end
 					end
@@ -158,7 +161,7 @@ function MeepoHazk.OnUpdate()
 			end
 			if MeepoHazk.FindEnemy(MeepoTable[i].hero,2000) then
 				MeepoTable[i].farmnum = 10				
-				if not NPC.IsRunning(MeepoTable[i].hero) and MeepoTable[i].poofpause - 0.5 < GameRules.GetGameTime() then
+				if not NPC.IsRunning(MeepoTable[i].hero) and MeepoTable[i].poofpause < GameRules.GetGameTime() then
 					MeepoHazk.GoToPos(MeepoTable[i].hero,MeepoHazk.NeedFountan())
 				end
 				MeepoTable[i].free = false
@@ -168,11 +171,11 @@ function MeepoHazk.OnUpdate()
 					if MeepoHazk.IsInSpot(MeepoTable[i].hero, MeepoTable[i].farmnum, 300) then
 						if MeepoHazk.FindNpc(Entity.GetAbsOrigin(MeepoTable[i].hero),400) then
 							MeepoTable[i].free = false
-							if Ability.IsCastable(poof, NPC.GetMana(MeepoTable[i].hero)) and Ability.IsReady(poof) and MeepoTable[i].poofpause <= GameRules.GetGameTime() and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(poof)*2 then
+							if MeepoHazk.IsPoofReady(MeepoTable[i].hero,MeepoTable[i].poofpause) then
 								MeepoHazk.NeedPoof(MeepoTable[i].hero,MeepoTable[i].hero,poof)
-								MeepoTable[i].poofpause = GameRules.GetGameTime() + 2
+								MeepoTable[i].poofpause = GameRules.GetGameTime() + 1.6
 							else
-								if MeepoTable[i].poofpause - 0.5 < GameRules.GetGameTime() then
+								if MeepoTable[i].poofpause < GameRules.GetGameTime() then
 									if not NPC.IsAttacking(MeepoTable[i].hero) then
 										MeepoHazk.AttackNpc(MeepoTable[i].hero, MeepoHazk.FindNpc(Entity.GetAbsOrigin(MeepoTable[i].hero), 400))
 									end
@@ -183,15 +186,15 @@ function MeepoHazk.OnUpdate()
 							MeepoTable[i].free = true
 						end
 					else
-						if not NPC.IsRunning(MeepoTable[i].hero) and MeepoTable[i].poofpause - 0.5 < GameRules.GetGameTime() then
+						if not NPC.IsRunning(MeepoTable[i].hero) and MeepoTable[i].poofpause < GameRules.GetGameTime() then
 							MeepoHazk.GoToPos(MeepoTable[i].hero, JangleSpots[MeepoTable[i].farmnum].pos)
 						end
 						local Distance = (Entity.GetAbsOrigin(MeepoTable[i].hero):Distance(JangleSpots[MeepoTable[i].farmnum].pos):Length2D())
 						if Distance > 1000 then
 							if MeepoHazk.PoofToMeepo(MeepoTable[i].hero,JangleSpots[MeepoTable[i].farmnum].pos,1500) then
-								if Ability.IsCastable(poof, NPC.GetMana(MeepoTable[i].hero)) and Ability.IsReady(poof) and MeepoTable[i].poofpause <= GameRules.GetGameTime() and NPC.GetMana(MeepoTable[i].hero) >= Ability.GetManaCost(poof)*2 then
+								if MeepoHazk.IsPoofReady(MeepoTable[i].hero,MeepoTable[i].poofpause) then
 									MeepoHazk.NeedPoof(MeepoTable[i].hero,MeepoHazk.PoofToMeepo(MeepoTable[i].hero,JangleSpots[MeepoTable[i].farmnum].pos,1500),poof)
-									MeepoTable[i].poofpause = GameRules.GetGameTime() + 2
+									MeepoTable[i].poofpause = GameRules.GetGameTime() + 1.6
 								end
 							end
 						end
@@ -200,11 +203,30 @@ function MeepoHazk.OnUpdate()
 				
 				if MeepoTable[i].free then
 					MeepoTable[i].farmnum = MeepoHazk.NeedSpot()
-					MeepoHazk.GoToPos(MeepoTable[i].hero, JangleSpots[MeepoTable[i].farmnum].pos)
+					if MeepoTable[i].farmnum == 10 and not NPC.IsRunning(MeepoTable[i].hero) then
+						MeepoHazk.GoToPos(MeepoTable[i].hero, MeepoHazk.NeedFountan())
+					elseif not NPC.IsRunning(MeepoTable[i].hero) then
+						MeepoHazk.GoToPos(MeepoTable[i].hero, JangleSpots[MeepoTable[i].farmnum].pos)
+					end
 					MeepoTable[i].free = false
 				end
 			end
 		end
+	end
+end
+
+function MeepoHazk.IsPoofReady(hero,timepoof,truger)
+	local poof = NPC.GetAbility(hero,"meepo_poof")
+	if 	Ability.IsCastable(poof, NPC.GetMana(hero)) and Ability.IsReady(poof) and timepoof <= GameRules.GetGameTime() then
+		if truger and NPC.GetMana(hero) >= Ability.GetManaCost(poof) then
+			return true
+		elseif NPC.GetMana(hero) >= Ability.GetManaCost(poof)*2 then
+			return true
+		else
+			return false
+		end
+	else
+		return false
 	end
 end
 
