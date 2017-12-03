@@ -225,7 +225,7 @@ function SkyWrathHake.PrayToDog()
 end
 
 function SkyWrathHake.AeonDispelling()
-	local aeonDiskBuff = NPC.GetModifier(SkyWrathHake.enemy, "modifier_item_combo_breaker_buff")
+	local aeonDiskBuff = NPC.GetModifier(SkyWrathHake.enemy, "modifier_item_aeon_disk_buff")
 	if(Entity.GetHealth(SkyWrathHake.enemy) / Entity.GetMaxHealth(SkyWrathHake.enemy) < 0.85 or aeonDiskBuff) and SkyWrathHake.nullifier and Ability.IsReady(SkyWrathHake.nullifier) and Ability.IsCastable(SkyWrathHake.nullifier, Ability.GetManaCost(SkyWrathHake.nullifier)) then
 		Ability.CastTarget(SkyWrathHake.nullifier, SkyWrathHake.enemy)
 	end

@@ -22,7 +22,7 @@ BTW.Locale = {
 		["russian"] = "Стил героев первыми двумя способностями"
 	},
 	["stealcloud"] = {
-		["english"] = "Auto steal by cloud",
+		["english"] = "Auto steal by nimbus",
 		["russian"] = "Стил героев облачком"
 	},
 	["stealult"] = {
@@ -44,11 +44,20 @@ BTW.Locale = {
 	["slider"] = {
 		["english"] = "Closest to mouse range",
 		["russian"] = "Радиус поиска ближнего"
+	},
+	["interrupt"] = {
+		["english"] = "Auto interrupt enemy's tp or channelling spell with bolt or nimbus",
+		["russian"] = "Прерывать вражеский ТП или каст способностей при помощи bolt или nimbus"
+	},
+	["interrupt_fog"] = {
+		["english"] = "Auto interrupt enemy's tp in fog with nimbus",
+		["russian"] = "Прерывать вражеский ТП в тумане войны при помощи nimbus"
 	}
 }
 BTW.Hero = nil
 BTW.Enabled = false
 BTW.MP = 0
+BTW.TPIndex = 0
 
 BTW.CastTypes  = {
 	["item_blink"] = 3,
@@ -115,7 +124,8 @@ function BTW.OnDraw()
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "combo", BTW.Locale["combo"], GUI.MenuType.Key, "K", BTW.Combo, 0)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "orbwalker", BTW.Locale["orbwalker"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "closest", BTW.Locale["slider"], GUI.MenuType.Slider, 100, 1500, 200)
-
+		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "interrupt", BTW.Locale["interrupt"], GUI.MenuType.CheckBox, 0)
+		GUI.AddMenuItem(BTW.Identity, BTW.Identity .. "interrupt_fog", BTW.Locale["interrupt_fog"], GUI.MenuType.CheckBox, 0)
 	end
 	
 	BTW.Initialize()
@@ -144,16 +154,42 @@ function BTW.Combo()
 	end
 end
 
+function BTW.OnParticleCreate(p)
+	if p.name == nil then return end
+	if p.name == "teleport_start" and GUI.IsEnabled(BTW.Identity .. "interrupt_fog") and BTW.Enabled then
+		BTW.TPIndex = p.index
+	end
+end
+
+function BTW.OnParticleUpdate(p)
+	if BTW.TPIndex == p.index then
+		local a = NPCs.InRadius(p.position, 50, Entity.GetTeamNum(BTW.Hero), Enum.TeamType.TEAM_FRIEND)
+		if (not a or #a == 0) and GUI.IsEnabled(BTW.Identity .. "interrupt_fog") and BTW.Enabled and p.position:Length2D() > 2 then 
+			BTW.Cast('zuus_cloud', BTW.Hero, nil, p.position, BTW.MP) 
+		end
+	end
+end
+
 function BTW.Steal()
 	if not BTW.Enabled then return end
 		
 	local isSteal = GUI.IsEnabled(BTW.Identity .. "steal")
 	local isCloud = GUI.IsEnabled(BTW.Identity .. "stealcloud")
 	local isUlt = GUI.IsEnabled(BTW.Identity .. "stealult")
-	
+	local isInterrupt = GUI.IsEnabled(BTW.Identity .. "interrupt")
+
 	for n, npc in pairs(Heroes.GetAll()) do	
-	
 		if not Entity.IsDormant(npc) and Entity.IsAlive(npc) and not NPC.IsIllusion(npc) and not Entity.IsSameTeam(BTW.Hero, npc) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+		
+			if isInterrupt and NPC.IsChannellingAbility(npc) or NPC.HasModifier(npc, "modifier_teleporting") then
+				if	NPC.IsEntityInRange(BTW.Hero, npc, Ability.GetCastRange(BTW.Abilitys['zuus_lightning_bolt'])) 
+				and	Ability.IsCastable(BTW.Abilitys['zuus_lightning_bolt'], BTW.MP)
+				then
+					BTW.Cast('zuus_lightning_bolt', BTW.Hero, npc, nil, BTW.MP)
+				elseif Ability.IsCastable(BTW.Abilitys['zuus_cloud'], BTW.MP) then
+					BTW.Cast('zuus_cloud', BTW.Hero, npc, NPC.GetAbsOrigin(npc), BTW.MP)
+				end
+			end
 		
 			local boltdmg = BTW.BoltDMG
 			local lightdmg = BTW.ArcDMG
@@ -283,6 +319,7 @@ function BTW.OnGameEnd()
 	BTW.BoltDMG = 0
 	BTW.StaticDMG = 0
 	BTW.UltDMG = 0
+	BTW.TPIndex = 0
 end
 
 function BTW.Cast(name, self, npc, position, manapoint)
@@ -295,7 +332,7 @@ function BTW.Cast(name, self, npc, position, manapoint)
 			if not ability then ability = NPC.GetItem(self, "item_dagon_" .. i, true) end
 		end
 	end
-	
+
 	local casttype = BTW.CastTypes[name]
 	if ability == nil then return end
 	if	ability

@@ -29,7 +29,7 @@ function DagonHake.FindTarget(me, item)
 		local enemyhero = Heroes.Get(index)
 		if not Entity.IsSameTeam(me, enemyhero) and not NPC.IsLinkensProtected(enemyhero) and not NPC.IsIllusion(enemyhero) and NPC.IsEntityInRange(me, enemyhero, Ability.GetCastRange(item) + NPC.GetCastRangeBonus(me)) then
 			local amplf = 0
-			if NPC.GetItem(me, "item_trident", true) then
+			if NPC.GetItem(me, "item_kaya", true) then
 				amplf = 0.1
 			end
 			amplf = amplf + DagonHake.GetAmplifiers(me, enemyhero)

@@ -21,6 +21,8 @@ GUI.SelectedCategory = 0
 GUI.SelectedLanguage = nil
 GUI.SelectedMenuPage = 0
 GUI.CurrentKey = ""
+GUI.DownKeyType = -1
+GUI.Keys = {}
 GUI.Items = {}
 GUI.Font = {}
 GUI.Font.Menu = Renderer.LoadFont("Arial", 17, Enum.FontWeight.BOLD)
@@ -33,8 +35,8 @@ GUI.Font.Search = Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
 GUI.Font.Footer = Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.GameState = -2
 GUI.Config = "GUI"
-GUI.Version = 171116
-GUI.TextVersion = 'v 17.11.16'
+GUI.Version = 171129
+GUI.TextVersion = 'v 17.11.29'
 
 GUI.GameStates = {}
 GUI.GameStates.OnGameMenu = -1
@@ -242,20 +244,16 @@ function GUI.OnDraw()
 		end
 	end
 	
-	CheckKeys()
-	CheckState()
+	GUI.CheckKeys()
+	GUI.CheckState()
 	
-	local leftclick = false
-	local rightclick = false
-
-	if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then leftclick = true end
-	if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_RIGHT) then rightclick = true end
-
-
+	local leftclick = GUI.CurrentKey == "left" and GUI.DownKeyType == 1
+	
 	if GUI.IsEnabled("gui:show") then 
 		GUI.Colors = GUI.ThemeColors[GUI.GetThemeName()]
-		GUI.Draw(leftclick, rightclick)
+		GUI.Draw(leftclick, GUI.CurrentKey == "right" and GUI.DownKeyType == 1)
 	end
+	
 	local w, h = Renderer.GetScreenSize()
 	DrawNotices(w, h, leftclick)
 	
@@ -310,9 +308,13 @@ function GUI.OnMenuOptionChange(option, oldValue, newValue)
 	end
 end
 
-function CheckKeys()
+function GUI.IsAvReadKey()
+	return string.len(GUI.CurrentKey) == 1 or GUI.CurrentKey == "backspace"
+end
+
+function GUI.CheckKeys()
 	local current_key = ""
-	local down_type = 0
+	GUI.DownKeyType = 0
 	GUI.CurrentKey = ""
 	local skip_array = {55,57,58,59,60,61}
 	
@@ -322,27 +324,42 @@ function CheckKeys()
 		if not hasValue(skip_array, i) then
 			if Input.IsKeyDown(i) then
 				current_key = string.sub(alphabet, i, i)
-			end
-			if Input.IsKeyDownOnce(i) then
+				
+				if GUI.Keys[i] == 0 or GUI.Keys[i] == nil then
+					GUI.Keys[i] = os.clock()
+				end
+			elseif	GUI.Keys[i] ~= nil and GUI.Keys[i] ~= 0 and (os.clock() - GUI.Keys[i]) > 0.005 then
+				GUI.Keys[i] = 0
 				current_key = string.sub(alphabet, i, i)
-				down_type = 1
+				GUI.DownKeyType = 1
 				GUI.CurrentKey = current_key
 			end
 		end
 	end
 	
-	if Input.IsKeyDown(70) or Input.IsKeyDownOnce(70) then
-		GUI.CurrentKey = " "
-		current_key = " "
-	end
+	local special_chars = {}
+	special_chars[70] = " "
+	special_chars[71] = "backspace"
+	special_chars[112] = "left"
+	special_chars[113] = "right"
 
-	if Input.IsKeyDownOnce(71) then
-		GUI.CurrentKey = "backspace"
+	for k, v in pairs(special_chars) do
+		if Input.IsKeyDown(k) then
+			current_key = v
+			if GUI.Keys[k] == 0 or GUI.Keys[k] == nil then
+				GUI.Keys[k] = os.clock()
+			end
+		elseif	GUI.Keys[k] ~= nil and GUI.Keys[k] ~= 0 and (os.clock() - GUI.Keys[k]) > 0.005 then
+			GUI.Keys[k] = 0
+			current_key = v
+			GUI.DownKeyType = 1
+			GUI.CurrentKey = current_key
+		end
 	end
 	
 	if current_key ~= "" then
 		for k, v in pairs(GUI.CallBackKey) do
-			if current_key == GUI.Data[v["itemcode"]] and v["type"] == down_type then
+			if current_key == GUI.Data[v["itemcode"]] and v["type"] == GUI.DownKeyType then
 				GUI.Items[v['menucode']]["items"][v["order"]]["callback"]()
 			end
 		end
@@ -652,7 +669,7 @@ function GUI.AddNotification(Notification)
     table.insert(GUI.Notices, Notification)
 end
 
-function CheckState()
+function GUI.CheckState()
 	if GameRules.GetGameState() ~= GUI.GameState then
 		for k, v in pairs(GUI.Subscriptions) do
 			if k == GameRules.GetGameState() or k == GUI.GameStates.OnGameStateChanged then
@@ -1181,7 +1198,7 @@ function DrawImageBox(click, x, y, value)
 		local inpos = Input.IsCursorInRect(tempx, y + 40, value["size_x"], value["size_y"])
 		
 		if inpos then
-			if GUI.CurrentKey ~= "" then
+			if GUI.IsAvReadKey() then
 				if value["search"] == nil then value["search"] = "" end
 			
 				if GUI.CurrentKey == "backspace" then
@@ -1316,7 +1333,7 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 		
 		local inpos = Input.IsCursorInRect(tempx, y + 40, value["size_x"], value["size_y"])
 		if inpos then
-			if GUI.CurrentKey ~= "" then
+			if GUI.IsAvReadKey() then
 				if value["search"] == nil then value["search"] = "" end
 			
 				if GUI.CurrentKey == "backspace" then
@@ -1409,7 +1426,7 @@ function DrawTextBox(inpos, click, x, y, size_x, size_y, value)
 	Renderer.SetDrawColor(255, 255, 255, 255)
 	if	inpos
 	then 
-		if GUI.CurrentKey ~= "" then
+		if GUI.IsAvReadKey() then
 			if GUI.Get(key) == nil then GUI.Set(key, "") end
 		
 			if GUI.CurrentKey == "backspace" then
@@ -1493,7 +1510,7 @@ function DrawSlider(leftclick, x, y, value)
 	inpos = Input.IsCursorInRect((x + (240 / 2)) - 30, y + 68, 60, 16)
 	if inpos then
 	
-		if GUI.CurrentKey ~= "" and tonumber(GUI.CurrentKey) ~= nil then
+		if GUI.IsAvReadKey() and tonumber(GUI.CurrentKey) ~= nil then
 			if value["newvalue"] == nil then value["newvalue"] = "" end
 		
 			if GUI.CurrentKey == "backspace" then
@@ -1545,7 +1562,7 @@ function DrawKeyBox(click, x, y, size_x, size_y, value)
 	local inpos = Input.IsCursorInRect(x, y, offset_x + size_x, size_y)
 	if	inpos
 	then 
-		if GUI.CurrentKey ~= "" then
+		if GUI.IsAvReadKey() then
 			if GUI.Get(key) == nil then GUI.Set(key, "") end
 		
 			if GUI.CurrentKey ~= "backspace" then
@@ -1644,7 +1661,6 @@ function ApplyTheme()
 	GUI.Theme.RadioInActive = Renderer.LoadImage("~/" .. f .. "/radio-inactive.png")
 	GUI.Theme.Close = Renderer.LoadImage("~/" .. f .. "/close.png")
 	GUI.Theme.Menu = Renderer.LoadImage("resource/flash3/images/badges/ti6_battle_pass_badge_4.png")
-	
 end
 
 function GUI.GetThemeName()

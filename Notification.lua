@@ -7,9 +7,9 @@ local optionRoshan = Menu.AddOption({"Awareness", "Notification"}, "Roshan", "No
 local optionParticleEffect = Menu.AddOption({"Awareness", "Notification"}, "Particle Effect", "Notify teammates (print on the screen) when certain particle effects happen.")
 
 local ParticleEffectList = {
-    mirana_moonlight_recipient = "pom开大了！",
-    smoke_of_deceit = "开雾了！",
-    nyx_assassin_vendetta_start = "小强隐身了！"
+    mirana_moonlight_recipient = "Ульт мираны",
+    smoke_of_deceit = "Кто то активировал смоки",
+    nyx_assassin_vendetta_start = "Нюкс в виндете"
 }
 
 function Notification.OnParticleCreate(particle)
