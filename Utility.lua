@@ -421,4 +421,42 @@ function Utility.IsAffectedByDoT(npc)
     return false
 end
 
+function Utility.GetCastRange(myHero, ability)
+    if not myHero or not ability then return 0 end
+
+    local range = Ability.GetCastRange(ability)
+
+    if NPC.HasItem(myHero, "item_aether_lens", true) then
+        range = range + 250
+    end
+
+    for i = 0, 24 do
+        local ability = NPC.GetAbilityByIndex(myHero, i)
+        if ability and Ability.GetLevel(ability) > 0 then
+            local bonus_name = Ability.GetName(ability)
+            if string.find(bonus_name, "special_bonus_cast_range") then
+                local diff = tonumber(string.match(bonus_name, "[0-9]+"))
+                range = range + diff
+            end
+        end
+    end
+
+    return range
+end
+
+function Utility.GetSafeDirection(myHero)
+    local mid = Vector()
+    local pos = Entity.GetAbsRotation(myHero):GetForward()
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) then
+            mid = mid + Entity.GetAbsRotation(enemy):GetForward()
+        end
+	end
+
+    mid:Set(mid:GetX()/Heroes.Count(), mid:GetY()/Heroes.Count(), mid:GetZ()/Heroes.Count())
+    return (pos + pos - mid):Normalized()
+end
+
 return Utility

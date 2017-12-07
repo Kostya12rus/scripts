@@ -1824,7 +1824,7 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 					and not Entity.IsDormant(v)
 					and not NPC.HasModifier(Unit, "modifier_manta")
 					and (NPC.IsKillable(v) or (NPC.HasItem(v, "item_aegis", 1) and optionDetonateAegis)
-					or (NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" and optionDetonateWk) or NPC.HasModifier(v, "modifier_templar_assassin_refraction_absorb"))
+					or NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" or NPC.HasModifier(v, "modifier_templar_assassin_refraction_absorb"))
 					and not NPC.HasModifier(v, "modifier_dazzle_shallow_grave") and not NPC.HasModifier(v, "modifier_oracle_false_promise")
 					and not NPC.HasModifier(v, "modifier_item_combo_breaker_buff")
 					and NPC.GetMagicalArmorDamageMultiplier(v) ~= 0

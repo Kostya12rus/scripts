@@ -10,6 +10,7 @@ GUI.SelectedTheme =  Menu.AddOption({ "GUI"}, "Theme", "Select GUI theme", 1, 3 
 Menu.SetValueName(GUI.SelectedTheme, 1, "Default")
 Menu.SetValueName(GUI.SelectedTheme, 2, "Dark")
 Menu.SetValueName(GUI.SelectedTheme, 3, "Mono")
+Menu.SetValueName(GUI.SelectedTheme, 4, "Red")
 GUI.Languages = {
 	[1] = "english",
 	[2] = "russian",
@@ -35,8 +36,8 @@ GUI.Font.Search = Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
 GUI.Font.Footer = Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.GameState = -2
 GUI.Config = "GUI"
-GUI.Version = 171129
-GUI.TextVersion = 'v 17.11.29'
+GUI.Version = 171206
+GUI.TextVersion = 'v 17.12.06'
 
 GUI.GameStates = {}
 GUI.GameStates.OnGameMenu = -1
@@ -202,6 +203,16 @@ GUI.ThemeColors["Mono"] = {
 	Author = "879999",
 	MenuDelimeter = "1f2024"
 }
+GUI.ThemeColors["Red"] = {
+	Accent = "222",
+	Version = "fff",
+	HeaderInActive = "000",
+	HeaderActive = "fff",
+	Navigation = "879999",
+	Author = "222",
+	MenuDelimeter = "dde0e5"
+}
+
 GUI.Colors = {}
 
 GUI.NotifyType = {}
@@ -389,15 +400,27 @@ function GUI.Initialize(code, category, name, desc, author, ...)
 		GUI_Object = category
 		
 		if type(GUI_Object["perfect_name"]) == "table" then
-			GUI_Object["perfect_name"] = category["perfect_name"][GUI.SelectedLanguage]
+			if category["perfect_name"][GUI.SelectedLanguage] == nil then
+				GUI_Object["perfect_name"] = category["perfect_name"]["english"]
+			else
+				GUI_Object["perfect_name"] = category["perfect_name"][GUI.SelectedLanguage]
+			end
 		end
 		
 		if type(GUI_Object["perfect_desc"]) == "table" then
-			GUI_Object["perfect_desc"] = category["perfect_desc"][GUI.SelectedLanguage]
+			if category["perfect_desc"][GUI.SelectedLanguage] == nil then
+				GUI_Object["perfect_desc"] = category["perfect_desc"]["english"]
+			else
+				GUI_Object["perfect_desc"] = category["perfect_desc"][GUI.SelectedLanguage]
+			end
 		end
 		
 		if type(GUI_Object["perfect_author"]) == "table" then
-			GUI_Object["perfect_author"] = category["perfect_author"][GUI.SelectedLanguage]
+			if category["perfect_author"][GUI.SelectedLanguage] == nil then
+				GUI_Object["perfect_author"] = category["perfect_author"]["english"]
+			else
+				GUI_Object["perfect_author"] = category["perfect_author"][GUI.SelectedLanguage]
+			end
 		end
 	else
 		if type(name) == "table" then
@@ -433,6 +456,9 @@ function GUI.Initialize(code, category, name, desc, author, ...)
 	GUI_Object["prevpage"] = {}
 	GUI_Object["items"] = {}
 	
+	if(utf8.len(GUI_Object["perfect_name"]) > 23) then
+		GUI_Object["perfect_name"] = utf8sub(GUI_Object["perfect_name"], 0, 19) .. ' ...'
+	end	
 	if GUI_Object["hero"] ~= nil then
 
 		local identity = "gui_" .. slug(GUI_Object["hero"])
@@ -455,6 +481,39 @@ function GUI.Initialize(code, category, name, desc, author, ...)
 	GUI.Items[code] = GUI_Object
 	GUI.Data[code] = 0
 end
+
+function chsize(char)
+	if not char then
+		return 0
+	elseif char > 240 then
+		return 4
+	elseif char > 225 then
+		return 3
+	elseif char > 192 then
+		return 2
+	else
+		return 1
+	end
+end
+ 
+function utf8sub(str, startChar, numChars)
+	local startIndex = 1
+	while startChar > 1 do
+		local char = string.byte(str, startIndex)
+		startIndex = startIndex + chsize(char)
+		startChar = startChar - 1
+	end
+
+	local currentIndex = startIndex
+
+	while numChars > 0 and currentIndex <= #str do
+		local char = string.byte(str, currentIndex)
+		currentIndex = currentIndex + chsize(char)
+		numChars = numChars -1
+	end
+	return str:sub(startIndex, currentIndex - 1)
+end
+
 
 function GUI.AddMenuItem(menucode, itemcode, name, control, ...)
 	if GUI.Items[menucode] == nil then return end
@@ -1667,6 +1726,7 @@ function GUI.GetThemeName()
 	if Menu.GetValue(GUI.SelectedTheme) == 1 then return "Default" end
 	if Menu.GetValue(GUI.SelectedTheme) == 2 then return "Dark" end
 	if Menu.GetValue(GUI.SelectedTheme) == 3 then return "Mono" end
+	if Menu.GetValue(GUI.SelectedTheme) == 4 then return "Red" end
 
 	return "Default"
 end

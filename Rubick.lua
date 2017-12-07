@@ -33,7 +33,7 @@ StealTable["brewmaster_primal_split"] = true
 StealTable["centaur_hoof_stomp"] = true
 StealTable["centaur_stampede"] = true
 StealTable["chaos_knight_chaos_bolt"] = true
-StealTable["chaos_knight_reality_rift"] = true
+-- StealTable["chaos_knight_reality_rift"] = true
 StealTable["chaos_knight_phantasm"] = true
 StealTable["chen_hand_of_god"] = true
 StealTable["chen_holy_persuasion"] = true
@@ -348,6 +348,7 @@ function Rubick.OnUpdate()
     end
 end
 
+-- Kill stealer or linkens breaker
 function Rubick.KillSteal()
     local myHero = Heroes.GetLocal()
     if not myHero or not Utility.IsSuitableToCastSpell(myHero) then return end
@@ -355,7 +356,7 @@ function Rubick.KillSteal()
     local spell = NPC.GetAbility(myHero, "rubick_fade_bolt")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
 
-    local range = Ability.GetCastRange(spell)
+    local range = Utility.GetCastRange(myHero, spell)
     local damage = 80 * Ability.GetLevel(spell)
 
     for i = 1, Heroes.Count() do
@@ -364,7 +365,7 @@ function Rubick.KillSteal()
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
             local true_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
-            if true_damage >= Entity.GetHealth(enemy) then
+            if true_damage >= Entity.GetHealth(enemy) or Utility.IsLinkensProtected(enemy) then
                 Ability.CastTarget(spell, enemy)
                 return
             end
@@ -379,13 +380,13 @@ function Rubick.AutoTelekinesis()
 
     local spell = NPC.GetAbility(myHero, "rubick_telekinesis")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
-    local range = Ability.GetCastRange(spell)
+    local range = Utility.GetCastRange(myHero, spell)
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
-        and not Utility.IsDisabled(enemy) then
+        and not Utility.IsDisabled(enemy) and not Utility.IsLinkensProtected(enemy) then
 
             Ability.CastTarget(spell, enemy)
             return
@@ -399,7 +400,7 @@ function Rubick.AutoSpellSteal()
 
     local steal = NPC.GetAbility(myHero, "rubick_spell_steal")
     if not steal or not Ability.IsCastable(steal, NPC.GetMana(myHero)) then return end
-    local range = Ability.GetCastRange(steal)
+    local range = Utility.GetCastRange(myHero, steal)
 
     -- don't steal if currently has stolen spells available
     local slot1 = NPC.GetAbilityByIndex(myHero, 3)
@@ -409,7 +410,8 @@ function Rubick.AutoSpellSteal()
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
+        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
+        and not Utility.IsLinkensProtected(enemy) then
 
             local spell = Rubick.GetLastSpell(enemy)
             if spell and StealTable[Ability.GetName(spell)]
@@ -435,7 +437,7 @@ function Rubick.QuickCast()
     end
 
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
-    local range = Ability.GetCastRange(spell)
+    local range = Utility.GetCastRange(myHero, spell)
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)

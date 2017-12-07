@@ -1,13 +1,13 @@
 -- foosAIO.lua
--- Version: beta.0.98.07c
+-- Version: beta.0.98.07d
 -- Author: foo0oo
 -- Release Date: 2017/05/03
--- Last Update: 2017/12/05
+-- Last Update: 2017/12/06
 
 local fooAllInOne = {}
 -- Menu Items
 	-- general Menu
-fooAllInOne.versionNumber = Menu.AddOption({ "Utility","foos AllInOne" }, "0. Version Number: beta.0.98.07c", "Release date: 2017/12/05", 0, 0, 0)
+fooAllInOne.versionNumber = Menu.AddOption({ "Utility","foos AllInOne" }, "0. Version Number: beta.0.98.07d", "Release date: 2017/12/05", 0, 0, 0)
 Menu.SetValueName(fooAllInOne.versionNumber, 0, '')
 
 fooAllInOne.optionEnable = Menu.AddOption({ "Utility","foos AllInOne" }, "1. Overall enabled {{overall}}", "Helpers helper")
@@ -87,7 +87,8 @@ fooAllInOne.optionItemArmlet = Menu.AddOption({ "Utility","foos AllInOne", "2. A
 fooAllInOne.optionItemArmletHPTreshold = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage", "Armlet" }, "1.1 HP threshold {{armlet}}", "minimum HP treshold to start toggling to avoid death; if dmg instance is higher then your current hp, it will start toggling even if your hp is higher then treshold", 100, 500, 50)
 fooAllInOne.optionItemArmletTickAdjuster = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage", "Armlet" }, "1.2 Tick adjustment {{armlet}}", "adjustment for latency, cpu time, ... (recommended for good pcs with good latency: 2)", 1, 5, 1)
 fooAllInOne.optionItemArmletCombo = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage", "Armlet" }, "2. Combo usage {{armlet}}", "will activate armlet in combo")
-fooAllInOne.optionItemArmletRightClick = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage", "Armlet" }, "3. Right click activation {{armlet}}", "DOUBLE right clicking on enemy or creep will trigger a toggle; move command (right click) will toggle armlet off")
+fooAllInOne.optionItemArmletRightClick = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage", "Armlet" }, "3. Right click activation {{armlet}}", "right clicking on enemy or creep will trigger a toggle; move command (right click) will toggle armlet off")
+fooAllInOne.optionItemArmletRightClickStyle = Menu.AddOption({ "Utility","foos AllInOne", "2. Auto Item Usage", "Armlet" }, "3.1 Right click style {{armlet}}", "", 0, 1, 1)
 
 	-- Linkens Menu
 fooAllInOne.optionLinkensEnable = Menu.AddOption({ "Utility","foos AllInOne", "3. Auto Break Linkens" }, "0. Enabled {{linkens}}", "Helpers helper")
@@ -442,6 +443,8 @@ Menu.SetValueName(fooAllInOne.optionItemDiffusal, 1, 'ON')
 Menu.SetValueName(fooAllInOne.optionItemStyle, 0, 'max speed, no order')
 Menu.SetValueName(fooAllInOne.optionItemStyle, 1, 'ordered')
 Menu.SetValueName(fooAllInOne.optionItemStyle, 2, 'smart ordered')
+Menu.SetValueName(fooAllInOne.optionItemArmletRightClickStyle, 0, 'single click')
+Menu.SetValueName(fooAllInOne.optionItemArmletRightClickStyle, 1, 'double click')
 
 Menu.SetValueName(fooAllInOne.optionLastHitStyle, 0, 'last hit + deny')
 Menu.SetValueName(fooAllInOne.optionLastHitStyle, 1, 'only last hit')
@@ -929,7 +932,8 @@ fooAllInOne.VisageFamiliarAttackCounter = {}
 fooAllInOne.heroIconHandler = {}
 fooAllInOne.itemIconHandler = {}
 
-fooAllInOne.heroList = { "npc_dota_hero_axe",
+fooAllInOne.heroList = { 
+	"npc_dota_hero_axe",
 	"npc_dota_hero_rattletrap", 
 	"npc_dota_hero_skywrath_mage",
 	"npc_dota_hero_tiny",
@@ -1112,8 +1116,8 @@ fooAllInOne.orbAttackTable = {
 fooAllInOne.attackPointTable = {
 	npc_dota_hero_abaddon = { 0.56, 0.41, 0 },
 	npc_dota_hero_alchemist = { 0.35, 0.65, 0 },
-	npc_dota_hero_antimage = { 0.45, 0.3, 1250 },
-	npc_dota_hero_ancient_apparition = { 0.3, 0.6, 0 },
+	npc_dota_hero_ancient_apparition = { 0.45, 0.3, 1250 },
+	npc_dota_hero_antimage = { 0.3, 0.6, 0 },
 	npc_dota_hero_arc_warden = { 0.3, 0.7, 800 },
 	npc_dota_hero_axe = { 0.5, 0.5, 0 },
 	npc_dota_hero_bane = { 0.3, 0.7, 900 },
@@ -1135,7 +1139,7 @@ fooAllInOne.attackPointTable = {
 	npc_dota_hero_death_prophet = { 0.56, 0.51, 1000 },
 	npc_dota_hero_disruptor = { 0.4, 0.5, 1200 },
 	npc_dota_hero_doom_bringer = { 0.5, 0.7, 0 },
-	npc_dota_hero_dragon_knight = { 0.5, 0.5, 0 },
+	npc_dota_hero_dragon_knight = { 0.5, 0.5, 900 },
 	npc_dota_hero_drow_ranger = { 0.7, 0.3, 1250 },
 	npc_dota_hero_earth_spirit = { 0.35, 0.65, 0 },
 	npc_dota_hero_earthshaker = { 0.467, 0.863, 0 },
@@ -2630,7 +2634,7 @@ function fooAllInOne.OnUnitAnimation(animation)
 			if Entity.IsHero(animation.unit) and NPC.IsEntityInRange(Heroes.GetLocal(), animation.unit, attackRange) and NPC.FindFacingNPC(animation.unit) == Heroes.GetLocal() then
 				local myProjectedPosition = Entity.GetAbsOrigin(Heroes.GetLocal())
 				local projectileTiming = ((Entity.GetAbsOrigin(animation.unit) - myProjectedPosition):Length2D() - NPC.GetHullRadius(Heroes.GetLocal())) / fooAllInOne.attackPointTable[NPC.GetUnitName(animation.unit)][3]
-				local damage = NPC.GetDamageMultiplierVersus(animation.unit, Heroes.GetLocal()) * ((NPC.GetTrueMaximumDamage(animation.unit)) * NPC.GetArmorDamageMultiplier(Heroes.GetLocal()))
+				local damage = NPC.GetDamageMultiplierVersus(animation.unit, Heroes.GetLocal()) * ((NPC.GetTrueMaximumDamage(animation.unit)) * NPC.GetArmorDamageMultiplier(Heroes.GetLocal()))		
 				table.insert(fooAllInOne.armletDamageInstanceTable, { instanceindex = Entity.GetIndex(animation.unit), time = fooAllInOne.utilityRoundNumber((GameRules.GetGameTime() + animation.castpoint + projectileTiming + (Menu.GetValue(fooAllInOne.optionItemArmletTickAdjuster) + 1) * 0.034 - NetChannel.GetAvgLatency(Enum.Flow.FLOW_INCOMING)), 3), casttime = animation.castpoint + projectileTiming, type = "rangeattack", damage = damage, projectileorigin = Entity.GetAbsOrigin(animation.unit), projectilestarttime = GameRules.GetGameTime() + animation.castpoint, projectilespeed = fooAllInOne.attackPointTable[NPC.GetUnitName(animation.unit)][3] })
 				if animation.castpoint < 0.25 then
 					table.insert(fooAllInOne.armletDamageInstanceTable, { instanceindex = Entity.GetIndex(animation.unit), time = fooAllInOne.utilityRoundNumber((GameRules.GetGameTime() + NPC.GetAttackTime(animation.unit) + animation.castpoint + projectileTiming + (Menu.GetValue(fooAllInOne.optionItemArmletTickAdjuster) + 1) * 0.034 - NetChannel.GetAvgLatency(Enum.Flow.FLOW_INCOMING)), 3), casttime = animation.castpoint + projectileTiming, type = "rangeattack", damage = damage, projectileorigin = Entity.GetAbsOrigin(animation.unit), projectilestarttime = GameRules.GetGameTime() + NPC.GetAttackTime(animation.unit) + animation.castpoint, projectilespeed = fooAllInOne.attackPointTable[NPC.GetUnitName(animation.unit)][3] })
@@ -2896,28 +2900,31 @@ function fooAllInOne.OnPrepareUnitOrders(orders)
 		local armlet = NPC.GetItem(myHero, "item_armlet", true)
 		if armlet then
 			if not fooAllInOne.armletRightClickToggle then
-		 		if not fooAllInOne.armletRightClickToggle then
-					if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
-						if not Entity.IsSameTeam(myHero, orders.target) then
+				if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
+					if not Entity.IsSameTeam(myHero, orders.target) then
+						if Menu.GetValue(fooAllInOne.optionItemArmletRightClickStyle) > 0 then
 							if os.clock() - fooAllInOne.armletRightClickDoubleClick > 0.3 then
 								fooAllInOne.armletRightClickDoubleClick = os.clock()
 								return true
 							else
 								if os.clock() - fooAllInOne.armletRightClickDoubleClick > 0.05 then
 									fooAllInOne.armletRightClickToggle = true
+									fooAllInOne.armletRightClickToggleTimer = os.clock()
 									return true
 								end
 							end
+						else
+							fooAllInOne.armletRightClickToggle = true
+							fooAllInOne.armletRightClickToggleTimer = os.clock()
+							return true
 						end
 					end
 				end
 			else
-				if fooAllInOne.armletRightClickToggle then
-					if os.clock() - fooAllInOne.armletRightClickToggleTimer > 0.7 then
-						if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION then
-							fooAllInOne.armletRightClickToggle = false
-							return true
-						end
+				if os.clock() - fooAllInOne.armletRightClickToggleTimer > 0.6 then
+					if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION then
+						fooAllInOne.armletRightClickToggle = false
+						return true
 					end
 				end
 			end
@@ -3812,7 +3819,7 @@ function fooAllInOne.lastHitterTimingOffsetter(myHero, target)
 	local projectileOffset = 0
 	for i, v in pairs(fooAllInOne.attackPointTable) do
 		if i == NPC.GetUnitName(myHero) then
-			if v[3] > 0 then
+			if NPC.IsRanged(myHero) then
 				attackPoint = v[1] / (1 + (increasedAS/100))
 				projectileOffset = ((Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(target)):Length2D()) / v[3]
 				break
@@ -8034,6 +8041,10 @@ function fooAllInOne.armletShouldBeToggledOn(myHero)
 
 	if fooAllInOne.isArmletManuallyToggled == true then 
 		return false 
+	end
+
+	if NPC.HasModifier(myHero, "modifier_ice_blast") then
+		return false
 	end
 
 	local hpTreshold = Menu.GetValue(fooAllInOne.optionItemArmletHPTreshold)
@@ -12581,7 +12592,7 @@ function fooAllInOne.LegionCombo(myHero, enemy)
 							end
 						else
 							if duel and Ability.IsCastable(duel, myMana) then
-								if NPC.HasItem(myHero, "item_armlet", true) then
+								if NPC.HasItem(myHero, "item_armlet", true) and Menu.IsEnabled(fooAllInOne.optionItemArmlet) and Menu.IsEnabled(fooAllInOne.optionItemArmletCombo) then
 									if fooAllInOne.armletCurrentHPGain > 0 then
 										Ability.CastTarget(duel, enemy)
 										return
@@ -21055,4 +21066,3 @@ function fooAllInOne.Debugger(time, npc, ability, order)
 end
 
 return fooAllInOne
-
