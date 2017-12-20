@@ -39,6 +39,7 @@ function MultiCheat.Init()
   msgMyTeam = ""
   msgEnemy = ""
   HeroNameAndAny = {}
+  ItemPingTime = 0
 end
 function MultiCheat.OnGameStart()
   MultiCheat.Init()
@@ -231,6 +232,9 @@ function MultiCheat.DrawOwerItem()
 		    	MultiCheat.ImgItem[tempName] = imageHandle
 		      end
 		      Renderer.DrawImage(imageHandle, CordX, CordY, ImgSize, ImgSizeY)
+			  if Input.IsCursorInRect(CordX,CordY,ImgSize,ImgSizeY) and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+				Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_PING_ABILITY, 0, Vector(), item, 0, nil)
+			  end
 		      CordY = (CordY + ImgSizeY - 1)
 		    end
 		  end
@@ -264,7 +268,7 @@ function MultiCheat.DrawOwerItem()
 	    Renderer.SetDrawColor(0, 0, 0, 255)
 	    Renderer.DrawTextCenteredX(MultiCheat.Font2, CordX+30, YposForHP,Health, 1)
 	    Renderer.SetDrawColor(0, 0, 0, 255)
-	    Renderer.DrawTextCenteredX(MultiCheat.Font2, CordX+30, YposForMana,Mana, 1)
+	    Renderer.DrawTextCenteredX(MultiCheat.Font2, CordX+30, YposForMana,math.floor(Mana), 1)
 	    if Menu.IsEnabled(MultiCheat.Draw_InPosHeroHpAndMana) and not Entity.IsSameTeam(Heroes.GetLocal(), entity) and not Entity.IsDormant(entity) then
 	      local HudUnPos = Entity.GetAbsOrigin(entity)
 	      local Xhud, Yhud, WorldWisHud= Renderer.WorldToScreen(HudUnPos)

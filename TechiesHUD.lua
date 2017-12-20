@@ -6,8 +6,8 @@ TechiesHUD.Locale = {
 		["english"] = "TechiesHUD"
 	},
 	["desc"] = {
-		["english"] = "TechiesHUD v1.3",
-		["russian"] = "TechiesHUD v1.3"
+		["english"] = "TechiesHUD v1.3.2",
+		["russian"] = "TechiesHUD v1.3.2"
 	},
 	["optionDetonate"] = {
 		["english"] = "Auto detonate remote mines",
@@ -477,6 +477,10 @@ function TechiesHUD.GetDamageAndShieldAfterDetonate(Unit, remote_damage, Hp, Mp,
 		additional_res = additional_res * kunkka_ghostship
 	end
 
+	if NPC.HasModifier(Unit, "modifier_ursa_enrage") then
+		additional_res = additional_res * 0.2
+	end
+
 	if NPC.HasModifier(Unit, "modifier_pangolier_shield_crash_buff") then
 		additional_res = additional_res * (1 - Modifier.GetStackCount(NPC.GetModifier(Unit, "modifier_pangolier_shield_crash_buff")) / 100)
 	end
@@ -528,7 +532,7 @@ function TechiesHUD.GetDamageAndShieldAfterDetonate(Unit, remote_damage, Hp, Mp,
 	if calc_remote_damage < 0 then
 		calc_remote_damage = 0
 	end
-	if NPC.HasItem(Unit, "item_combo_breaker", 1) and Ability.GetCooldownTimeLeft(NPC.GetItem(Unit, "item_combo_breaker", 1)) == 0 and (Hp - calc_remote_damage) / Entity.GetMaxHealth(Unit) < 0.8 then -- spell_shield_resistance
+	if NPC.HasItem(Unit, "item_aeon_disk", 1) and Ability.GetCooldownTimeLeft(NPC.GetItem(Unit, "item_aeon_disk", 1)) == 0 and (Hp - calc_remote_damage) / Entity.GetMaxHealth(Unit) < 0.8 then -- spell_shield_resistance
 		if optionActiveAeon then
 			Hp = 0
 			calc_remote_damage = 999999
@@ -613,6 +617,10 @@ function TechiesHUD.GetNumRemoteForKill(Unit, remote_damage, Hp, Mp)
 
 		if NPC.HasModifier(Unit, "modifier_kunkka_ghost_ship_damage_absorb") then
 			additional_res = additional_res * kunkka_ghostship
+		end
+
+		if NPC.HasModifier(Unit, "modifier_ursa_enrage") then
+			additional_res = additional_res * 0.2
 		end
 
 		if NPC.HasModifier(Unit, "modifier_pangolier_shield_crash_buff") then
@@ -969,7 +977,7 @@ function TechiesHUD.OnDraw()
 	local land_m_damage = Ability.GetLevelSpecialValueFor(land_m, "damage")
 	local blast_damage = Ability.GetLevelSpecialValueFor(blast, "damage") + Ability.GetLevel(NPC.GetAbilityByIndex(myHero, 8)) * 300
 
-	local magicalDamageMul = 1 + Hero.GetIntellectTotal(myHero)/ 14 / 100 + 0.1 *(NPC.HasItem(myHero, "item_trident", 1) and 1 or 0)
+	local magicalDamageMul = 1 + Hero.GetIntellectTotal(myHero)/ 14 / 100 + 0.1 *(NPC.HasItem(myHero, "item_kaya", 1) and 1 or 0)
 
 	local remote_damage = Ability.GetLevelSpecialValueFor(remote, "damage")
 
@@ -1630,7 +1638,7 @@ function TechiesHUD.OnUpdate()
 				then
 					local num_enemy = 0
 					for j, v in pairs(heroes_in_radius) do
-						if (NPC.IsKillable(v) or (NPC.HasItem(v, "item_aegis", 1) and optionDetonateAegis) or (NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" and optionDetonateWk) or NPC.HasModifier(v, "modifier_templar_assassin_refraction_absorb")) and not NPC.HasModifier(v, "modifier_item_combo_breaker_buff") and not NPC.HasModifier(v, "modifier_dazzle_shallow_grave") and not NPC.HasModifier(v, "modifier_oracle_false_promise") then
+						if (NPC.IsKillable(v) or (NPC.HasItem(v, "item_aegis", 1) and optionDetonateAegis) or (NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" and optionDetonateWk) or NPC.HasModifier(v, "modifier_templar_assassin_refraction_absorb")) and not NPC.HasModifier(v, "modifier_item_aeon_disk_buff") and not NPC.HasModifier(v, "modifier_dazzle_shallow_grave") and not NPC.HasModifier(v, "modifier_oracle_false_promise") then
 							-- for k, b in pairs(NPC.GetModifiers(v)) do
 								-- Log.Write(Modifier.GetName(b))
 							-- end
@@ -1715,7 +1723,7 @@ function TechiesHUD.OnUpdate()
 			and (NPC.IsKillable(Unit) or (NPC.HasItem(Unit, "item_aegis", 1) and optionDetonateAegis) or (NPC.GetUnitName(Unit) == "npc_dota_hero_skeleton_king" and optionDetonateWk)
 			or NPC.HasModifier(Unit, "modifier_templar_assassin_refraction_absorb"))
 			and not NPC.HasModifier(Unit, "modifier_dazzle_shallow_grave") and not NPC.HasModifier(Unit, "modifier_oracle_false_promise")
-			and not NPC.HasModifier(Unit, "modifier_item_combo_breaker_buff")
+			and not NPC.HasModifier(Unit, "modifier_item_aeon_disk_buff")
 			and Entity.IsAlive(Unit)
 			then
 				--Log.Write(NPC.GetMagicalArmorDamageMultiplier(Unit) .. " " .. (Entity.GetHealth(Unit) - Entity.GetMaxHealth(Unit) * 0.1) / (Entity.GetMaxHealth(Unit) * 0.9))
@@ -1826,7 +1834,7 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 					and (NPC.IsKillable(v) or (NPC.HasItem(v, "item_aegis", 1) and optionDetonateAegis)
 					or NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" or NPC.HasModifier(v, "modifier_templar_assassin_refraction_absorb"))
 					and not NPC.HasModifier(v, "modifier_dazzle_shallow_grave") and not NPC.HasModifier(v, "modifier_oracle_false_promise")
-					and not NPC.HasModifier(v, "modifier_item_combo_breaker_buff")
+					and not NPC.HasModifier(v, "modifier_item_aeon_disk_buff")
 					and NPC.GetMagicalArmorDamageMultiplier(v) ~= 0
 					then
 						Log.Write("check")

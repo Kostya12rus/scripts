@@ -21,8 +21,8 @@ HpMpBar.Locale = {
 		["english"] = "HpMpBar"
 	},
 	["desc"] = {
-		["english"] = "HpMpBar v0.2",
-		["russian"] = "HpMpBar v0.2"
+		["english"] = "HpMpBar v0.2.1",
+		["russian"] = "HpMpBar v0.2.1"
 	},
 	["bary"] = {
 		["english"] = "Height in percent",
@@ -149,7 +149,7 @@ function HpMpBar.GetHeroPos(Unit)
 	local pos = math.floor( p * dw )
 	local addit_h = 0
 	local myHero = Heroes.GetLocal()
-	if Player.GetTeamData(Players.GetByPlayerID(indexHero)).respawnTime ~= -1 then
+	if Players.GetByPlayerID(indexHero) and Player.GetTeamData(Players.GetByPlayerID(indexHero)) and Player.GetTeamData(Players.GetByPlayerID(indexHero)).respawnTime ~= -1 then
 		addit_h = addit_h + 2.45
 	else
 		if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and myHero and Entity.IsSameTeam(myHero, Unit) then
@@ -434,7 +434,7 @@ function HpMpBar.OnChatEvent(chatEvent)
 end
 
 function HpMpBar.OnParticleCreate(particle)
-	if particle.name and particle.name == "teleport_end" then
+	if particle.name and particle.name == "teleport_end" and Hero.GetPlayerID(particle.entityForModifiers) then
 		HpMpBar.TpTime[Hero.GetPlayerID(particle.entityForModifiers)] = GameRules.GetGameTime()
 	end
 end

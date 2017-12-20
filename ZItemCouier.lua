@@ -36,14 +36,18 @@ function ItemCouer.OnDraw()
 						imageHandle = Renderer.LoadImage("resource/flash3/images/items/" ..tempName..".png")
 						imgtable[tempName] = imageHandle
 					end
+					Renderer.SetDrawColor(255,255,255,255)
+					imgsizeX = imgsize
+					imgsizeY = imgsize*0.75
+					Renderer.DrawImage(imageHandle, CordX, CordY, imgsizeX, imgsizeY)
+					Renderer.DrawImage(imgtable[Item.GetPlayerOwnerID(item)], CordX, cordpos[Entity.GetTeamNum(unitNA)][2]-(imgsize*0.75+1), imgsizeX, imgsizeY)
+					if Input.IsCursorInRect(CordX,CordY,imgsizeX,imgsizeY) and Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then
+						Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_PING_ABILITY, 0, Vector(), item, 0, nil)
+					end
 					if Entity.GetTeamNum(unitNA) == 3 then
-						Renderer.DrawImage(imageHandle, cordpos[Entity.GetTeamNum(unitNA)][1], cordpos[Entity.GetTeamNum(unitNA)][2], imgsize, imgsize*0.75)
-						Renderer.DrawImage(imgtable[Item.GetPlayerOwnerID(item)], cordpos[Entity.GetTeamNum(unitNA)][1], cordpos[Entity.GetTeamNum(unitNA)][2]-(imgsize*0.75+1), imgsize, imgsize*0.75)
-						cordpos[Entity.GetTeamNum(unitNA)][1] = cordpos[Entity.GetTeamNum(unitNA)][1] + (imgsize+1)
+						CordX = CordX + (imgsize+1)
 					elseif Entity.GetTeamNum(unitNA) == 2 then
-						Renderer.DrawImage(imageHandle, cordpos[Entity.GetTeamNum(unitNA)][1], cordpos[Entity.GetTeamNum(unitNA)][2], imgsize, imgsize*0.75)
-						Renderer.DrawImage(imgtable[Item.GetPlayerOwnerID(item)], cordpos[Entity.GetTeamNum(unitNA)][1], cordpos[Entity.GetTeamNum(unitNA)][2]-(imgsize*0.75+1), imgsize, imgsize*0.75)
-						cordpos[Entity.GetTeamNum(unitNA)][1] = cordpos[Entity.GetTeamNum(unitNA)][1] - (imgsize+1)
+						CordX = CordX - (imgsize+1)
 					end
 					
 				end
