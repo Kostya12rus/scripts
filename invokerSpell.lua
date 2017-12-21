@@ -39,10 +39,10 @@ function invoker.OnUpdate()
     
     if NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
 
-    local Q = NPC.GetAbility(myHero,"invoker_quas") 
-    local W = NPC.GetAbility(myHero,"invoker_wex") 
-    local E = NPC.GetAbility(myHero,"invoker_exort") 
-    local R = NPC.GetAbility(myHero,"invoker_invoke") 
+    local Q = NPC.GetAbilityByIndex(myHero, 0)
+    local W = NPC.GetAbilityByIndex(myHero, 1)
+    local E = NPC.GetAbilityByIndex(myHero, 2)
+    local R = NPC.GetAbilityByIndex(myHero, 5)
     local myMana = NPC.GetMana(myHero)
      if Menu.IsKeyDownOnce(invoker.optionColdSnap) then 
         invoker.coldSnapInstant(Q,W,E,R, myMana)
@@ -91,6 +91,7 @@ function invoker.OnUpdate()
         return
     end 
     local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+    local modifiers = NPC.GetModifiers(enemy)
     -- for i,v in ipairs(modifiers) do
     --     Log.Write(Modifier.GetName(v))
     -- end 

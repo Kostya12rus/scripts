@@ -21,8 +21,8 @@ HpMpBar.Locale = {
 		["english"] = "HpMpBar"
 	},
 	["desc"] = {
-		["english"] = "HpMpBar v0.2.1",
-		["russian"] = "HpMpBar v0.2.1"
+		["english"] = "HpMpBar v0.2.2",
+		["russian"] = "HpMpBar v0.2.2"
 	},
 	["bary"] = {
 		["english"] = "Height in percent",
@@ -235,7 +235,7 @@ function HpMpBar.OnDraw()
 			local Hp, HpMax = Entity.GetHealth(Unit), Entity.GetMaxHealth(Unit)
 			local HpPercent = Hp / HpMax
 
-			local Mp, MpMax = NPC.GetMana(Unit), NPC.GetMaxMana(Unit)
+			local Mp, MpMax = math.ceil(NPC.GetMana(Unit)), math.ceil(NPC.GetMaxMana(Unit))
 			local MpPercent = Mp / MpMax
 
 			local alpha = 255
@@ -316,15 +316,17 @@ function HpMpBar.OnDraw()
 			local center_x, center_y = x_center - math.ceil(HpMpBar.GetSize() / 4), y_center + math.floor(bary * 2.5)
 			local center_x_r, center_y_r = x_center + math.ceil(HpMpBar.GetSize() / 4), y_center + math.floor(bary * 2.5)
 
-			Renderer.SetDrawColor(0, 100, 0, alpha)
-			Renderer.DrawFilledRect(x + math.floor((HpMpBar.GetSize() - 4) * HpPercent), y, HpMpBar.GetSize() - 4 - math.floor((HpMpBar.GetSize() - 4) * HpPercent), bary)
-			if myHero and Entity.IsSameTeam(myHero, Unit) and NPC.IsVisible(Unit) then
-				Renderer.SetDrawColor(0, 200, 200, alpha)
-			else
-				Renderer.SetDrawColor(0, 200, 0, alpha)
+			if HpPercent == HpPercent then
+				Renderer.SetDrawColor(0, 100, 0, alpha)
+				Renderer.DrawFilledRect(x + math.floor((HpMpBar.GetSize() - 4) * HpPercent), y, HpMpBar.GetSize() - 4 - math.floor((HpMpBar.GetSize() - 4) * HpPercent), bary)
+				if myHero and Entity.IsSameTeam(myHero, Unit) and NPC.IsVisible(Unit) then
+					Renderer.SetDrawColor(0, 200, 200, alpha)
+				else
+					Renderer.SetDrawColor(0, 200, 0, alpha)
+				end
+				Renderer.DrawFilledRect(x, y, math.floor((HpMpBar.GetSize() - 4) * HpPercent), bary)
+				Renderer.SetDrawColor(255, 255, 255, alpha)
 			end
-			Renderer.DrawFilledRect(x, y, math.floor((HpMpBar.GetSize() - 4) * HpPercent), bary)
-			Renderer.SetDrawColor(255, 255, 255, alpha)
 
 			if bayback_cd_p <= 0 and not Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and GUI.IsEnabled(HpMpBar.Identity .. "baybackpanel") then
 				Renderer.SetDrawColor(255, 180, 0, alpha)
@@ -332,13 +334,13 @@ function HpMpBar.OnDraw()
 			end
 
 
-
-			Renderer.SetDrawColor(0, 0, 100, alpha)
-			Renderer.DrawFilledRect(x + math.floor((HpMpBar.GetSize() - 4) * MpPercent), y + bary, HpMpBar.GetSize() - 4 - math.floor((HpMpBar.GetSize() - 4) * MpPercent), bary)
-			Renderer.SetDrawColor(0, 0, 255, alpha)
-			Renderer.DrawFilledRect(x, y + bary, math.floor((HpMpBar.GetSize() - 4) * MpPercent), bary)
-			Renderer.SetDrawColor(255, 255, 255, alpha)
-
+			if MpPercent == MpPercent then
+				Renderer.SetDrawColor(0, 0, 100, alpha)
+				Renderer.DrawFilledRect(x + math.floor((HpMpBar.GetSize() - 4) * MpPercent), y + bary, HpMpBar.GetSize() - 4 - math.floor((HpMpBar.GetSize() - 4) * MpPercent), bary)
+				Renderer.SetDrawColor(0, 0, 255, alpha)
+				Renderer.DrawFilledRect(x, y + bary, math.floor((HpMpBar.GetSize() - 4) * MpPercent), bary)
+				Renderer.SetDrawColor(255, 255, 255, alpha)
+			end
 			if GUI.IsEnabled(HpMpBar.Identity .. "altinfohpmp") and Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) then
 				--Log.Write((#("720") * (math.floor(((math.floor((12 + fontoff) * scale)) / 2.5) + 0.5) + 1)) - 1)
 				if GUI.IsEnabled(HpMpBar.Identity .. "showhp") then
@@ -434,7 +436,7 @@ function HpMpBar.OnChatEvent(chatEvent)
 end
 
 function HpMpBar.OnParticleCreate(particle)
-	if particle.name and particle.name == "teleport_end" and Hero.GetPlayerID(particle.entityForModifiers) then
+	if particle.name and particle.name == "teleport_end" and particle.entityForModifiers and Hero.GetPlayerID(particle.entityForModifiers) then
 		HpMpBar.TpTime[Hero.GetPlayerID(particle.entityForModifiers)] = GameRules.GetGameTime()
 	end
 end
