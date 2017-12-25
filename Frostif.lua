@@ -6,17 +6,12 @@ Frostif.key = Menu.AddKeyOption({"Kostya12rus","frostif"},"Key for ...",Enum.But
 
 function Frostif.OnParticleCreate(particle)
 	if not Heroes.GetLocal() or not Menu.IsEnabled(Frostif.optionEnable) then return end
-	-- Log.Write("OnParticleCreate: index = "..tostring(particle.index)..", entity = "..NPC.GetUnitName(particle.entity)..", particleNameIndex = "..tostring(particle.particleNameIndex)
-	-- ..", attachType = "..tostring(particle.attachType)..", entityForModifiers = "..tostring(particle.entityForModifiers)..", fullName = "..tostring(particle.fullName)..", name = "..tostring(particle.name))
-	-- end
 	partikle[particle.index] = {}
 	table.insert(partikle[particle.index],particle.name)
 	table.insert(partikle[particle.index],GameRules.GetGameTime())
 end
 function Frostif.OnParticleUpdateEntity(particle)
 	if not Heroes.GetLocal() or not Menu.IsEnabled(Frostif.optionEnable) then return end
-	--Log.Write("OnParticleUpdateEntity: index = "..tostring(particle.index)..", controlPoint = "..tostring(particle.controlPoint)..", entity = "..tostring(particle.entity)
-	--..", attachType = "..tostring(particle.attachType)..", attachment = "..tostring(particle.attachment)..", position = "..tostring(particle.position)..", includeWearables = "..tostring(particle.includeWearables))
 	partikle[particle.index][10] = particle.position
 end
 function Frostif.OnParticleUpdate(particle)
@@ -98,7 +93,7 @@ function Frostif.OnDraw()
 			if vis1 or vis2 then
 				Renderer.DrawLine(x1,y1,x2,y2)
 			end
-			Frostif.DrawCircle(artic[4], 50)
+			Frostif.DrawCircle(artic[4], 70)
 		elseif artic[1] == "pudge_meathook" then
 			x1,y1,vis1 = Renderer.WorldToScreen(artic[3])
 			x2,y2,vis2 = Renderer.WorldToScreen(artic[10])
@@ -107,7 +102,7 @@ function Frostif.OnDraw()
 				Renderer.DrawLine(x1,y1,x2,y2)
 				Renderer.DrawImage(imagePudge,x2,y2,32,32)
 			end
-			if artic[2]+0.1 <= GameRules.GetGameTime() then
+			if artic[2]+0.5 >= GameRules.GetGameTime() then
 				hook = NPC.GetAbility(myHero,"custom_pudge_meat_hook")
 				if hook and Ability.IsCastable(hook,NPC.GetMana(myHero)) and Entity.IsAlive(myHero) and artic[10]:Distance(myPos):Length2D() < 1000 then
 					if Menu.IsKeyDown(Frostif.key) then
@@ -208,6 +203,18 @@ function Frostif.OnDraw()
 					end
 				end
 			end
+		elseif NPC.GetUnitName(myHero) == "npc_dota_hero_drow_ranger" then
+			drowshot = NPC.GetAbility(Heroes.GetLocal(),"drow_shoot_arrow_lua")
+			local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+			if enemy == nil then return end
+			enemypos = Entity.GetAbsOrigin(enemy)
+			if enemypos:Distance(myPos):Length2D() < 500 then
+				if drowshot and Ability.IsCastable(drowshot,NPC.GetMana(myHero)) then
+					if not NPC.IsRunning(enemy) then
+						Ability.CastPosition(drowshot,Entity.GetAbsOrigin(enemy))
+					end
+				end
+			end
 		elseif NPC.GetUnitName(myHero) == "npc_dota_hero_templar_assassin" then
 			gase = NPC.GetAbility(Heroes.GetLocal(),"refraction_lua") 
 			if templartick <= GameRules.GetGameTime() then
@@ -221,18 +228,6 @@ function Frostif.OnDraw()
 					end
 				end
 				templartick = GameRules.GetGameTime() + 0.1
-			end
-		elseif NPC.GetUnitName(myHero) == "npc_dota_hero_drow_ranger" then
-			drowshot = NPC.GetAbility(Heroes.GetLocal(),"drow_shoot_arrow_lua")
-			local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
-			if enemy == nil then return end
-			enemypos = Entity.GetAbsOrigin(enemy)
-			if enemypos:Distance(myPos):Length2D() < 500 then
-				if drowshot and Ability.IsCastable(drowshot,NPC.GetMana(myHero)) then
-					if not NPC.IsRunning(enemy) then
-						Ability.CastPosition(drowshot,Entity.GetAbsOrigin(enemy))
-					end
-				end
 			end
 		end
 	end
@@ -250,26 +245,24 @@ function Frostif.OnDraw()
 			ypos = ypos + 12
 		end
 	end
-	 --[[ -- pudge wars custom_pudge_meat_hook -- teches mine summo place_propulsion_mine_lua detonate_propulsion_mine_lua -- furion maining  furion_teleport_lua -- enchanters dmg impetus_lua -- puck ogre war custom_puck_phase_shift -- sniper zoombbe  sniper_ground_shot_lua -- morg war custom_nether_swap -- wiwer speed shakuchi_lua -- drow aroow drow_shoot_arrow_lua -- Chain Frost Tag conjure_image_lua]]--
 end
 
 function Frostif.TemplarCast()
 	local mindist = false
-	
 	if projectiless then
 		for index,key in pairs(projectiless) do
 			local t = GameRules.GetGameTime() - key[3]
 			local curPos = key[1] + key[2]:Scaled(t)
 			local dist = curPos:Distance(Entity.GetAbsOrigin(Heroes.GetLocal())):Length2D()
-			if dist <= 200 then
-				local mindist = true
+			if dist <= 290 then
+				mindist = true
 			end		
 			if key[3]+10 <= GameRules.GetGameTime() then
 				projectiless[index] = nil
 			end
 		end
-		return mindist
 	end
+	return mindist
 end
 
 function Frostif.invokerCast(one,two,tre)
@@ -312,20 +305,20 @@ function Frostif.PositionAngle(nps,rotation,range)
 end
 
 function Frostif.init()
-	imagePudge = Renderer.LoadImage("resource/flash3/images/miniheroes/pudge.png")
-	timetick = 0
-	weavirtick = 0
-	invokertik = 0
-	templartick = 0
-	partikle = {}
-	animationtable = {}
-	projectiless = {}
+  imagePudge = Renderer.LoadImage("resource/flash3/images/miniheroes/pudge.png")
+  timetick = 0
+  weavirtick = 0
+  invokertik = 0
+  templartick = 0
+  partikle = {}
+  animationtable = {}
+  projectiless = {}
 end
 function Frostif.OnGameStart()
-	Frostif.init()
+  Frostif.init()
 end
 function Frostif.OnGameEnd()
-	Frostif.init()
+  Frostif.init()
 end
 Frostif.init()
 return Frostif

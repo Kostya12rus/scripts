@@ -1,227 +1,254 @@
-GUI = {}
-GUI.Enabled = Menu.AddOption({ "GUI" }, "Enable", "")
-GUI.InGameMenu = Menu.AddOption({ "GUI" }, "In-game menu", "")
-GUI.Key = Menu.AddKeyOption({ "GUI" }, "Key", Enum.ButtonCode.KEY_BACKQUOTE)
-GUI.Locale =  Menu.AddOption({ "GUI"}, "Localization", "Select your primary language", 1, 3 )
-Menu.SetValueName(GUI.Locale, 1, "English")
-Menu.SetValueName(GUI.Locale, 2, "Russian")
-Menu.SetValueName(GUI.Locale, 3, "Chinese")
-GUI.SelectedTheme =  Menu.AddOption({ "GUI"}, "Theme", "Select GUI theme", 1, 3 )
-Menu.SetValueName(GUI.SelectedTheme, 1, "Default")
-Menu.SetValueName(GUI.SelectedTheme, 2, "Dark")
-Menu.SetValueName(GUI.SelectedTheme, 3, "Mono")
-Menu.SetValueName(GUI.SelectedTheme, 4, "Red")
-GUI.Languages = {
-	[1] = "english",
-	[2] = "russian",
-	[3] = "chinese"
+GUI					= {}
+GUI.Enabled			= Menu.AddOption({ "GUI" },	"Enable", "")
+GUI.InGameMenu		= Menu.AddOption({ "GUI" },	"In-game menu", "")
+GUI.Locale			= Menu.AddOption({ "GUI"},	"Localization", "Select your primary language", 1, 3)
+GUI.SelectedTheme	= Menu.AddOption({ "GUI"},	"Theme", "Select GUI theme", 1, 3)
+GUI.LockPanel		= Menu.AddOption({ "GUI" },	"Lock panel position", "")
+GUI.Key				= Menu.AddKeyOption({ "GUI" }, "Key", Enum.ButtonCode.KEY_BACKQUOTE)
+Menu.SetValueName(GUI.Locale,			1,	"English")
+Menu.SetValueName(GUI.Locale,			2,	"Russian")
+Menu.SetValueName(GUI.Locale,			3,	"Chinese")
+Menu.SetValueName(GUI.SelectedTheme,	1,	"Default")
+Menu.SetValueName(GUI.SelectedTheme,	2,	"Dark")
+Menu.SetValueName(GUI.SelectedTheme,	3,	"Mono")
+GUI.Languages	= {
+	[1]	= "english",
+	[2]	= "russian",
+	[3]	= "chinese"
 }
-GUI.SelectedMenu = ":about"
-GUI.TempSelectedMenu = ""
-GUI.SelectedCategory = 0
-GUI.SelectedLanguage = nil
-GUI.SelectedMenuPage = 0
-GUI.CurrentKey = ""
-GUI.DownKeyType = -1
-GUI.Keys = {}
-GUI.Items = {}
-GUI.Font = {}
-GUI.Font.Menu = Renderer.LoadFont("Arial", 17, Enum.FontWeight.BOLD)
-GUI.Font.Content = Renderer.LoadFont("Arial", 18, Enum.FontWeight.BOLD)
-GUI.Font.ContentBold = Renderer.LoadFont("Arial", 17, Enum.FontWeight.BOLD)
-GUI.Font.ContentSmallBold = Renderer.LoadFont("Arial", 15, Enum.FontWeight.BOLD)
-GUI.Font.UltraSmallBold = Renderer.LoadFont("Arial", 11, Enum.FontWeight.BOLD)
-GUI.Font.Header = Renderer.LoadFont("Arial", 19, Enum.FontWeight.BOLD)
-GUI.Font.Search = Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
-GUI.Font.Footer = Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
-GUI.GameState = -2
-GUI.Config = "GUI"
-GUI.Version = 171206
-GUI.TextVersion = 'v 17.12.06'
+GUI.SelectedMenu					= ":about"
+GUI.TempSelectedMenu				= ""
+GUI.SelectedCategory				= 0
+GUI.SelectedLanguage				= nil
+GUI.SelectedMenuPage				= 0
+GUI.CurrentKey						= ""
+GUI.DownKeyType						= -1
+GUI.Keys							= {}
+GUI.Items							= {}
+GUI.Font							= {}
+GUI.Font.Menu						= Renderer.LoadFont("Arial", 17, Enum.FontWeight.BOLD)
+GUI.Font.Content					= Renderer.LoadFont("Arial", 18, Enum.FontWeight.BOLD)
+GUI.Font.ContentBold				= Renderer.LoadFont("Arial", 17, Enum.FontWeight.BOLD)
+GUI.Font.ContentSmallBold			= Renderer.LoadFont("Arial", 15, Enum.FontWeight.BOLD)
+GUI.Font.UltraSmallBold				= Renderer.LoadFont("Arial", 11, Enum.FontWeight.BOLD)
+GUI.Font.Header						= Renderer.LoadFont("Arial", 19, Enum.FontWeight.BOLD)
+GUI.Font.Search						= Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
+GUI.Font.Footer						= Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
+GUI.GameState						= -2
+GUI.Config							= "GUI"
+GUI.Version							= 171223
+GUI.TextVersion						= 'v 17.12.23'
 
-GUI.GameStates = {}
-GUI.GameStates.OnGameMenu = -1
-GUI.GameStates.OnLobbyPreload = 0
-GUI.GameStates.OnLobbyLoad = 1
-GUI.GameStates.OnLobbyChoose = 2
-GUI.GameStates.OnLobbyChoosed = 3
-GUI.GameStates.OnGamePreStart = 4
-GUI.GameStates.OnGameStart = 5
-GUI.GameStates.OnGameEnd = 6
-GUI.GameStates.OnGameStateChanged = 7
+GUI.GameStates						= {}
+GUI.GameStates.OnGameMenu			= -1
+GUI.GameStates.OnLobbyPreload		= 0
+GUI.GameStates.OnLobbyLoad			= 1
+GUI.GameStates.OnLobbyChoose		= 2
+GUI.GameStates.OnLobbyChoosed		= 3
+GUI.GameStates.OnGamePreStart		= 4
+GUI.GameStates.OnGameStart			= 5
+GUI.GameStates.OnGameEnd			= 6
+GUI.GameStates.OnGameStateChanged	= 7
 
-GUI.TimeOutPause = {}
-GUI.TimeOut = {}
-GUI.Pause = {}
+GUI.TimeOutPause					= {}
+GUI.TimeOut							= {}
+GUI.Pause							= {}
 
-GUI.MenuType = {}
-GUI.MenuType.CheckBox = 0
-GUI.MenuType.TextBox = 1
-GUI.MenuType.ImageBox = 2
-GUI.MenuType.Label = 3
-GUI.MenuType.Key = 4
-GUI.MenuType.Button = 5
-GUI.MenuType.Slider = 6
-GUI.MenuType.OrderBox = 7
-GUI.MenuType.SelectBox = 8
+GUI.MenuType						= {}
+GUI.MenuType.CheckBox				= 0
+GUI.MenuType.TextBox				= 1
+GUI.MenuType.ImageBox				= 2
+GUI.MenuType.Label					= 3
+GUI.MenuType.Key					= 4
+GUI.MenuType.Button					= 5
+GUI.MenuType.Slider					= 6
+GUI.MenuType.OrderBox				= 7
+GUI.MenuType.SelectBox				= 8
 
-GUI.DEBUG = {}
-GUI.DEBUG.Enabled = false
-GUI.DEBUG.Variables = {}
+GUI.DEBUG							= {}
+GUI.DEBUG.Enabled					= false
+GUI.DEBUG.Variables					= {}
 
-GUI.Actions = {}
-GUI.Actions.MoveHeader = false
+GUI.Actions							= {}
+GUI.Actions.MoveHeader				= false
 
-GUI.Theme = {}
-GUI.Theme.Background = nil
-GUI.Theme.MenuInActive = nil
-GUI.Theme.MenuOnMouse = nil
-GUI.Theme.MenuActive = nil
-GUI.Theme.CheckBoxInActive = nil
-GUI.Theme.CheckBoxOnMouse = nil
-GUI.Theme.CheckBoxActive = nil
-GUI.Theme.TextBoxInActive = nil
-GUI.Theme.TextBoxActive = nil
-GUI.Theme.NextInActive = nil
-GUI.Theme.NextActive = nil
-GUI.Theme.PrevInActive = nil
-GUI.Theme.PrevActive = nil
-GUI.Theme.MenuCatActive = nil
-GUI.Theme.MenuNextActive = nil
-GUI.Theme.MenuPrevActive = nil
-GUI.Theme.KeyBox = nil
-GUI.Theme.Button = {}
-GUI.Theme.Button.InActive = {}
-GUI.Theme.Button.InActive.Left = nil
-GUI.Theme.Button.InActive.Center = nil
-GUI.Theme.Button.InActive.Right = nil
-GUI.Theme.Button.Active = {}
-GUI.Theme.Button.Active.Left = nil
-GUI.Theme.Button.Active.Center = nil
-GUI.Theme.Button.Active.Right = nil
-GUI.Theme.Slider = nil
-GUI.Theme.SliderBase = nil
-GUI.Theme.SliderFill = nil
-GUI.Theme.CheckInActive = nil
-GUI.Theme.CheckActive = nil
-GUI.Theme.Category = nil
-GUI.Theme.Back = nil
-GUI.Theme.RadioActive = nil
-GUI.Theme.RadioInActive = nil
-GUI.Theme.Close = nil
-GUI.Theme.Menu = nil
+GUI.Theme							= {}
+GUI.Theme.MenuItem					= nil
+GUI.Theme.CheckBoxInActive			= nil
+GUI.Theme.CheckBoxOnMouse			= nil
+GUI.Theme.CheckBoxActive			= nil
+GUI.Theme.Slider					= nil
+GUI.Theme.CheckInActive				= nil
+GUI.Theme.CheckActive				= nil
+GUI.Theme.Category					= nil
+GUI.Theme.Back						= nil
+GUI.Theme.RadioActive				= nil
+GUI.Theme.RadioInActive				= nil
+GUI.Theme.Close						= nil
+GUI.Theme.Menu						= Renderer.LoadImage("resource/flash3/images/badges/ti6_battle_pass_badge_4.png")
 
-GUI.Settings = {}
-GUI.Settings.PosX = -1
-GUI.Settings.PosY = -1
-GUI.Storage = {}
+GUI.Settings						= {}
+GUI.Settings.PosX					= -1
+GUI.Settings.PosY					= -1
+GUI.offsetPosX						= 0
+GUI.offsetPosY						= 0
+GUI.Storage							= {}
 
-GUI.Data = {}
-GUI.ImageCashe = {}
-GUI.CallBackKey = {}
-GUI.Subscriptions = {}
-GUI.HeroesIconPath = "resource/flash3/images/heroes/"
+GUI.Data							= {}
+GUI.ImageCashe						= {}
+GUI.CallBackKey						= {}
+GUI.Subscriptions					= {}
+GUI.HeroesIconPath					= "resource/flash3/images/heroes/"
+GUI.IsInputCaptured					= false
+GUI.ShowDesc						= false
 
-GUI.Category = {}
-GUI.Category.General = 0
-GUI.Category.Heroes = 1
-GUI.Category.Items = 2
-GUI.CategoryName = {
-	["english"] = {
-		[0] = "General",
-		[1] = "Heroes",
-		[2] = "Items"
+GUI.Category						= {}
+GUI.Category.General				= 0
+GUI.Category.Heroes					= 1
+GUI.Category.Items					= 2
+GUI.CategoryName	= {
+	[0]	= "G",
+	[1]	= "H",
+	[2]	= "I"
+}
+GUI.ActiveCategories				= {	[0] = false, [1] = false, [2] = false }
+GUI.TextValues	= {
+	["english"]	= {
+		["changelog"]	= "",
+		["version_s"]	= "This script requires GUI version ",
+		["version_e"]	= " or higher",
+		["page"]		= "Page ",
+		["of"]			= " of ",
+		["back"]		= "Back",
+		["by"]			= " by "
 	},
 	["russian"] = {
-		[0] = "Общие",
-		[1] = "Герои",
-		[2] = "Предметы"
+		["changelog"]	= "",
+		["version_s"]	= "Данный скрипт требует GUI версии ",
+		["version_e"]	= " или выше",
+		["page"]		= "Страница ",
+		["of"]			= " из ",
+		["back"]		= "Назад",
+		["by"]			= " от "
 	},
 	["chinese"] = {
-		[0] = "常见",
-		[1] = "英雄",
-		[2] = "对象"
-	}
-}
-GUI.ActiveCategories = { [0] = false, [1] = false, [2] = false }
-
-GUI.TextValues = {
-	["english"] = {
-		["changelog"] = "",
-		["version_s"] = "This script requires GUI version ",
-		["version_e"] = " or higher",
-		["page"] = "Page ",
-		["of"] = " of ",
-		["back"] = "Back",
-		["by"] = " by "
-	},
-	["russian"] = {
-		["changelog"] = "",
-		["version_s"] = "Данный скрипт требует GUI версии ",
-		["version_e"] = " или выше",
-		["page"] = "Страница ",
-		["of"] = " из ",
-		["back"] = "Назад",
-		["by"] = " от "
-	},
-	["chinese"] = {
-		["changelog"] = "",
-		["version_s"] = "這個腳本需要一個 GUI ",
-		["version_e"] = "或更高版本",
-		["page"] = "頁 ",
-		["of"] = " 從 ",
-		["back"] = "前",
-		["by"] = " 从 "
+		["changelog"]	= "",
+		["version_s"]	= "這個腳本需要一個 GUI ",
+		["version_e"]	= "或更高版本",
+		["page"]		= "頁 ",
+		["of"]			= " 從 ",
+		["back"]		= "前",
+		["by"]			= " 从 "
 	}
 }
 
 GUI.ThemeColors = {}
 GUI.ThemeColors["Default"] = {
-	Accent = "fff",
-	Version = "fff",
-	HeaderInActive = "fff",
-	HeaderActive = "fff",
-	Navigation = "7f8fa4",
-	Author = "7f8fa4",
-	MenuDelimeter = "313d4f"
+	Background				= "0f1f2e",
+	OutLine					= "273b4f",
+	Accent					= "fff",
+	Version					= "fff",
+	HeaderInActive			= "fff",
+	HeaderActive			= "fff",
+	Navigation				= "7f8fa4",
+	SliderFill				= "273b4f",
+	SliderBase				= "0096f1",
+	Author					= "7f8fa4",
+	MenuDelimeter			= "313d4f",
+	MenuBackgroundInActive	= "0c1420",
+	MenuBackgroundActive	= "26292f",
+	MenuBackgroundOnMouse	= "161f2e",
+	PaginationOutLine		= "273b4f",
+	PaginationBackGround	= "0c1420",
+	PaginationColor			= "fff",
+	TextBoxOutLine			= "0093f0",
+	TextBoxBackGround		= "16283a",
+	TextBoxColorActive		= "fff",
+	TextBoxColorInActive	= "9b9b9b",
+	ButtonOutLine			= "0093f0",
+	ButtonBackGround		= "16283a",
+	ButtonColorActive		= "fff",
+	ButtonColorInActive		= "9b9b9b",
+	KeyBoxOutLine			= "0093f0",
+	KeyBoxBackGround		= "16283a",
+	KeyBoxBackGroundActive	= "00a0f9",
+	KeyBoxColorActive		= "fff",
+	KeyBoxColorInActive		= "9b9b9b"
 }
 GUI.ThemeColors["Dark"] = {
-	Accent = "fff",
-	Version = "fff",
-	HeaderInActive = "fff",
-	HeaderActive = "fff",
-	Navigation = "7f8fa4",
-	Author = "7f8fa4",
-	MenuDelimeter = "313d4f"
+	Background				= "0c1117",
+	OutLine					= "273b4f",
+	Accent					= "fff",
+	Version					= "fff",
+	HeaderInActive			= "fff",
+	HeaderActive			= "fff",
+	Navigation				= "7f8fa4",
+	SliderFill				= "273b4f",
+	SliderBase				= "0096f1",
+	Author					= "7f8fa4",
+	MenuDelimeter			= "313d4f",
+	MenuBackgroundInActive	= "0c1117",
+	MenuBackgroundActive	= "121920",
+	MenuBackgroundOnMouse	= "0f141c",
+	PaginationOutLine		= "273b4f",
+	PaginationBackGround	= "0c1117",
+	PaginationColor			= "fff",
+	TextBoxOutLine			= "0093f0",
+	TextBoxBackGround		= "16283a",
+	TextBoxColorActive		= "fff",
+	TextBoxColorInActive	= "9b9b9b",
+	ButtonOutLine			= "0093f0",
+	ButtonBackGround		= "16283a",
+	ButtonColorActive		= "fff",
+	ButtonColorInActive		= "9b9b9b",
+	KeyBoxOutLine			= "0093f0",
+	KeyBoxBackGround		= "16283a",
+	KeyBoxBackGroundActive	= "00a0f9",
+	KeyBoxColorActive		= "fff",
+	KeyBoxColorInActive		= "9b9b9b"
 }
 GUI.ThemeColors["Mono"] = {
-	Accent = "fff",
-	Version = "fff",
-	HeaderInActive = "fff",
-	HeaderActive = "fff",
-	Navigation = "879999",
-	Author = "879999",
-	MenuDelimeter = "1f2024"
+	Background				= "0f1113",
+	OutLine					= "191a1f",
+	Accent					= "fff",
+	Version					= "fff",
+	HeaderInActive			= "fff",
+	HeaderActive			= "fff",
+	Navigation				= "879999",
+	SliderFill				= "464d4b",
+	SliderBase				= "879999",
+	Author					= "879999",
+	MenuDelimeter			= "1f2024",
+	MenuBackgroundInActive	= "000000",
+	MenuBackgroundActive	= "0f1113",
+	MenuBackgroundOnMouse	= "0f1113",
+	PaginationOutLine		= "191a1f",
+	PaginationBackGround	= "0f1113",
+	PaginationColor			= "fff",
+	TextBoxOutLine			= "3f4545",
+	TextBoxBackGround		= "27282d",
+	TextBoxColorActive		= "fff",
+	TextBoxColorInActive	= "9b9b9b",
+	ButtonOutLine			= "3f4545",
+	ButtonBackGround		= "27282d",
+	ButtonColorActive		= "fff",
+	ButtonColorInActive		= "9b9b9b",
+	KeyBoxOutLine			= "3f4545",
+	KeyBoxBackGround		= "27282d",
+	KeyBoxBackGroundActive	= "545e5b",
+	KeyBoxColorActive		= "fff",
+	KeyBoxColorInActive		= "9b9b9b"
 }
-GUI.ThemeColors["Red"] = {
-	Accent = "222",
-	Version = "fff",
-	HeaderInActive = "000",
-	HeaderActive = "fff",
-	Navigation = "879999",
-	Author = "222",
-	MenuDelimeter = "dde0e5"
-}
+GUI.Colors						= {}
 
-GUI.Colors = {}
-
-GUI.NotifyType = {}
-GUI.NotifyType.Text = 0
-GUI.NotifyType.ImageText = 1
-GUI.NotifyType.ImageTextImage = 2
-GUI.Notices = {}
+GUI.NotifyType					= {}
+GUI.NotifyType.Text				= 0
+GUI.NotifyType.ImageText		= 1
+GUI.NotifyType.ImageTextImage	= 2
+GUI.Notices						= {}
 
 function GUI.Write(text, identity, log)
+	if text == nil then return end
 	identity = identity or GUI.Config
     log = log or true
 	if log then Log.Write("[" .. os.date("%X") .. "]\t" .. identity .. "\t->\t" .. text) end
@@ -260,14 +287,14 @@ function GUI.OnDraw()
 	
 	local leftclick = GUI.CurrentKey == "left" and GUI.DownKeyType == 1
 	
-	if GUI.IsEnabled("gui:show") then 
+	if GUI.IsEnabled("gui:show") then
+		GUI.IsInputCaptured = false
 		GUI.Colors = GUI.ThemeColors[GUI.GetThemeName()]
 		GUI.Draw(leftclick, GUI.CurrentKey == "right" and GUI.DownKeyType == 1)
 	end
 	
 	local w, h = Renderer.GetScreenSize()
 	DrawNotices(w, h, leftclick)
-	
 	
 	if Engine.IsInGame() and Menu.IsEnabled(GUI.InGameMenu) then 
 		local tmi_loc_x = math.floor(w * 0.10)
@@ -312,6 +339,9 @@ end
 function GUI.OnMenuOptionChange(option, oldValue, newValue)
 	if option == GUI.Locale then
 		GUI.SelectedLanguage = GUI.Languages[newValue]
+		for k, v in pairs(GUI.Items) do
+			GUI.DeInitialize(k)
+		end
 	end
 	
 	if option == GUI.SelectedTheme then
@@ -480,6 +510,11 @@ function GUI.Initialize(code, category, name, desc, author, ...)
 	if GUI_Object["switch"] == nil then GUI_Object["switch"] = true end
 	GUI.Items[code] = GUI_Object
 	GUI.Data[code] = 0
+end
+
+function GUI.DeInitialize(code)
+	GUI.Items = removeKey(GUI.Items, code)
+	GUI.Data = removeKey(GUI.Data, code)
 end
 
 function chsize(char)
@@ -683,7 +718,7 @@ function GUI.AddMenuItem(menucode, itemcode, name, control, ...)
 		if select(8, ...) ~= nil then
 			GUI.Items[menucode]["items"][order]["inrow"] = select(8, ...)
 		else
-			GUI.Items[menucode]["items"][order]["inrow"] = 12
+			GUI.Items[menucode]["items"][order]["inrow"] = 11
 		end
 		
 	elseif GUI.MenuType.OrderBox == control then
@@ -757,33 +792,28 @@ function GUI.RemoveMenuItem(code, item)
 	end
 end
 
-local offsetPosX = 0
-local offsetPosY = 0
-
 function GUI.Draw(leftclick, rightclick)
-	local work_h = 974
-	local work_y = 614
-	local workbox_x = 241
-	local workbox_y = 44
-	local limit_y = 490
+	local work_h = 900
+	local work_y = 560
+	local workbox_x = 230
+	local limit_y = 510
 	
-	local menusize_x = 235
-	local menusize_y = 37
-	local menufont_offset = 8
+	local menusize_x = 230
+	local menusize_y = 40
 	
 	local w, h = Renderer.GetScreenSize()
-	local startx = math.floor(w / 2) - 487
-	local starty = math.floor(h / 2) - 307
+	local startx = math.floor(w / 2) - 450
+	local starty = math.floor(h / 2) - 330
 
 	if GUI.Actions.MoveHeader then
 		local mx, my = Input.GetCursorPos()
 		
-		GUI.Set("gui:posx", mx - offsetPosX)
-		GUI.Set("gui:posy", my - offsetPosY)
+		GUI.Set("gui:posx", mx - GUI.offsetPosX)
+		GUI.Set("gui:posy", my - GUI.offsetPosY)
 		if tonumber(GUI.Get("gui:posx")) < 1 then GUI.Set("gui:posx", 1) end
 		if tonumber(GUI.Get("gui:posy")) < 1 then GUI.Set("gui:posy", 1) end
-		if (tonumber(GUI.Get("gui:posx")) + work_h) > w then GUI.Set("gui:posx", w - work_h) end
-		if (tonumber(GUI.Get("gui:posy")) + work_y) > h then GUI.Set("gui:posy", h - work_y) end
+		if (tonumber(GUI.Get("gui:posx")) + work_h + 2) > w then GUI.Set("gui:posx", w - work_h - 2) end
+		if (tonumber(GUI.Get("gui:posy")) + work_y + 2) > h then GUI.Set("gui:posy", h - work_y - 2) end
 	end
 	
 	if GUI.IsEnabled("gui:posx") then
@@ -791,65 +821,57 @@ function GUI.Draw(leftclick, rightclick)
 		starty = tonumber(GUI.Get("gui:posy"))
 	end
 	
-	Renderer.SetDrawColor(hex2rgb("#fff"))
-	Renderer.DrawImage(GUI.Theme.Background, startx, starty, work_h, work_y)
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.OutLine))
+	Renderer.DrawOutlineRect(startx, starty, work_h + 2, work_y + 2)
 
-	Renderer.SetDrawColor(hex2rgb(GUI.Colors.Version))
-	Renderer.DrawText(GUI.Font.ContentSmallBold, startx + work_h - 80, starty + 17, GUI.TextVersion, false)
-	Renderer.SetDrawColor(hex2rgb("#fff"))
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.Background))
+	Renderer.DrawFilledRect(startx + 1, starty + 1, work_h, work_y)
+	
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.OutLine))
+	Renderer.DrawFilledRect(startx + menusize_x + 1, starty + 2, 1, work_y)
 
-	-- Draw Menu Items
-	local nextposition = starty + workbox_y
+	Renderer.SetDrawColor(hex2rgb("#fff"))
 	local nextlocx = startx
 	
-	for k,v in pairs(GUI.CategoryName[GUI.SelectedLanguage]) do
+	for k,v in pairs(GUI.CategoryName) do
 		if GUI.ActiveCategories[k] then
 			local color = GUI.Colors.HeaderInActive
-		
+			Renderer.SetDrawColor(255,255,255,60)
+
 			if	(GUI.SelectedCategory == k) 
 			then 
-				Renderer.DrawImage(GUI.Theme.MenuCatActive, nextlocx + 6, starty + 5, 100, 38)
-				color = GUI.Colors.HeaderActive
-			elseif	Input.IsCursorInRect(nextlocx + 6, starty + 6, 100, 38)
+				Renderer.SetDrawColor(255,255,255,255)
+			elseif	Input.IsCursorInRect(nextlocx, starty, 40, 40)
 			then
+				GUI.IsInputCaptured = true
 				if leftclick then 
 					GUI.SelectedCategory = k
 					GUI.SelectedMenu = ":about"
 					GUI.SelectedMenuPage = 0
 				end
-				Renderer.SetDrawColor(255,255,255,120)
-				Renderer.DrawImage(GUI.Theme.MenuCatActive, nextlocx + 6, starty + 5, 100, 38)
-				Renderer.SetDrawColor(255,255,255,255)
-				color = GUI.Colors.HeaderActive
+				Renderer.SetDrawColor(255,255,255,150)
 			end
+			Renderer.DrawTextCentered(GUI.Font.Header, nextlocx + 21, starty + 20, v, false)
 			
-			Renderer.SetDrawColor(hex2rgb(color))
-			Renderer.DrawTextCenteredX(GUI.Font.Header, nextlocx + 56, starty + 15, v, false)
+			Renderer.SetDrawColor(hex2rgb(GUI.Colors.OutLine))
+			Renderer.DrawFilledRect(nextlocx + 41, starty, 1, 40)
+
 			Renderer.SetDrawColor(hex2rgb("#fff"))
-			nextlocx = nextlocx + 100
+			nextlocx = nextlocx + 41
 		end
 	end
-	
-	nextlocx = nextlocx + 6
-	
-	if leftclick then 
-		if GUI.Actions.MoveHeader then
-			GUI.Actions.MoveHeader = false
-		elseif Input.IsCursorInRect(nextlocx, starty, work_h - (nextlocx - startx), workbox_y) then
-			GUI.Actions.MoveHeader = true
-			local temp_x, temp_y = Input.GetCursorPos()
-			offsetPosX = temp_x - startx
-			offsetPosY = temp_y - starty
-		end
-	end
-	
+	Renderer.SetDrawColor(hex2rgb("#fff"))
+	Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, startx + 192, starty + 20, GUI.TextVersion, false)
+	local nextposition = starty + menusize_y
+		
 	if GUI.TempSelectedMenu ~= "" then
 		GUI.SelectedMenu = GUI.TempSelectedMenu
+		GUI.ShowDesc = false
 		GUI.TempSelectedMenu = ""
 	end
 		
 	local temp_table = GUI.Items
-	local showonpage = 13
+	local showonpage = 12
 	local c = GUI.SelectedMenuPage
 	local i = 0
 
@@ -864,7 +886,7 @@ function GUI.Draw(leftclick, rightclick)
 			end
 		end
 		
-		DrawMenuItem(back_to, startx + 6, nextposition, menusize_x, menusize_y, GUI.TextValues[GUI.SelectedLanguage]["back"], leftclick, "gui_back")
+		DrawMenuItem(back_to, startx + 1, nextposition, menusize_x, menusize_y, GUI.TextValues[GUI.SelectedLanguage]["back"], leftclick, "gui_back")
 		nextposition = nextposition + menusize_y
 	end
 
@@ -880,7 +902,7 @@ function GUI.Draw(leftclick, rightclick)
 			temp_val = temp_val + 1
 			
 			if i >= (c * showonpage) and i < ((c + 1) * showonpage) then 
-				DrawMenuItem(v, startx + 6, nextposition, menusize_x, menusize_y, v["perfect_name"], leftclick, k)
+				DrawMenuItem(v, startx + 1, nextposition, menusize_x, menusize_y, v["perfect_name"], leftclick, k)
 				nextposition = nextposition + menusize_y
 			end
 			i = i + 1
@@ -890,34 +912,60 @@ function GUI.Draw(leftclick, rightclick)
 	local totalpage = math.ceil(temp_val / showonpage)
 	if totalpage > 1 then
 		Renderer.SetDrawColor(hex2rgb(GUI.Colors.Navigation))
-		Renderer.DrawTextCenteredX(GUI.Font.Footer, startx + 120, starty + 536, GUI.TextValues[GUI.SelectedLanguage]["page"] .. (c + 1) .. GUI.TextValues[GUI.SelectedLanguage]["of"] .. totalpage, false)
+		Renderer.DrawTextCentered(GUI.Font.Footer, startx + 115, starty + 540, GUI.TextValues[GUI.SelectedLanguage]["page"] .. (c + 1) .. GUI.TextValues[GUI.SelectedLanguage]["of"] .. totalpage, false)
 		Renderer.SetDrawColor(hex2rgb("#fff"))
 
-		if (c + 1) ~= 1 then
-			Renderer.SetDrawColor(255, 255, 255, 100)
-			if Input.IsCursorInRect(startx + 10, starty + 527, 36, 36) then
+		if (c + 1) ~= 1 then		
+			Renderer.SetDrawColor(hex2rgb(GUI.Colors.PaginationOutLine))
+			Renderer.DrawOutlineRect(startx, starty + 522, 40, 40)
+			Renderer.SetDrawColor(hex2rgb(GUI.Colors.PaginationBackGround))
+			Renderer.DrawFilledRect(startx + 1, starty + 523, 38, 38)
+			
+			Renderer.SetDrawColor(255, 255, 255, 80)
+			if Input.IsCursorInRect(startx + 1, starty + 523, 38, 38) then
+				GUI.IsInputCaptured = true
 				if leftclick then GUI.SelectedMenuPage = GUI.SelectedMenuPage - 1 end 
 				Renderer.SetDrawColor(255, 255, 255, 255)
 			end
-			Renderer.DrawImage(GUI.Theme.MenuPrevActive, startx + 10, starty + 527, 36, 36)
+			Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, startx + 20, starty + 542, "<", false)
 		end
 		
 		if (c + 1) ~= totalpage then
-			Renderer.SetDrawColor(255, 255, 255, 100)
-			if Input.IsCursorInRect(startx + 200, starty + 527, 36, 36) then
+			Renderer.SetDrawColor(hex2rgb(GUI.Colors.PaginationOutLine))
+			Renderer.DrawOutlineRect(startx + 192, starty + 522, 40, 40)
+			Renderer.SetDrawColor(hex2rgb(GUI.Colors.PaginationBackGround))
+			Renderer.DrawFilledRect(startx + 193, starty + 523, 38, 38)
+			
+			Renderer.SetDrawColor(255, 255, 255, 80)
+			if Input.IsCursorInRect(startx + 193, starty + 523, 38, 38) then
+				GUI.IsInputCaptured = true
 				if leftclick then GUI.SelectedMenuPage = GUI.SelectedMenuPage + 1 end 
 				Renderer.SetDrawColor(255, 255, 255, 255)
 			end
-			Renderer.DrawImage(GUI.Theme.MenuNextActive, startx + 200, starty + 527, 36, 36)
+			Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, startx + 213, starty + 542, ">", false)
 		end
 	end
 
-	Renderer.SetDrawColor(hex2rgb("#fff"))
-	
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.OutLine))
+
 	if GUI.SelectedMenu ~= nil and GUI.SelectedMenu ~= ":about" and GUI.Items[GUI.SelectedMenu]["iscat"] == nil then
-		DrawMenuBox(GUI.SelectedMenu, startx, starty, workbox_x, workbox_y, limit_y, leftclick, rightclick)
+		Renderer.DrawFilledRect(startx + 1, starty + 40, work_h, 1)
+		Renderer.SetDrawColor(255, 255, 255, 255)
+		DrawMenuBox(GUI.SelectedMenu, startx, starty, workbox_x, limit_y, leftclick, rightclick)
+	else
+		Renderer.DrawFilledRect(startx + 1, starty + 40, menusize_x + 1, 1)
 	end
 	
+	if leftclick and not Menu.IsEnabled(GUI.LockPanel) then 
+		if GUI.Actions.MoveHeader then
+			GUI.Actions.MoveHeader = false
+		elseif Input.IsCursorInRect(startx, starty, work_h, work_y) and not GUI.IsInputCaptured then
+			GUI.Actions.MoveHeader = true
+			local temp_x, temp_y = Input.GetCursorPos()
+			GUI.offsetPosX = temp_x - startx
+			GUI.offsetPosY = temp_y - starty
+		end
+	end
 end
 
 function DrawNotices(w, h, leftclick)
@@ -975,13 +1023,47 @@ function DrawNotices(w, h, leftclick)
 	end
 end
 
-function DrawMenuBox(k, startx, starty, workbox_x, workbox_y, limit_y, leftclick, rightclick)
+function DrawMenuBox(k, startx, starty, workbox_x, limit_y, leftclick, rightclick)
 	local v = GUI.Items[k]["perfect_name"]
 
 	if k == GUI.SelectedMenu then
 	
-		-- Draw Blocks
-		DrawText(startx + workbox_x + 20, starty + workbox_y + 14, GUI.Items[k]["perfect_desc"])
+		local t = GUI.Items[k]["perfect_author"] .. ' // ' .. GUI.Items[k]["perfect_desc"]
+		if GUI.Items[k]["perfect_desc"] == "" then t = GUI.Items[k]["perfect_author"] end
+		if (utf8.len(t) > 70) then
+			t = utf8sub(t, 0, 58) .. ' ...'
+			
+			local tx = startx + workbox_x + 551
+			local ty = starty
+			local tsize = 41
+			
+			Renderer.SetDrawColor(hex2rgb(GUI.Colors.PaginationOutLine))
+			Renderer.DrawOutlineRect(tx, ty, tsize, tsize)
+			Renderer.SetDrawColor(hex2rgb(GUI.Colors.PaginationBackGround))
+			Renderer.DrawFilledRect(tx + 1, ty + 1, tsize - 2, tsize - 2)
+			
+			Renderer.SetDrawColor(255, 255, 255, 80)
+			if Input.IsCursorInRect(tx + 1, ty + 1, tsize - 2, tsize - 2) then
+				GUI.IsInputCaptured = true
+				Renderer.SetDrawColor(255, 255, 255, 255)
+				if leftclick then
+					if GUI.ShowDesc then
+						GUI.ShowDesc = false
+					else
+						GUI.ShowDesc = true
+					end
+				end
+			end
+			if GUI.ShowDesc then
+				Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, tx + math.floor(tsize / 2), ty + math.floor(tsize / 2), "<", false)
+			else
+				Renderer.DrawTextCentered(GUI.Font.Header, tx + math.floor(tsize / 2), ty + math.floor(tsize / 2) - 4, "...", false)
+			end
+		end
+		
+		Renderer.SetDrawColor(255, 255, 255, 255)
+		Renderer.DrawText(GUI.Font.Menu, startx + workbox_x + 20, starty + 12, t, false)
+
 		local _, count = string.gsub(GUI.Items[k]["perfect_desc"], "\r\n", "")
 		count = count + 1
 		local xt = 30 * count
@@ -990,130 +1072,120 @@ function DrawMenuBox(k, startx, starty, workbox_x, workbox_y, limit_y, leftclick
 		local donotshow = false
 		local realshow = 1
 		
-		if GUI.Items[k]["perfect_version"] ~= nil and GUI.Items[k]["perfect_version"] ~= 0 then
-			if GUI.Items[k]["perfect_version"] > GUI.Version then
-				Renderer.SetDrawColor(hex2rgb('de3333'))
-				Renderer.DrawFilledRect(startx + workbox_x, starty + workbox_y + xt + 10, 725, 40)
-				Renderer.SetDrawColor(hex2rgb('fff'))
-				Renderer.DrawText(GUI.Font.Header, startx + workbox_x + 20, starty + workbox_y + xt + 20, GUI.TextValues[GUI.SelectedLanguage]["version_s"] .. GUI.Items[k]["perfect_version"] .. GUI.TextValues[GUI.SelectedLanguage]["version_e"], false)
-				xt = xt + 40
-			end
-		end
-		
-		for i = 1, Length(GUI.Items[k]["items"]) do
-			if donotshow then break end
-			local value = GUI.Items[k]["items"][i]
-			
-			-- CHECKBOX
-			if value["type"] == GUI.MenuType.CheckBox and GUI.Items[k]["page"] < drawed then
-				if xt + 40 < limit_y then
-					local inpos = Input.IsCursorInRect(startx + workbox_x + 20, starty + workbox_y + 20 + xt, 28, 28)
-					DrawCheckBox(inpos, leftclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, 28, value)
-					xt = xt + 40
-					realshow = realshow + 1
-				else donotshow = true end
+		if not GUI.ShowDesc then 
+
+			if GUI.Items[k]["perfect_version"] ~= nil and GUI.Items[k]["perfect_version"] ~= 0 then
+				if GUI.Items[k]["perfect_version"] > GUI.Version then
+					Renderer.SetDrawColor(hex2rgb('e0bc2d'))
+					Renderer.DrawTextCentered(GUI.Font.Search, startx + workbox_x + math.floor((900 - workbox_x) / 2), starty + 280, GUI.TextValues[GUI.SelectedLanguage]["version_s"] .. GUI.Items[k]["perfect_version"] .. GUI.TextValues[GUI.SelectedLanguage]["version_e"], false)
+					if true then return end
+				end
 			end
 			
-			-- TEXTBOX
-			if value["type"] == GUI.MenuType.TextBox and GUI.Items[k]["page"] < drawed then
-				if xt + 70 < limit_y then
-					local inpos = Input.IsCursorInRect(startx + workbox_x + 20, starty + workbox_y + 20 + xt, 690, 70)
-					DrawTextBox(inpos, leftclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, 690, 36, value)
-					xt = xt + 70
-					realshow = realshow + 1
-				else donotshow = true end
+			for i = 1, Length(GUI.Items[k]["items"]) do
+				if donotshow then break end
+				local value = GUI.Items[k]["items"][i]
+				
+				if value["type"] == GUI.MenuType.CheckBox and GUI.Items[k]["page"] < drawed then
+					if xt + 34 < limit_y then
+						local inpos = Input.IsCursorInRect(startx + workbox_x + 20, starty + 20 + xt, 26, 26)
+						DrawCheckBox(inpos, leftclick, startx + workbox_x + 20, starty + xt + 20, 26, value)
+						xt = xt + 34
+						realshow = realshow + 1
+					else donotshow = true end
+				end
+				
+				if value["type"] == GUI.MenuType.TextBox and GUI.Items[k]["page"] < drawed then
+					if xt + 60 < limit_y then
+						DrawTextBox(leftclick, startx + workbox_x + 20, starty + xt + 20, 630, 32, value)
+						xt = xt + 60
+						realshow = realshow + 1
+					else donotshow = true end
+				end
+				
+				if value["type"] == GUI.MenuType.Slider and GUI.Items[k]["page"] < drawed then
+					if xt + 72 < limit_y then
+						DrawSlider(leftclick, startx + workbox_x + 20, starty + xt + 20, value)
+						xt = xt + 72
+						realshow = realshow + 1
+					else donotshow = true end
+				end
+				
+				if value["type"] == GUI.MenuType.ImageBox and GUI.Items[k]["page"] < drawed then
+					if xt + (32 * math.ceil(Length(value["heroes"]) / value["inrow"])) + 50 < limit_y then
+						local tsy = DrawImageBox(leftclick, startx + workbox_x + 20, starty + xt + 20, value)
+						xt = xt + tsy + 10
+						realshow = realshow + 1
+					else donotshow = true end
+				end
+				
+				if value["type"] == GUI.MenuType.OrderBox and GUI.Items[k]["page"] < drawed then
+					if xt + (32 * math.ceil(Length(value["heroes"]) / 12)) + 50 < limit_y then
+						local tsy = DrawOrderBox(false, leftclick, rightclick, startx + workbox_x + 20, starty + xt + 20, value)
+						xt = xt + tsy + 10
+						realshow = realshow + 1
+					else donotshow = true end
+				end
+				
+				if value["type"] == GUI.MenuType.SelectBox and GUI.Items[k]["page"] < drawed then
+					if xt + math.ceil(Length(value["list"][GUI.SelectedLanguage]) * 25) + 50 < limit_y then
+						DrawSelectBox(leftclick, startx + workbox_x + 20, starty + xt + 20, value)
+						xt = xt + math.ceil(Length(value["list"][GUI.SelectedLanguage]) * 25) + 50
+						realshow = realshow + 1
+					else donotshow = true end
+				end
+				
+				if value["type"] == GUI.MenuType.Label and GUI.Items[k]["page"] < drawed then
+					local _, calculate = string.gsub(value["name"], "\r\n", "")
+					calculate = calculate + 1
+					if xt + (calculate * 30) < limit_y then
+						DrawText(startx + workbox_x + 20, starty + xt + 20, value["name"])
+						xt = xt + (calculate * 30)
+						realshow = realshow + 1
+					else donotshow = true end
+				end
+				
+				if value["type"] == GUI.MenuType.Key and GUI.Items[k]["page"] < drawed then
+					if xt + 40 < limit_y then
+						DrawKeyBox(leftclick, startx + workbox_x + 20, starty + xt + 20, value)
+						xt = xt + 40
+						realshow = realshow + 1
+					else donotshow = true end
+				end
+				 
+				if value["type"] == GUI.MenuType.Button and GUI.Items[k]["page"] < drawed then
+					if xt + 56 < limit_y then
+						DrawButton(startx + workbox_x + 20, starty + xt + 30, value["name"], value["width"],  leftclick, value["callback"])
+						xt = xt + 56
+						realshow = realshow + 1
+					else donotshow = true end
+				end
+				
+				
+				if not donotshow then drawed = drawed + 1 end
 			end
 			
-			-- SLIDER
-			if value["type"] == GUI.MenuType.Slider and GUI.Items[k]["page"] < drawed then
-				if xt + 100 < limit_y then
-					DrawSlider(leftclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, value)
-					xt = xt + 104
-					realshow = realshow + 1
-				else donotshow = true end
+					
+			if donotshow or GUI.Items[k]["page"] ~= 0 then
+				Renderer.SetDrawColor(hex2rgb("#fff"))
+				DrawPagination(k, leftclick, startx + workbox_x + 591, starty, 41, 41, realshow - 1, Length(GUI.Items[k]["items"]), drawed - 1)
 			end
-			
-			-- IMAGEBOX
-			if value["type"] == GUI.MenuType.ImageBox and GUI.Items[k]["page"] < drawed then
-				if xt + (32 * math.ceil(Length(value["heroes"]) / value["inrow"])) + 50 < limit_y then
-					DrawImageBox(leftclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, value)
-					xt = xt + (value["size_y"] * math.ceil(Length(value["heroes"]) / value["inrow"])) + 50
-					realshow = realshow + 1
-				else donotshow = true end
-			end
-			
-			-- ORDERBOX
-			if value["type"] == GUI.MenuType.OrderBox and GUI.Items[k]["page"] < drawed then
-				if xt + (32 * math.ceil(Length(value["heroes"]) / 12)) + 50 < limit_y then
-					DrawOrderBox(false, leftclick, rightclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, value)
-					xt = xt + (32 * math.ceil(Length(value["heroes"]) / 12)) + 50
-					realshow = realshow + 1
-				else donotshow = true end
-			end
-			
-			-- SELECTBOX
-			if value["type"] == GUI.MenuType.SelectBox and GUI.Items[k]["page"] < drawed then
-				if xt + math.ceil(Length(value["list"][GUI.SelectedLanguage]) * 25) + 60 < limit_y then
-					DrawSelectBox(leftclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, value)
-					xt = xt + math.ceil(Length(value["list"][GUI.SelectedLanguage]) * 25) + 60
-					realshow = realshow + 1
-				else donotshow = true end
-			end
-			
-			-- LABEL
-			if value["type"] == GUI.MenuType.Label and GUI.Items[k]["page"] < drawed then
-				local _, calculate = string.gsub(value["name"], "\r\n", "")
-				calculate = calculate + 1
-				if xt + (calculate * 30) < limit_y then
-					DrawText(startx + workbox_x + 20, starty + workbox_y + xt + 20, value["name"])
-					xt = xt + (calculate * 30)
-					realshow = realshow + 1
-				else donotshow = true end
-			end
-			
-			-- KEYBOX
-			if value["type"] == GUI.MenuType.Key and GUI.Items[k]["page"] < drawed then
-				if xt + 70 < limit_y then
-					DrawKeyBox(leftclick, startx + workbox_x + 20, starty + workbox_y + xt + 20, 36, 36, value)
-					xt = xt + 70
-					realshow = realshow + 1
-				else donotshow = true end
-			end
-			 
-			-- BUTTON
-			if value["type"] == GUI.MenuType.Button and GUI.Items[k]["page"] < drawed then
-				if xt + 55 < limit_y then
-					DrawButton(startx + workbox_x + 20, starty + workbox_y + xt + 30, value["name"], value["width"],  leftclick, value["callback"])
-					xt = xt + 55
-					realshow = realshow + 1
-				else donotshow = true end
-			end
-			
-			
-			if not donotshow then drawed = drawed + 1 end
+		else
+			DrawText(startx + workbox_x + 20, starty + 60, GUI.Items[k]["perfect_desc"], GUI.Font.ContentSmallBold)
 		end
 
-		
-		if donotshow or GUI.Items[k]["page"] ~= 0 then
-			Renderer.SetDrawColor(hex2rgb("#fff"))
-			DrawPagination(k, leftclick, startx + workbox_x + 620, starty + workbox_y + 470, 36, 36, realshow - 1, Length(GUI.Items[k]["items"]), drawed - 1)
-		end
-		
-		Renderer.SetDrawColor(hex2rgb(GUI.Colors.Author))
-		Renderer.DrawText(GUI.Font.Menu, startx + 20, starty + 576, v .. GUI.TextValues[GUI.SelectedLanguage]["by"] .. GUI.Items[k]["perfect_author"], false)
 		Renderer.SetDrawColor(hex2rgb("#fff"))
-
 	end
 end
 
 function DrawMenuItem(value, x, y, size_x, size_y, name, click, key)
-	local background_image = GUI.Theme.MenuInActive
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.MenuBackgroundInActive))
 	
 	if key == GUI.SelectedMenu then
-		background_image = GUI.Theme.MenuActive
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.MenuBackgroundActive))
 	else
-		if Input.IsCursorInRect(x + 36, y, size_x - 36, size_y) then
-		
+		if Input.IsCursorInRect(x + 40, y, size_x - 40, size_y) then
+			GUI.IsInputCaptured = true
 			if click then 
 				if key == "gui_back" then
 					GUI.TempSelectedMenu = value
@@ -1122,22 +1194,21 @@ function DrawMenuItem(value, x, y, size_x, size_y, name, click, key)
 				end
 			end
 			
-			
-			background_image = GUI.Theme.MenuOnMouse
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.MenuBackgroundOnMouse))
 		end
 	end
 
-	Renderer.DrawImage(background_image, x, y, size_x, size_y)
+	Renderer.DrawFilledRect(x, y, size_x, size_y)
 	Renderer.SetDrawColor(hex2rgb(GUI.Colors.Accent))
-	Renderer.DrawText(GUI.Font.Menu, x + 46, y + 10, name, false)
+	Renderer.DrawText(GUI.Font.Menu, x + 46, y + 12, name, false)
 	Renderer.SetDrawColor(hex2rgb("#fff"))
 
-	------------------------------------------------------------------------------
 	local menu_icon = GUI.Theme.CheckInActive
 	if key == "gui_back" then 
 		menu_icon = GUI.Theme.Back
 	else
-		if key ~= nil and value["iscat"] == nil and Input.IsCursorInRect(x, y, 36, 36) and click then	
+		if key ~= nil and value["iscat"] == nil and Input.IsCursorInRect(x, y, 40, 40) and click then	
+			GUI.IsInputCaptured = true
 			if  GUI.IsEnabled(key) then
 				GUI.Set(key, 0)
 			else
@@ -1153,80 +1224,150 @@ function DrawMenuItem(value, x, y, size_x, size_y, name, click, key)
 		if not value["switch"] then menu_icon = GUI.Theme.MenuItem end
 	end
 	
-	
-	Renderer.DrawImage(menu_icon, x + 10, y + 10, 16, 16)
+	Renderer.DrawImage(menu_icon, x + 12, y + 12, 16, 16)
 	Renderer.SetDrawColor(hex2rgb(GUI.Colors.MenuDelimeter))
-	Renderer.DrawFilledRect(x + 36, y, 1, size_y)
+	Renderer.DrawFilledRect(x + 40, y, 1, size_y)
+	Renderer.DrawFilledRect(x, y + 39, size_x, 1)
 	Renderer.SetDrawColor(hex2rgb("#fff"))
 end
 
--- CONTROLS
+function DrawButton(x, y, text, width, leftclick, callback)
+	width			= utf8.len(text) * 10
+	if width < 80 then width = 80 end
+	local inpos		= Input.IsCursorInRect(x, y, width + 10, 36)
 
-function DrawButton(x,y, text, width, leftclick, callback)
-	local inpos = Input.IsCursorInRect(x, y, width + 10, 36)
-	Renderer.SetDrawColor(hex2rgb("#fff"))
-	local left = GUI.Theme.Button.InActive.Left
-	local center = GUI.Theme.Button.InActive.Center
-	local right = GUI.Theme.Button.InActive.Right
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.ButtonOutLine))
+	Renderer.DrawOutlineRect(x, y, width, 36)
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.ButtonBackGround))
+	Renderer.DrawOutlineRect(x + 1, y + 1, width - 2, 34)
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.ButtonColorInActive))
 
 	if inpos then
-		left = GUI.Theme.Button.Active.Left
-		center = GUI.Theme.Button.Active.Center
-		right = GUI.Theme.Button.Active.Right
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.ButtonColorActive))
+		
 		if leftclick then
 			callback()
 		end
 	end
-	
-	Renderer.DrawImage(left, x, y, 5, 36)
-	for i = 0, width do
-		Renderer.DrawImage(center, (x + 5) + i, y, 1, 36)
-	end
-	Renderer.DrawImage(right, x + width + 5, y, 5, 36)
-	Renderer.DrawTextCenteredY(GUI.Font.ContentBold, x + 15, y + 17, text, false)
+
+	Renderer.DrawTextCentered(GUI.Font.ContentBold, x + math.floor(width / 2), y + 18, text, false)
 end
 
-function DrawText(x,y,text)
+function DrawKeyBox(click, x, y, value)
+	local key = value["code"]
+	local width = utf8.len(value["name"]) * 10
+					
+	local drawtext = "?"
+	if GUI.Get(key) ~= nil then drawtext = GUI.Get(key) end
+	local key_size = 20 + (utf8.len(drawtext) * 10)
+	
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.Accent))
+	Renderer.DrawTextCenteredY(GUI.Font.Content, x, y + 15, value["name"], false)
+	
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.KeyBoxOutLine))
+	Renderer.DrawOutlineRect(x + width, y, key_size, 30)
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.KeyBoxBackGround))
+
+	local inpos = Input.IsCursorInRect(x + width + 1, y + 1, key_size, 28)
+	if	inpos
+	then 
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.KeyBoxBackGroundActive))
+		if GUI.IsAvReadKey() then
+			if GUI.Get(key) == nil then GUI.Set(key, "") end
+		
+			if GUI.CurrentKey ~= "backspace" then
+				GUI.Set(key, GUI.CurrentKey)
+			end
+			
+			GUI.CurrentKey = ""
+		end
+	end
+	
+	Renderer.DrawFilledRect(x + width + 1, y + 1, key_size - 2, 28)
+	
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.KeyBoxColorActive))
+	
+	if not inpos then
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.KeyBoxColorInActive))
+		Renderer.DrawTextCentered(GUI.Font.ContentBold, x + width + math.floor(key_size / 2), y + 15, drawtext, false)
+	else
+		Renderer.DrawTextCentered(GUI.Font.ContentBold, x + width + math.floor(key_size / 2), y + 15, drawtext, false)
+	end
+	
+	Renderer.SetDrawColor(255, 255, 255, 255)
+end
+
+function DrawText(x, y, text, font)
 	if text == nil then return end
+	font = font or GUI.Font.Menu
 	Renderer.SetDrawColor(hex2rgb("#fff"))
-	Renderer.DrawText(GUI.Font.Menu, x, y, text, false)
+	local ty	= 0
+	local tstr	= ""
+	
+	for q,w,e in text:gmatch("(%s*)(%S+)(%s*)") do
+		if utf8.len(tstr .. " " .. w) < 96 then
+			if tstr == "" then 
+				tstr = w
+			else
+				tstr = tstr .. " " .. w
+			end
+		else
+			Renderer.DrawText(font, x, y + ty, tstr, false)
+			ty = ty + 20
+			tstr = ""
+		end
+	end
+	
+	Renderer.DrawText(font, x, y + ty, tstr, false)
+	return ty
 end
 
 function DrawPagination(key, click, x, y, size_x, size_y, showed, count, totalshowed)
-	-- PREV
 	if GUI.Items[key]["page"] > 0 then 
 		local inpos = Input.IsCursorInRect(x, y, size_x, size_y)
+		
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.PaginationOutLine))
+		Renderer.DrawOutlineRect(x, y, size_x, size_y)
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.PaginationBackGround))
+		Renderer.DrawFilledRect(x + 1, y + 1, size_x - 2, size_y - 2)
+		
+		Renderer.SetDrawColor(255, 255, 255, 80)
 		if inpos then
+			GUI.IsInputCaptured = true
+			Renderer.SetDrawColor(255, 255, 255, 170)
 			if click then
 				GUI.Items[key]["page"] = GUI.Items[key]["page"] - GUI.Items[key]["prevpage"][GUI.Items[key]["page"]]
-				Renderer.DrawImage(GUI.Theme.PrevActive, x, y, size_x, size_y)
-			else
-				Renderer.DrawImage(GUI.Theme.PrevActive, x, y, size_x, size_y)
 			end
-		else
-			Renderer.DrawImage(GUI.Theme.PrevInActive, x, y, size_x, size_y)
 		end
+
+		Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, x + math.floor(size_x / 2), y + math.floor(size_y / 2), "<", false)
 	end
 	
-	-- NEXT
 	if totalshowed ~= count then 
-		local inpos = Input.IsCursorInRect(x + size_x + 10, y, size_x, size_y)
+		local inpos = Input.IsCursorInRect(x + size_x - 1, y, size_x, size_y)
+		
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.PaginationOutLine))
+		Renderer.DrawOutlineRect(x + size_x - 1, y, size_x, size_y)
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.PaginationBackGround))
+		Renderer.DrawFilledRect(x + size_x, y + 1, size_x - 2, size_y - 2)
+		
+		Renderer.SetDrawColor(255, 255, 255, 80)
 		if inpos then
+			GUI.IsInputCaptured = true
+			Renderer.SetDrawColor(255, 255, 255, 170)
 			if click then
 				GUI.Items[key]["page"] = GUI.Items[key]["page"] + showed
 				GUI.Items[key]["prevpage"][GUI.Items[key]["page"]] = showed
-				Renderer.DrawImage(GUI.Theme.NextActive, x + size_x + 10, y, size_x, size_y)
-			else
-				Renderer.DrawImage(GUI.Theme.NextActive, x + size_x + 10, y, size_x, size_y)
 			end
-		else
-			Renderer.DrawImage(GUI.Theme.NextInActive, x + size_x + 10, y, size_x, size_y)
 		end
+
+		Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, x + size_x - 1 + math.floor(size_x / 2), y + math.floor(size_y / 2), ">", false)
 	end
 end
 
 function DrawImageBox(click, x, y, value)
-	Renderer.DrawText(GUI.Font.Menu, x + 10, y + 10, value["name"], false)
+	Renderer.SetDrawColor(255, 255, 255, 255)
+	Renderer.DrawText(GUI.Font.Menu, x, y, value["name"], false)
 	local key = value["code"]
 	local count = 1
 	local tempx = x
@@ -1235,6 +1376,7 @@ function DrawImageBox(click, x, y, value)
 	local datawork = GUI.Data[key]
 	Renderer.SetDrawColor(255, 255, 255, 60)
 	local sortedKeys = getKeysSortedByValue(value["heroes"], function(a, b) return a < b end)		
+	local realWidth = 0 
 	
 	for _, k in ipairs(sortedKeys) do
 		local tempName = k:gsub(value["replace"], "")
@@ -1250,13 +1392,14 @@ function DrawImageBox(click, x, y, value)
 
 		if value["search"] ~= nil and strpos(tempName, string.lower(value["search"])) ~= false then
 			Renderer.SetDrawColor(0, 255, 0, 255)
-			Renderer.DrawOutlineRect(tempx, y + 40, value["size_x"], value["size_y"])
+			Renderer.DrawOutlineRect(tempx, y + 25, value["size_x"], value["size_y"])
 			Renderer.SetDrawColor(255, 255, 255, 60)
 		end
 		
-		local inpos = Input.IsCursorInRect(tempx, y + 40, value["size_x"], value["size_y"])
+		local inpos = Input.IsCursorInRect(tempx, y + 25, value["size_x"], value["size_y"])
 		
 		if inpos then
+			GUI.IsInputCaptured = true
 			if GUI.IsAvReadKey() then
 				if value["search"] == nil then value["search"] = "" end
 			
@@ -1273,7 +1416,7 @@ function DrawImageBox(click, x, y, value)
 		
 		
 			Renderer.SetDrawColor(255, 0, 0, 255)
-			Renderer.DrawOutlineRect(tempx, y + 40, value["size_x"], value["size_y"])
+			Renderer.DrawOutlineRect(tempx, y + 25, value["size_x"], value["size_y"])
 			Renderer.SetDrawColor(255, 255, 255, 60)
 
 			if click then
@@ -1294,13 +1437,14 @@ function DrawImageBox(click, x, y, value)
 		
 		if hasValue(datawork, k) then Renderer.SetDrawColor(255, 255, 255, 255) end
 		
-		Renderer.DrawImage(imageHandle, tempx, y + 40, value["size_x"], value["size_y"])
+		Renderer.DrawImage(imageHandle, tempx, y + 25, value["size_x"], value["size_y"])
 		if inpos or hasValue(datawork,k) then
 			Renderer.SetDrawColor(255, 255, 255, 60)
 		end
 		
-		if count % value["inrow"] == 0 then
+		if (tempx + value["size_x"] + 1) > x + 620 then
 			y = y + value["size_y"]
+			realWidth = (tempx + value["size_x"] + 1) - safe_x
 			tempx = x
 		else
 			tempx = tempx + value["size_x"] + 1
@@ -1309,11 +1453,11 @@ function DrawImageBox(click, x, y, value)
 	end
 	
 	if value["search"] ~= nil and value["last_time"] ~= nil and value["last_time"] + 3 > os.clock() then
-		Renderer.SetDrawColor(80, 80, 80, 40)
-		Renderer.DrawFilledRect(safe_x, safe_y + 40, value["inrow"] * (value["size_x"] + 1), (math.ceil(Length(sortedKeys) / value["inrow"]) * value["size_y"]))
+		Renderer.SetDrawColor(80, 80, 80, 80)
+		Renderer.DrawFilledRect(safe_x, safe_y + 25, realWidth, (y + value["size_y"]) - safe_y)
 	
 		Renderer.SetDrawColor(255, 255, 255, 255)
-		Renderer.DrawTextCentered(GUI.Font.Search, safe_x + math.floor((value["inrow"] * (value["size_x"] + 1)) / 2), safe_y + 40 + math.floor((math.ceil(Length(sortedKeys) / value["inrow"]) * value["size_y"]) / 2), value["search"], false)
+		Renderer.DrawTextCentered(GUI.Font.Search, safe_x + math.floor(realWidth / 2), safe_y + 25 + math.floor(((y + value["size_y"]) - safe_y) / 2), value["search"], false)
 	end
 	
 	if value["search"] ~= nil and value["last_time"] ~= nil and value["last_time"] + 5 < os.clock() then
@@ -1321,48 +1465,12 @@ function DrawImageBox(click, x, y, value)
 	end
 	
 	GUI.Set(key, datawork)
-end
-
-function DrawSelectBox(leftclick, x, y, value)
-	Renderer.SetDrawColor(255, 255, 255, 255)
-	Renderer.DrawText(GUI.Font.Menu, x + 10, y + 10, value["name"], false)
-	local key = value["code"]
-	local count = 1
-	local tempx = x
-	local datawork = GUI.Data[key]
-	y = y + 25
-	for k, v in pairs(value["list"][GUI.SelectedLanguage]) do
-		Renderer.SetDrawColor(255, 255, 255, 160)
-		local inpos = Input.IsCursorInRect(tempx, y + 20, 690, 25)
-		if inpos then
-			if leftclick then
-				if not hasValue(datawork,k) then
-					if Length(datawork) == value["count"] then
-						table.remove(datawork, 1)
-					end
-					datawork[Length(datawork) + 1] = k
-				end
-				
-				if value["callback"] ~= nil then
-					value["callback"](key, datawork)
-				end
-			end
-			Renderer.SetDrawColor(255, 255, 255, 255)
-		end
-		
-		if hasValue(datawork,k) then
-			Renderer.DrawImage(GUI.Theme.RadioActive, tempx, y + 20, 16, 16)
-		else
-			Renderer.DrawImage(GUI.Theme.RadioInActive, tempx, y + 20, 16, 16)
-		end
-		Renderer.DrawText(GUI.Font.ContentSmallBold, tempx + 26, y + 20, v, false)
-		y = y + 25
-	end
-	GUI.Set(key, datawork)
+	return ((y + value["size_y"]) - safe_y) + 25
 end
 
 function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
-	Renderer.DrawText(GUI.Font.Menu, x + 10, y + 10, value["name"], false)
+	Renderer.SetDrawColor(255, 255, 255, 255)
+	Renderer.DrawText(GUI.Font.Menu, x, y, value["name"], false)
 	local key = value["code"]
 	local count = 1
 	local tempx = x
@@ -1371,6 +1479,7 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 	local datawork = GUI.Data[key]
 	Renderer.SetDrawColor(255, 255, 255, 60)
 	local sortedKeys = getKeysSortedByValue(value["heroes"], function(a, b) return a < b end)
+	local realWidth = 0 
 	
 	for _, k in ipairs(sortedKeys) do
 		local tempName = k:gsub(value["replace"], "")
@@ -1386,12 +1495,13 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 		
 		if value["search"] ~= nil and strpos(tempName, string.lower(value["search"])) ~= false then
 			Renderer.SetDrawColor(0, 255, 0, 255)
-			Renderer.DrawOutlineRect(tempx, y + 40, value["size_x"], value["size_y"])
+			Renderer.DrawOutlineRect(tempx, y + 25, value["size_x"], value["size_y"])
 			Renderer.SetDrawColor(255, 255, 255, 60)
 		end
 		
-		local inpos = Input.IsCursorInRect(tempx, y + 40, value["size_x"], value["size_y"])
+		local inpos = Input.IsCursorInRect(tempx, y + 25, value["size_x"], value["size_y"])
 		if inpos then
+			GUI.IsInputCaptured = true
 			if GUI.IsAvReadKey() then
 				if value["search"] == nil then value["search"] = "" end
 			
@@ -1440,10 +1550,10 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 			Renderer.SetDrawColor(255, 255, 255, 60)
 		end
 		
-		Renderer.DrawImage(imageHandle, tempx, y + 40, value["size_x"], value["size_y"])
+		Renderer.DrawImage(imageHandle, tempx, y + 25, value["size_x"], value["size_y"])
 		if hasValue(datawork, k) then
 			Renderer.SetDrawColor(0, 0, 0, 200)
-			Renderer.DrawFilledRect(tempx, y + 40, value["size_x"], value["size_y"])
+			Renderer.DrawFilledRect(tempx, y + 25, value["size_x"], value["size_y"])
 			Renderer.SetDrawColor(255, 255, 255, 255)
 			
 			local drawindex = "";
@@ -1453,38 +1563,96 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 				end
 			end
 			
-			Renderer.DrawTextCentered(GUI.Font.Content, math.floor(tempx + (value["size_x"] / 2)), math.floor(y + 40 + (value["size_y"] / 2)), drawindex, false)
+			Renderer.DrawTextCentered(GUI.Font.Content, math.floor(tempx + (value["size_x"] / 2)), math.floor(y + 25 + (value["size_y"] / 2)), drawindex, false)
 		end
 		
-		if count % 12 == 0 then
+		if (tempx + value["size_x"] + 1) > x + 620 then
 			y = y + value["size_y"]
+			realWidth = (tempx + value["size_x"] + 1) - safe_x
 			tempx = x
 		else
 			tempx = tempx + value["size_x"] + 1
 		end
+		
 		count = count + 1
 	end
 	
 	if value["search"] ~= nil and value["last_time"] ~= nil and value["last_time"] + 3 > os.clock() then
-		Renderer.SetDrawColor(80, 80, 80, 40)
-		Renderer.DrawFilledRect(safe_x, safe_y + 40, 12 * (value["size_x"] + 1), (math.ceil(Length(sortedKeys) / 12) * value["size_y"]))
+		Renderer.SetDrawColor(80, 80, 80, 80)
+		Renderer.DrawFilledRect(safe_x, safe_y + 25, realWidth, (y + value["size_y"]) - safe_y)
 	
 		Renderer.SetDrawColor(255, 255, 255, 255)
-		Renderer.DrawTextCentered(GUI.Font.Search, safe_x + math.floor((12 * (value["size_x"] + 1)) / 2), safe_y + 40 + math.floor((math.ceil(Length(sortedKeys) / 12) * value["size_y"]) / 2), value["search"], false)
+		Renderer.DrawTextCentered(GUI.Font.Search, safe_x + math.floor(realWidth / 2), safe_y + 25 + math.floor(((y + value["size_y"]) - safe_y) / 2), value["search"], false)
 	end
+	
 	
 	if value["search"] ~= nil and value["last_time"] ~= nil and value["last_time"] + 5 < os.clock() then
 		value["search"] = nil
 	end
 	
 	GUI.Set(key, datawork)
+	return ((y + value["size_y"]) - safe_y) + 25
 end
 
-function DrawTextBox(inpos, click, x, y, size_x, size_y, value)
+function DrawSelectBox(leftclick, x, y, value)
+	local key		= value["code"]
+	local count		= 1
+	local tempx		= x
+	local datawork	= GUI.Data[key]
+
+	Renderer.SetDrawColor(255, 255, 255, 255)
+	Renderer.DrawText(GUI.Font.Menu, x, y, value["name"], false)
+	y				= y + 15
+
+	for k, v in pairs(value["list"][GUI.SelectedLanguage]) do
+		Renderer.SetDrawColor(255, 255, 255, 160)
+		local inpos = Input.IsCursorInRect(tempx, y + 20, 690, 25)
+		if inpos then
+			GUI.IsInputCaptured = true
+			if leftclick then
+				if not hasValue(datawork,k) then
+					if Length(datawork) == value["count"] then
+						table.remove(datawork, 1)
+					end
+					datawork[Length(datawork) + 1] = k
+				end
+				
+				if value["callback"] ~= nil then
+					value["callback"](key, datawork)
+				end
+			end
+			Renderer.SetDrawColor(255, 255, 255, 255)
+		end
+		
+		if hasValue(datawork,k) then
+			Renderer.DrawImage(GUI.Theme.RadioActive, tempx, y + 20, 16, 16)
+		else
+			Renderer.DrawImage(GUI.Theme.RadioInActive, tempx, y + 20, 16, 16)
+		end
+		Renderer.DrawText(GUI.Font.ContentSmallBold, tempx + 26, y + 20, v, false)
+		y = y + 25
+	end
+	
+	GUI.Set(key, datawork)
+end
+
+function DrawTextBox(click, x, y, size_x, size_y, value)
 	local key = value["code"]
 	Renderer.SetDrawColor(255, 255, 255, 255)
-	if	inpos
-	then 
+
+	local drawtext = ""
+	if GUI.Get(key) ~= nil then drawtext = GUI.Get(key) end
+	
+	Renderer.DrawText(GUI.Font.Content, x, y, value["name"], false)
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.TextBoxOutLine))
+	Renderer.DrawOutlineRect(x, y + 23, size_x, size_y)
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.TextBoxBackGround))
+	Renderer.DrawFilledRect(x + 1, y + 24, size_x - 2, size_y - 2)
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.TextBoxColorInActive))
+	
+	if	Input.IsCursorInRect(x, y + 23, size_x - size_y, size_y) then 
+		GUI.IsInputCaptured = true
+		Renderer.SetDrawColor(hex2rgb(GUI.Colors.TextBoxColorActive))
 		if GUI.IsAvReadKey() then
 			if GUI.Get(key) == nil then GUI.Set(key, "") end
 		
@@ -1499,20 +1667,17 @@ function DrawTextBox(inpos, click, x, y, size_x, size_y, value)
 			GUI.CurrentKey = ""
 		end
 	end
-
-	local drawtext = "Enter something ..."
-	if GUI.Get(key) ~= nil then drawtext = GUI.Get(key) end
+	Renderer.DrawText(GUI.Font.Menu, x + 10, y + 30, drawtext, false)
 	
-	Renderer.DrawText(GUI.Font.Content, x + 10, y + 10, value["name"], false)
-	if not inpos then
-		Renderer.DrawImage(GUI.Theme.TextBoxInActive, x, y + 35, size_x, size_y)
-		Renderer.SetDrawColor(255, 255, 255, 120)
-		Renderer.DrawText(GUI.Font.Content, x + 10, y + 43, drawtext, false)
+	Renderer.SetDrawColor(255, 255, 255, 100)
+	if	Input.IsCursorInRect(x + size_x - size_y, y + 24, size_y, size_y - 2) then
+		GUI.IsInputCaptured = true
 		Renderer.SetDrawColor(255, 255, 255, 255)
-	else
-		Renderer.DrawImage(GUI.Theme.TextBoxActive, x, y + 35, size_x, size_y)
-		Renderer.DrawText(GUI.Font.Content, x + 10, y + 43, drawtext, false)
+		if click then
+			GUI.Set(key, '')
+		end
 	end
+	Renderer.DrawImage(GUI.Theme.Close, x + size_x - (size_y - 10), y + 23 + math.floor(size_y / 2) - 5, 10, 10)
 end
 
 function DrawSlider(leftclick, x, y, value)
@@ -1521,30 +1686,42 @@ function DrawSlider(leftclick, x, y, value)
 	local full = value["max"] - value["min"]
 	local pos = tonumber(GUI.Get(key)) - value["min"]
 	local percent = math.ceil((pos / full) * 100)
-	local t =  2.45
-	Renderer.DrawText(GUI.Font.Content, x + 10, y + 10, value["name"], false)
-	
+	local t =  2.95
+	Renderer.DrawText(GUI.Font.Content, x, y, value["name"], false)
 	Renderer.SetDrawColor(255, 255, 255, 25)
-	Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, x, y + 74, value["min"], false)
-	if Input.IsKeyDown(Enum.ButtonCode.MOUSE_LEFT) then
-		if Input.IsCursorInRect(x - 5, y + 69, 10, 10) then
+	
+	if Input.IsCursorInRect(x, y + 44, math.floor(string.len(value["min"]) * 8), 12) then
+		GUI.IsInputCaptured = true
+		if Input.IsKeyDown(Enum.ButtonCode.MOUSE_LEFT) then 
 			GUI.Set(key, value["min"])
 		end
-		if Input.IsCursorInRect(x + 250, y + 69, 10, 10) then
+		Renderer.SetDrawColor(255, 255, 255, 150)
+	end
+	Renderer.DrawTextCenteredY(GUI.Font.ContentSmallBold, x, y + 50, value["min"], false)
+	
+	Renderer.SetDrawColor(255, 255, 255, 25)
+	if Input.IsCursorInRect((x + 300) - math.floor(string.len(value["min"]) * 8), y + 44, math.floor(string.len(value["max"]) * 8), 12) then
+		GUI.IsInputCaptured = true
+		if Input.IsKeyDown(Enum.ButtonCode.MOUSE_LEFT) then 
 			GUI.Set(key, value["max"])
 		end
+		Renderer.SetDrawColor(255, 255, 255, 150)
 	end
-	Renderer.DrawTextCentered(GUI.Font.ContentSmallBold, x + 255, y + 74, value["max"], false)
-	Renderer.SetDrawColor(255, 255, 255, 255)
+	Renderer.DrawTextCenteredY(GUI.Font.ContentSmallBold, (x + 300) - math.floor(string.len(value["min"]) * 8), y + 50, value["max"], false)
 	
-	Renderer.DrawImage(GUI.Theme.SliderBase, x, y + 50, 255, 4)
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.SliderFill))
+	Renderer.DrawFilledRect(x, y + 30, 300, 4)
+	
+	Renderer.SetDrawColor(hex2rgb(GUI.Colors.SliderBase))
 	local fil = math.floor(percent * t)
-	Renderer.DrawImage(GUI.Theme.SliderFill, x, y + 50, 5 + fil, 4)
+	Renderer.DrawFilledRect(x, y + 30, 5 + fil, 4)
 	
-	local inpos = Input.IsCursorInRect(x - 10, y + 32, 275, 40)
+	Renderer.SetDrawColor(255, 255, 255, 255)
+	local inpos = Input.IsCursorInRect(x - 10, y + 15, 320, 34)
 	if not inpos then
-		Renderer.DrawImage(GUI.Theme.Slider, 5 + x  + (math.ceil(percent * t) - 8), y + 44, 16, 16)
+		Renderer.DrawImage(GUI.Theme.Slider, 5 + x  + (math.ceil(percent * t) - 8), y + 24, 16, 16)
 	else
+		GUI.IsInputCaptured = true
 		local cx, cy = Input.GetCursorPos()
 
 		if Input.IsKeyDown(Enum.ButtonCode.MOUSE_LEFT) then
@@ -1560,15 +1737,15 @@ function DrawSlider(leftclick, x, y, value)
 			
 			local percent = math.ceil((val / full) * 100)
 
-			Renderer.DrawImage(GUI.Theme.Slider, 5 + x + (math.ceil(percent * t) - 8), y + 44, 16, 16)
+			Renderer.DrawImage(GUI.Theme.Slider, 5 + x + (math.ceil(percent * t) - 8), y + 24, 16, 16)
 		else
-			Renderer.DrawImage(GUI.Theme.Slider, 5 + x + (math.ceil(percent * t) - 8), y + 44, 16, 16)
+			Renderer.DrawImage(GUI.Theme.Slider, 5 + x + (math.ceil(percent * t) - 8), y + 24, 16, 16)
 		end
 	end
 	
-	inpos = Input.IsCursorInRect((x + (240 / 2)) - 30, y + 68, 60, 16)
+	inpos = Input.IsCursorInRect((x + (300 / 2)) - 30, y + 50, 60, 16)
 	if inpos then
-	
+		GUI.IsInputCaptured = true
 		if GUI.IsAvReadKey() and tonumber(GUI.CurrentKey) ~= nil then
 			if value["newvalue"] == nil then value["newvalue"] = "" end
 		
@@ -1601,117 +1778,55 @@ function DrawSlider(leftclick, x, y, value)
 	end
 	
 	if value["newvalue"] ~= nil then
-		Renderer.DrawTextCenteredX(GUI.Font.ContentBold, x + (240 / 2), y + 68, value["newvalue"], false)
+		Renderer.DrawTextCenteredX(GUI.Font.ContentBold, x + (300 / 2), y + 45, value["newvalue"], false)
 	else
-		Renderer.DrawTextCenteredX(GUI.Font.ContentBold, x + (240 / 2), y + 68, GUI.Get(key), false)
-	end
-end
-
-function DrawKeyBox(click, x, y, size_x, size_y, value)
-	local key = value["code"]
-	Renderer.SetDrawColor(255, 255, 255, 255)
-					
-
-	local drawtext = "?"
-	if GUI.Get(key) ~= nil then drawtext = GUI.Get(key) end
-	
-	local offset_x = string.len(value["name"]) * 11
-	if GUI.SelectedLanguage == "russian" then offset_x = math.floor(offset_x / 2) end
-	
-	local inpos = Input.IsCursorInRect(x, y, offset_x + size_x, size_y)
-	if	inpos
-	then 
-		if GUI.IsAvReadKey() then
-			if GUI.Get(key) == nil then GUI.Set(key, "") end
-		
-			if GUI.CurrentKey ~= "backspace" then
-				GUI.Set(key, GUI.CurrentKey)
-			end
-			
-			GUI.CurrentKey = ""
-		end
-	end
-	
-	Renderer.DrawText(GUI.Font.Content, x, y + 10, value["name"], false)
-	if not inpos then
-		Renderer.SetDrawColor(255, 255, 255, 120)
-		Renderer.DrawImage(GUI.Theme.KeyBox, x + offset_x, y + 2, size_x, size_y)
-		Renderer.DrawTextCentered(GUI.Font.ContentBold, x + offset_x + 18, y + 20, drawtext, false)
-		Renderer.SetDrawColor(255, 255, 255, 255)
-	else
-		Renderer.DrawImage(GUI.Theme.KeyBox, x + offset_x, y + 2, size_x, size_y)
-		Renderer.DrawTextCentered(GUI.Font.ContentBold, x + offset_x + 18, y + 20, drawtext, false)
+		Renderer.DrawTextCenteredX(GUI.Font.ContentBold, x + (300 / 2), y + 45, GUI.Get(key), false)
 	end
 end
 
 function DrawCheckBox(inpos, click, x, y, size, value)
 	Renderer.SetDrawColor(255, 255, 255, 255)
+
 	local key = value["code"]
-	if	inpos
-		and click 
-	then 
-		if not GUI.IsEnabled(key) then
-			GUI.Set(key, 1)
-			if value["callback"] ~= nil then
-				value["callback"](key, 1)
+	
+	local di = GUI.Theme.CheckBoxInActive
+	local ot = 125
+	
+	if inpos then
+		GUI.IsInputCaptured = true
+		if click then
+			if not GUI.IsEnabled(key) then
+				GUI.Set(key, 1)
+			else
+				GUI.Set(key, 0)
 			end
-		else
-			GUI.Set(key, 0)
 			if value["callback"] ~= nil then
-				value["callback"](key, 0)
+				value["callback"](key, GUI.Get(key))
 			end
 		end
+	
+		di = GUI.Theme.CheckBoxOnMouse
+		ot = 220
 	end
 	
-	if not GUI.IsEnabled(key) then
-		if inpos then
-			Renderer.DrawImage(GUI.Theme.CheckBoxOnMouse, x, y, size, size)
-			Renderer.SetDrawColor(255, 255, 255, 240)
-			Renderer.DrawText(GUI.Font.Content, x + 35, y + 5, value["name"], false)
-			Renderer.SetDrawColor(255, 255, 255, 255)
-		else
-			Renderer.DrawImage(GUI.Theme.CheckBoxInActive, x , y, size, size)
-			Renderer.SetDrawColor(255, 255, 255, 125)
-			Renderer.DrawText(GUI.Font.Content, x + 35, y + 5, value["name"], false)
-			Renderer.SetDrawColor(255, 255, 255, 255)
-		end
-	else
-		Renderer.DrawImage(GUI.Theme.CheckBoxActive, x, y, size, size)
-		Renderer.DrawText(GUI.Font.Content, x + 35, y + 5, value["name"], false)
+	if GUI.IsEnabled(key) then
+		di = GUI.Theme.CheckBoxActive
+		ot = 255
 	end
+	
+	Renderer.DrawImage(di, x, y, size, size)
+	Renderer.SetDrawColor(255, 255, 255, ot)
+	Renderer.DrawText(GUI.Font.Content, x + 32, y + 4, value["name"], false)
+	Renderer.SetDrawColor(255, 255, 255, 255)
 end
-
------------------------------------------------------------------------------------------------------------
 
 function ApplyTheme()
 	local f = GUI.GetThemeName()
-	GUI.Theme.Background = Renderer.LoadImage("~/" .. f .. "/background.png")
 	GUI.Theme.MenuItem = Renderer.LoadImage("~/" .. f .. "/menu.png")
-	GUI.Theme.MenuInActive = Renderer.LoadImage("~/" .. f .. "/menu-inactive.png")
-	GUI.Theme.MenuOnMouse = Renderer.LoadImage("~/" .. f .. "/menu-onmouse.png")
-	GUI.Theme.MenuActive = Renderer.LoadImage("~/" .. f .. "/menu-active.png")
 	GUI.Theme.CheckBoxInActive = Renderer.LoadImage("~/" .. f .. "/checkbox-inactive.png")
 	GUI.Theme.CheckBoxOnMouse = Renderer.LoadImage("~/" .. f .. "/checkbox-onmouse.png")
 	GUI.Theme.CheckBoxActive = Renderer.LoadImage("~/" .. f .. "/checkbox-active.png")
-	GUI.Theme.TextBoxInActive = Renderer.LoadImage("~/" .. f .. "/textbox-inactive.png")
-	GUI.Theme.TextBoxActive = Renderer.LoadImage("~/" .. f .. "/textbox-active.png")
-	GUI.Theme.NextInActive = Renderer.LoadImage("~/" .. f .. "/next-inactive.png")
-	GUI.Theme.NextActive = Renderer.LoadImage("~/" .. f .. "/next-active.png")
-	GUI.Theme.PrevInActive = Renderer.LoadImage("~/" .. f .. "/prev-inactive.png")
-	GUI.Theme.PrevActive = Renderer.LoadImage("~/" .. f .. "/prev-active.png")
-	GUI.Theme.MenuCatActive = Renderer.LoadImage("~/" .. f .. "/menucat-active.png")
-	GUI.Theme.MenuNextActive = Renderer.LoadImage("~/" .. f .. "/menunext-active.png")
-	GUI.Theme.MenuPrevActive = Renderer.LoadImage("~/" .. f .. "/menuprev-active.png")
-	GUI.Theme.KeyBox = Renderer.LoadImage("~/" .. f .. "/keybox.png")
-	GUI.Theme.Button.InActive.Left = Renderer.LoadImage("~/" .. f .. "/Button/left-inactive.png")
-	GUI.Theme.Button.InActive.Center = Renderer.LoadImage("~/" .. f .. "/Button/center-inactive.png")
-	GUI.Theme.Button.InActive.Right = Renderer.LoadImage("~/" .. f .. "/Button/right-inactive.png")
-	GUI.Theme.Button.Active.Left = Renderer.LoadImage("~/" .. f .. "/Button/left-active.png")
-	GUI.Theme.Button.Active.Center = Renderer.LoadImage("~/" .. f .. "/Button/center-active.png")
-	GUI.Theme.Button.Active.Right = Renderer.LoadImage("~/" .. f .. "/Button/right-active.png")
 	GUI.Theme.Slider = Renderer.LoadImage("~/" .. f .. "/slider.png")
-	GUI.Theme.SliderFill = Renderer.LoadImage("~/" .. f .. "/slider-fill.png")
-	GUI.Theme.SliderBase = Renderer.LoadImage("~/" .. f .. "/slider-base.png")
 	GUI.Theme.CheckInActive = Renderer.LoadImage("~/" .. f .. "/check-inactive.png")
 	GUI.Theme.CheckActive = Renderer.LoadImage("~/" .. f .. "/check-active.png")
 	GUI.Theme.Category = Renderer.LoadImage("~/" .. f .. "/category.png")
@@ -1719,14 +1834,12 @@ function ApplyTheme()
 	GUI.Theme.RadioActive = Renderer.LoadImage("~/" .. f .. "/radio-active.png")
 	GUI.Theme.RadioInActive = Renderer.LoadImage("~/" .. f .. "/radio-inactive.png")
 	GUI.Theme.Close = Renderer.LoadImage("~/" .. f .. "/close.png")
-	GUI.Theme.Menu = Renderer.LoadImage("resource/flash3/images/badges/ti6_battle_pass_badge_4.png")
 end
 
 function GUI.GetThemeName()
 	if Menu.GetValue(GUI.SelectedTheme) == 1 then return "Default" end
 	if Menu.GetValue(GUI.SelectedTheme) == 2 then return "Dark" end
 	if Menu.GetValue(GUI.SelectedTheme) == 3 then return "Mono" end
-	if Menu.GetValue(GUI.SelectedTheme) == 4 then return "Red" end
 
 	return "Default"
 end
@@ -1753,6 +1866,7 @@ GUI.HeroesList["npc_dota_hero_clinkz"] = "Clinkz"
 GUI.HeroesList["npc_dota_hero_rattletrap"] = "Clockwerk"
 GUI.HeroesList["npc_dota_hero_crystal_maiden"] = "Crystal Maiden"
 GUI.HeroesList["npc_dota_hero_dark_seer"] = "Dark Seer"
+GUI.HeroesList["npc_dota_hero_dark_willow"] = "Dark Willow"
 GUI.HeroesList["npc_dota_hero_dazzle"] = "Dazzle"
 GUI.HeroesList["npc_dota_hero_death_prophet"] = "Death Prophet"
 GUI.HeroesList["npc_dota_hero_disruptor"] = "Disruptor"
@@ -1798,6 +1912,7 @@ GUI.HeroesList["npc_dota_hero_ogre_magi"] = "Ogre Magi"
 GUI.HeroesList["npc_dota_hero_omniknight"] = "Omniknight"
 GUI.HeroesList["npc_dota_hero_oracle"] = "Oracle"
 GUI.HeroesList["npc_dota_hero_obsidian_destroyer"] = "Outworld Devourer"
+GUI.HeroesList["npc_dota_hero_pangolier"] = "Pangolier"
 GUI.HeroesList["npc_dota_hero_phantom_assassin"] = "Phantom Assassin"
 GUI.HeroesList["npc_dota_hero_phantom_lancer"] = "Phantom Lancer"
 GUI.HeroesList["npc_dota_hero_phoenix"] = "Phoenix"
@@ -1846,7 +1961,6 @@ GUI.HeroesList["npc_dota_hero_witch_doctor"] = "Witch Doctor"
 GUI.HeroesList["npc_dota_hero_skeleton_king"] = "Wraith King"
 GUI.HeroesList["npc_dota_hero_zuus"] = "Zeus"
 
------------------------------------------------------------------------------------------------------------
 function GUI.Set(key, value)
 	if type(value) ~= "table" then
 		Config.WriteString("GUI", key, "~" .. value .. "~")
@@ -1905,7 +2019,7 @@ end
 function GUI.DEBUG.Add(name, var)
 	GUI.DEBUG.Variables[name] = var
 end
------------------------------------------------------------------------------------------------------------
+
 function tableToString (table)
 	return "return" .. tostr(table)
 end
@@ -1956,7 +2070,7 @@ function tostr ( tbl )
 	end
 	return "{" .. table.concat( result, "," ) .. "}"
 end
------------------------------------------------------------------------------------------------------------
+
 function spairs (t, order)
     local keys = {}
     for k in pairs(t) do keys[#keys+1] = k end

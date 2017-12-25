@@ -73,7 +73,7 @@ function Weather.OnDraw()
 	end
 end
 
-function Weather.UpdateSelect(t)
+function Weather.UpdateSelect(id, t)
 	if not GUI.IsEnabled(Weather.Identity) then return end
 	Weather.EnableSVCheats()
 	

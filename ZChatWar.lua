@@ -194,6 +194,8 @@ function ZChatWar.OnUpdate()
 end
 
 function ZChatWar.OnChatEvent(chatEvent)
+	if not Menu.IsEnabled(ZChatWar.optionEnable) then return end
+	if not Heroes.GetLocal() then return end
 	InfoPlayer_1 = chatEvent.players[1]
 	InfoPlayer_2 = chatEvent.players[2]
 	InfoPlayer_3 = chatEvent.players[3]
