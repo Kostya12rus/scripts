@@ -1,37 +1,31 @@
 local sadafaf = {}
 sadafaf.optionEnable = Menu.AddOption({"Kostya12rus","ItemManeger"}, "Activate", "")
-
 trigerTime = 0
 tick = 0
+function sadafaf.OnGameStart()
+trigerTime = 0
+tick = 0
+end
 function sadafaf.OnDraw()
 	if not Menu.IsEnabled(sadafaf.optionEnable) then return end
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end 
 	if GameRules.GetGameTime() >= trigerTime then
-		if tick < 500 then
+		if tick < 10000 then
 			sadafaf.BuyWard(tick)
-			itemtr = false
 			for index_item = 0, 15 do
 				local item = NPC.GetItemByIndex(myHero, index_item)
 				if item and Entity.IsAbility(item) then
 					local itemName = Ability.GetName(item)
 					Log.Write(tick .. " - ".. itemName)
-					sadafaf.SellWard(item)
+					if not Item.IsSellable(item) then
+						sadafaf.DropItem(item)
+					else
+						sadafaf.SellWard(item)
+					end
 					trigerTime = GameRules.GetGameTime() + 0.2
-					itemtr = true
 				end
 			end
-			for index_item = 0, 15 do
-				local item = NPC.GetItemByIndex(myHero, index_item)
-				if item then
-					sadafaf.DropItem(item)
-				end
-			end
-			if not itemtr then
-				Log.Write(tick .. " - Not Item")
-			end
-			
-			
 			tick = tick + 1
 		end
 	end

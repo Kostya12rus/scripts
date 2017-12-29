@@ -31,7 +31,7 @@ function Frostif.OnUnitAnimation(animation)
 	animationtable[Entity.GetIndex(animation.unit)] = {}
 	table.insert(animationtable[Entity.GetIndex(animation.unit)],animation.sequenceName)
 	table.insert(animationtable[Entity.GetIndex(animation.unit)],animation.unit)
-	table.insert(animationtable[Entity.GetIndex(animation.unit)],GameRules.GetGameTime()+5)
+	table.insert(animationtable[Entity.GetIndex(animation.unit)],GameRules.GetGameTime())
 end
 
 function Frostif.OnLinearProjectileCreate(projectile)
@@ -51,24 +51,35 @@ end
 function Frostif.OnDraw()
     local myHero = Heroes.GetLocal()
 	if not myHero or not Menu.IsEnabled(Frostif.optionEnable) then return end
-	local myPos = Entity.GetAbsOrigin(myHero)
-	
+	local myPos = Entity.GetAbsOrigin(myHero)	
 	if animationtable then
 		for index,key in pairs(animationtable) do
 			if NPC.GetUnitName(key[2]) == "npc_dota_creature_ogre_tank_boss" then
 				if key[1] == "PVE_attack2_jump" then
 					Frostif.DrawCircle(Entity.GetAbsOrigin(key[2]), 400)
+					if key[3]+1.7 <= GameRules.GetGameTime() then
+						animationtable[index] = nil
+					end
 				elseif key[1] == "PVE_attack1" then
-					Frostif.DrawCircle(Frostif.PositionAngle(key[2],0,590), 240)
+					Frostif.DrawCircle(Frostif.PositionAngle(key[2],0,583), 240)
+					if key[3]+1 <= GameRules.GetGameTime() then
+						animationtable[index] = nil
+					end
 				end
 			elseif NPC.GetUnitName(key[2]) == "npc_dota_creature_ogre_tank" then
 				if key[1] == "PVE_attack2_jump" then
-					Frostif.DrawCircle(Entity.GetAbsOrigin(key[2]), 240)
+					Frostif.DrawCircle(Entity.GetAbsOrigin(key[2]), 290)
+					if key[3]+2 <= GameRules.GetGameTime() then
+						animationtable[index] = nil
+					end
 				elseif key[1] == "PVE_attack1" then
 					Frostif.DrawCircle(Frostif.PositionAngle(key[2],0,500), 200)
+					if key[3]+1 <= GameRules.GetGameTime() then
+						animationtable[index] = nil
+					end
 				end
 			end
-			if key[3] <= GameRules.GetGameTime() then
+			if key[3]+5 <= GameRules.GetGameTime() then
 				animationtable[index] = nil
 			end
 		end
@@ -102,7 +113,7 @@ function Frostif.OnDraw()
 				Renderer.DrawLine(x1,y1,x2,y2)
 				Renderer.DrawImage(imagePudge,x2,y2,32,32)
 			end
-			if artic[2]+0.5 >= GameRules.GetGameTime() then
+			if artic[2]+0.1 >= GameRules.GetGameTime() then
 				hook = NPC.GetAbility(myHero,"custom_pudge_meat_hook")
 				if hook and Ability.IsCastable(hook,NPC.GetMana(myHero)) and Entity.IsAlive(myHero) and artic[10]:Distance(myPos):Length2D() < 1000 then
 					if Menu.IsKeyDown(Frostif.key) then
@@ -253,10 +264,12 @@ function Frostif.TemplarCast()
 		for index,key in pairs(projectiless) do
 			local t = GameRules.GetGameTime() - key[3]
 			local curPos = key[1] + key[2]:Scaled(t)
+			local ymypos = Entity.GetAbsOrigin(Heroes.GetLocal()):GetY()
+			local ycurpos = curPos:GetY()
 			local dist = curPos:Distance(Entity.GetAbsOrigin(Heroes.GetLocal())):Length2D()
-			if dist <= 290 then
+			if ycurpos <= ymypos + 290 and ycurpos >= ymypos - 1 then
 				mindist = true
-			end		
+			end
 			if key[3]+10 <= GameRules.GetGameTime() then
 				projectiless[index] = nil
 			end
@@ -271,7 +284,7 @@ function Frostif.invokerCast(one,two,tre)
 	Ability.CastNoTarget(two)
 	Ability.CastNoTarget(tre)
 	Ability.CastNoTarget(r)
-	invokertik = GameRules.GetGameTime() + 0.2
+	invokertik = GameRules.GetGameTime() + 0.1
 	return
 end
 local size_x, size_y = Renderer.GetScreenSize()
@@ -281,8 +294,8 @@ function Frostif.DrawCircle(UnitPos, radius)
         local x4, y4, x3, y3, visible3
         local dergee = 10
         for angle = 0, 360 / dergee do
-            x4 = 0 * math.cos(angle * dergee / 57.3) - radius * math.sin(angle * dergee / 57.3)
-            y4 = radius * math.cos(angle * dergee / 57.3) + 0 * math.sin(angle * dergee / 57.3)
+            x4 = 0 - radius * math.sin(angle * dergee / 57.3)
+            y4 = radius * math.cos(angle * dergee / 57.3)
             x3,y3 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
             Renderer.DrawLine(x1,y1,x3,y3)
             x1,y1 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
@@ -306,6 +319,7 @@ end
 
 function Frostif.init()
   imagePudge = Renderer.LoadImage("resource/flash3/images/miniheroes/pudge.png")
+  circlepart = "particles\\ui_mouseactions\\drag_selected_ring.vpcf"
   timetick = 0
   weavirtick = 0
   invokertik = 0
@@ -313,6 +327,7 @@ function Frostif.init()
   partikle = {}
   animationtable = {}
   projectiless = {}
+  enttable = {}
 end
 function Frostif.OnGameStart()
   Frostif.init()
