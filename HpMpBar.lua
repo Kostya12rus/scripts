@@ -21,8 +21,8 @@ HpMpBar.Locale = {
 		["english"] = "HpMpBar"
 	},
 	["desc"] = {
-		["english"] = "HpMpBar v0.2.2",
-		["russian"] = "HpMpBar v0.2.2"
+		["english"] = "HpMpBar v0.2.3",
+		["russian"] = "HpMpBar v0.2.3"
 	},
 	["bary"] = {
 		["english"] = "Height in percent",
@@ -109,6 +109,7 @@ function HpMpBar.OnGameEnd()
 end
 
 local Monitor = {
+	["21"] = { ["first"] = 33.8,	["next"] = 54, 		["step"] = 2.51 },
 	["10"] = { ["first"] = 26.9,	["next"] = 55.7, 	["step"] = 3.533},
 	["9"] =  { ["first"] = 28.326,	["next"] = 55.32,	["step"] = 3.314},
 	["3"] =  { ["first"] = 21.3,	["next"] = 57.14,	["step"] = 4.4	},
@@ -124,6 +125,8 @@ function HpMpBar.GetSize()
 		m = "9"
 	elseif math.floor(r * 10) / 10 == 2.1 then
 		m = "1"
+	elseif math.floor(r * 10) / 10 == 2.3 then
+		m = "21"
 	end
 	local p = ( w / 100 )
 	return math.floor(Monitor[m]["step"] * p)
@@ -140,6 +143,8 @@ function HpMpBar.GetHeroPos(Unit)
 		m = "9"
 	elseif math.floor(r * 10) / 10 == 2.1 then
 		m = "1"
+	elseif math.floor(r * 10) / 10 == 2.3 then
+		m = "21"
 	end
 	local p = ( w / 100 )
 	local dw = Monitor[m]["first"] + GUI.Get(HpMpBar.Identity .. "left") / 10 + ((indexHero) * (Monitor[m]["step"] + (GUI.Get(HpMpBar.Identity .. "dist") / 10)) )
