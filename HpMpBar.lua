@@ -335,7 +335,7 @@ function HpMpBar.OnDraw()
 
 			if bayback_cd_p <= 0 and not Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and GUI.IsEnabled(HpMpBar.Identity .. "baybackpanel") then
 				Renderer.SetDrawColor(255, 180, 0, alpha)
-				Renderer.DrawFilledRect(x - 1, y + bary * 2 - 2, HpMpBar.GetSize() - 2, 4)
+				Renderer.DrawFilledRect(x - 1, y + bary * 2 - 2, HpMpBar.GetSize() - 2, 6)
 			end
 
 
