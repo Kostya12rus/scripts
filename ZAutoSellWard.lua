@@ -1,5 +1,6 @@
 local sadafaf = {}
 sadafaf.optionEnable = Menu.AddOption({"Kostya12rus","ItemManeger"}, "Activate", "")
+sadafaf.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 trigerTime = 0
 tick = 0
 function sadafaf.OnGameStart()
@@ -10,6 +11,7 @@ function sadafaf.OnDraw()
 	if not Menu.IsEnabled(sadafaf.optionEnable) then return end
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end 
+	Renderer.DrawTextCentered(sadafaf.font, 200, 300, tick, 1)
 	if GameRules.GetGameTime() >= trigerTime then
 		if tick < 10000 then
 			sadafaf.BuyWard(tick)
@@ -27,6 +29,9 @@ function sadafaf.OnDraw()
 				end
 			end
 			tick = tick + 1
+			if tick == 10000 then
+				Log.Write("Все предметы купленны")
+			end
 		end
 	end
 end

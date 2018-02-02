@@ -273,7 +273,7 @@ end
 
 function SkyWrathHake.AeonDispelling()
 	local aeonDiskBuff = NPC.GetModifier(enemy, "modifier_item_aeon_disk_buff")
-	if NPC.GetItem(enemy, "item_aeon_disk", true) and(Entity.GetHealth(enemy) / Entity.GetMaxHealth(enemy) < 0.83 or aeonDiskBuff) and nullifier and Ability.IsReady(nullifier) and Ability.IsCastable(nullifier, Ability.GetManaCost(nullifier)) then
+	if NPC.GetItem(enemy, "item_aeon_disk", true) and(Entity.GetHealth(enemy) / Entity.GetMaxHealth(enemy) < 0.73 or aeonDiskBuff) and nullifier and Ability.IsReady(nullifier) and Ability.IsCastable(nullifier, Ability.GetManaCost(nullifier)) then
 		Ability.CastTarget(nullifier, enemy)
 		return true
 	end
