@@ -35,10 +35,29 @@ function MyTeamateInGame.FindFort()
 end
 
 function MyTeamateInGame.WriteToList()
+	local dates = os.date()
+	if string.sub(dates, 5, 7) == "Jan" then month = "01"
+	elseif string.sub(dates, 5, 7) == "Feb" then month = "02"
+	elseif string.sub(dates, 5, 7) == "Mar" then month = "03"
+	elseif string.sub(dates, 5, 7) == "Apr" then month = "04"
+	elseif string.sub(dates, 5, 7) == "May" then month = "05"
+	elseif string.sub(dates, 5, 7) == "Jun" then month = "06"
+	elseif string.sub(dates, 5, 7) == "Jul" then month = "07"
+	elseif string.sub(dates, 5, 7) == "Aug" then month = "08"
+	elseif string.sub(dates, 5, 7) == "Sep" then month = "09"
+	elseif string.sub(dates, 5, 7) == "Oct" then month = "10"
+	elseif string.sub(dates, 5, 7) == "Nov" then month = "11"
+	elseif string.sub(dates, 5, 7) == "Dec" then month = "12"
+	end
+	Weekday = string.sub(dates, 1, 3)
+	day = string.sub(dates, 9, 10)
+	times = string.sub(dates, 12, 19)
+	year = string.sub(dates, 21, 24)
+	
 	if not MyTeamateInGame.WriteTriger then
 		for key,ind in pairs(MyTeamateInGame.PlayerTable) do
 			GamesRead = Config.ReadInt("MyTeamateInGameGames", MyTeamateInGame.PlayerTable[key][4], 0)
-			Config.WriteString("MyTeamateInGame", tostring(os.date()).."|"..key, "SteamID="..MyTeamateInGame.PlayerTable[key][4].."|".."Game="..GamesRead.."|".."KDA="..MyTeamateInGame.PlayerTable[key][3]
+			Config.WriteString("MyTeamateInGame", year.." "..month.." "..day.." "..times.."|"..key, "SteamID="..MyTeamateInGame.PlayerTable[key][4].."|".."Game="..GamesRead.."|".."KDA="..MyTeamateInGame.PlayerTable[key][3]
 			.."|".."Nick="..MyTeamateInGame.PlayerTable[key][1].."|".."Hero="..MyTeamateInGame.PlayerTable[key][2])
 			Config.WriteInt("MyTeamateInGameGames", MyTeamateInGame.PlayerTable[key][4], GamesRead+1)
 		end

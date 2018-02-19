@@ -85,7 +85,6 @@ GUI.Theme.Back						= nil
 GUI.Theme.RadioActive				= nil
 GUI.Theme.RadioInActive				= nil
 GUI.Theme.Close						= nil
-GUI.Theme.Menu						= Renderer.LoadImage("resource/flash3/images/badges/ti6_battle_pass_badge_4.png")
 
 GUI.Settings						= {}
 GUI.Settings.PosX					= -1
@@ -298,10 +297,10 @@ function GUI.OnDraw()
 	
 	if Engine.IsInGame() and Menu.IsEnabled(GUI.InGameMenu) then 
 		local tmi_loc_x = math.floor(w * 0.10)
-		local tmi_loc_y = math.floor(h * 0.01)
+		local tmi_loc_y = math.floor(h * 0.012)
 		local size = math.floor(h * 0.032)
 		if Input.IsCursorInRect(tmi_loc_x, tmi_loc_y + 1, size, size) then
-			Renderer.SetDrawColor(255, 255, 255, 255)
+			Renderer.SetDrawColor(255, 255, 255, 180)
 			if leftclick then
 				if GUI.IsEnabled("gui:show") then 
 					GUI.Set("gui:show", 0)
@@ -310,9 +309,10 @@ function GUI.OnDraw()
 				end
 			end
 		else
-			Renderer.SetDrawColor(255, 255, 255, 180)
+			Renderer.SetDrawColor(180, 194, 220, 255)
 		end
-		Renderer.DrawImage(GUI.Theme.Menu, tmi_loc_x, tmi_loc_y + 1, size, size)
+		
+		Renderer.DrawText(GUI.Font.Search, tmi_loc_x, tmi_loc_y, "G")
 	end
 	
 	if GUI.DEBUG.Enabled then

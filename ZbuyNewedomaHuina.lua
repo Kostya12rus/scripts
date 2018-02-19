@@ -1,6 +1,6 @@
 local TopbuyKek = {}
-TopbuyKek.optionEnable = Menu.AddOption({"Kostya12rus","ItemManeger1"}, "Activate", "")
-TopbuyKek.optionKey = Menu.AddKeyOption({"Kostya12rus","ItemManeger1"},"Key for buy",Enum.ButtonCode.KEY_D)
+TopbuyKek.optionEnable = Menu.AddOption({"Kostya12rus","ItemManeger"}, "Activate", "")
+TopbuyKek.optionKey = Menu.AddKeyOption({"Kostya12rus","ItemManeger"},"Key for buy",Enum.ButtonCode.KEY_D)
 trigerTimes = 0
 
 function TopbuyKek.OnGameStart()
