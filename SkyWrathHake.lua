@@ -5,7 +5,7 @@ SkyWrathHake.IsTargetParticleEnabled = Menu.AddOption({"Hero Specific", "SkyWrat
 SkyWrathHake.IsConcShotParticleEnabled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Concussive shot indicator", "Draws concussive shot particle if enemy is in range of cast")
 SkyWrathHake.combokey = Menu.AddKeyOption({"Hero Specific", "SkyWrathHake"}, "Combo Key", Enum.ButtonCode.KEY_F)
 SkyWrathHake.harraskey = Menu.AddKeyOption({"Hero Specific", "SkyWrathHake"}, "Harras Key", Enum.ButtonCode.KEY_D)
-enemyInRange = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Closest to mouse range", "Range that makes assembly checking for enemy in selected range.", 100, 600, 100)
+SkyWrathHake.enemyInRange = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Closest to mouse range", "Range that makes assembly checking for enemy in selected range.", 100, 600, 100)
 
 SkyWrathHake.menuItems = {atos = "Rod of Atos", hex = "Scythe of Vyse", eblade = "Ethereal Blade", veil = "Veil of Discrod", dagon = "Dagon", orchid = "Orchid", blood = "Bloodthorn", shiva = "Shiva's guard"}
 SkyWrathHake.ItemsOptionID = {atos, hex, eblade, veil, dagon, orchid, blood, shiva}
@@ -152,12 +152,12 @@ function SkyWrathHake.OnDraw()
 	Renderer.DrawText(Font, x, y, "[EZ KILL: "..ezKillMode.."]", 0)
 	local particleEnemy = enemy
 	if Menu.IsEnabled(SkyWrathHake.IsTargetParticleEnabled) then	
-		if not particleEnemy or(not NPC.IsPositionInRange(enemy, Input.GetWorldCursorPos(), Menu.GetValue(enemyInRange), 0) and targetParticle ~= 0) or enemy ~= particleEnemy then
+		if not particleEnemy or(not NPC.IsPositionInRange(enemy, Input.GetWorldCursorPos(), Menu.GetValue(SkyWrathHake.enemyInRange), 0) and targetParticle ~= 0) or enemy ~= particleEnemy then
 			Particle.Destroy(targetParticle)			
 			targetParticle = 0
 			particleEnemy = enemy
 		else
-			if targetParticle == 0 and NPC.IsPositionInRange(enemy, Input.GetWorldCursorPos(), Menu.GetValue(enemyInRange), 0) then
+			if targetParticle == 0 and NPC.IsPositionInRange(enemy, Input.GetWorldCursorPos(), Menu.GetValue(SkyWrathHake.enemyInRange), 0) then
 				targetParticle = Particle.Create("particles/ui_mouseactions/range_finder_tower_aoe.vpcf", Enum.ParticleAttachment.PATTACH_INVALID, enemy)				
 			end
 			if targetParticle ~= 0 then
@@ -203,7 +203,7 @@ end
 function SkyWrathHake.PrayToDog()	
 	if not Menu.IsKeyDown(SkyWrathHake.combokey) then return end
 	
-	if not enemy or not NPC.IsPositionInRange(enemy, Input.GetWorldCursorPos(), Menu.GetValue(enemyInRange), 0) then
+	if not enemy or not NPC.IsPositionInRange(enemy, Input.GetWorldCursorPos(), Menu.GetValue(SkyWrathHake.enemyInRange), 0) then
 		return
 	end
 	
@@ -283,7 +283,7 @@ end
 function SkyWrathHake.ArcaneHarras()
 	if not Menu.IsKeyDown(SkyWrathHake.harraskey) then return end		
 	enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
-	if not enemy or not NPC.IsPositionInRange(enemy, Input.GetWorldCursorPos(), Menu.GetValue(enemyInRange), 0) then
+	if not enemy or not NPC.IsPositionInRange(enemy, Input.GetWorldCursorPos(), Menu.GetValue(SkyWrathHake.enemyInRange), 0) then
 		return
 	end
 	enemyPos = Entity.GetAbsOrigin(enemy)
