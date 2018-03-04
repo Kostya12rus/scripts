@@ -5,7 +5,7 @@ AbilityAlert2.boxSizeOption = Menu.AddOption({ "Awareness", "Ability Alert Advan
 AbilityAlert2.miniBoxSizeOption = Menu.AddOption({ "Awareness", "Ability Alert Advanced" }, "MiniMap Display Size", "", 10, 50, 1)
 AbilityAlert2.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 AbilityAlert2.mapFont = Renderer.LoadFont("Tahoma", 22, Enum.FontWeight.NORMAL)
-AbilityAlert2.miniHero = "resource/flash3/images/miniheroes/"
+AbilityAlert2.miniHero = "resource/flash3/images/heroes/"
 -- current active alerts.
 AbilityAlert2.alerts = {}
 AbilityAlert2.mapOrigin = {x=-7000, y=7000}

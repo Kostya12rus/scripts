@@ -36,8 +36,8 @@ GUI.Font.Search						= Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
 GUI.Font.Footer						= Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.GameState						= -2
 GUI.Config							= "GUI"
-GUI.Version							= 171223
-GUI.TextVersion						= 'v 17.12.23'
+GUI.Version							= 180303
+GUI.TextVersion						= 'v 18.03.03'
 
 GUI.GameStates						= {}
 GUI.GameStates.OnGameMenu			= -1
@@ -94,10 +94,8 @@ GUI.offsetPosY						= 0
 GUI.Storage							= {}
 
 GUI.Data							= {}
-GUI.ImageCashe						= {}
 GUI.CallBackKey						= {}
 GUI.Subscriptions					= {}
-GUI.HeroesIconPath					= "resource/flash3/images/heroes/"
 GUI.IsInputCaptured					= false
 GUI.ShowDesc						= false
 
@@ -239,7 +237,6 @@ GUI.ThemeColors["Mono"] = {
 	KeyBoxColorInActive		= "9b9b9b"
 }
 GUI.Colors						= {}
-
 GUI.NotifyType					= {}
 GUI.NotifyType.Text				= 0
 GUI.NotifyType.ImageText		= 1
@@ -255,13 +252,13 @@ end
 
 function GUI.OnDraw()
 	if not Menu.IsEnabled(GUI.Enabled) then return end
-	if GUI.SelectedLanguage == nil then 
+	if GUI.SelectedLanguage == nil and GUIDB ~= nil then 
 		GUI.SelectedLanguage = GUI.Languages[Menu.GetValue(GUI.Locale)]
 		ApplyTheme()
-		
 		GUI.Write(GUI.TextVersion)
 		GUI.Write(GUI.GetThemeName())
 		GUI.Write(GUI.SelectedLanguage)
+		GUIDB.Cache()
 		GUI.Write("¯\\_(ツ)_/¯")
 	end
 	
@@ -474,7 +471,7 @@ function GUI.Initialize(code, category, name, desc, author, ...)
 		end
 	
 		if select(1, ...) ~= nil then
-			GUI_Object["hero"] = GUI.HeroesList[select(1, ...)]
+			GUI_Object["hero"] = GUIDB.Heroes[select(1, ...)]
 		end
 		GUI_Object["perfect_author"] = author
 		GUI_Object["perfect_version"] = 0
@@ -688,12 +685,12 @@ function GUI.AddMenuItem(menucode, itemcode, name, control, ...)
 		GUI.Items[menucode]["items"][order]["count"] = select(1, ...)
 		GUI.Items[menucode]["items"][order]["cache"] = {}
 		if select(2, ...) == nil then
-			GUI.Items[menucode]["items"][order]["heroes"] = GUI.HeroesList
+			GUI.Items[menucode]["items"][order]["heroes"] = GUIDB.Heroes
 		else
 			GUI.Items[menucode]["items"][order]["heroes"] = select(2, ...)
 		end
 		if select(3, ...) == nil then
-			GUI.Items[menucode]["items"][order]["iconpath"] = GUI.HeroesIconPath
+			GUI.Items[menucode]["items"][order]["iconpath"] = GUIDB.HeroPath
 		else
 			GUI.Items[menucode]["items"][order]["iconpath"] = select(3, ...)
 		end
@@ -727,12 +724,12 @@ function GUI.AddMenuItem(menucode, itemcode, name, control, ...)
 		if temp_data ~= nil then GUI.Data[itemcode] = temp_data end
 		GUI.Items[menucode]["items"][order]["cache"] = {}
 		if select(1, ...) == nil then
-			GUI.Items[menucode]["items"][order]["heroes"] = GUI.HeroesList
+			GUI.Items[menucode]["items"][order]["heroes"] = GUIDB.Heroes
 		else
 			GUI.Items[menucode]["items"][order]["heroes"] = select(1, ...)
 		end
 		if select(2, ...) == nil then
-			GUI.Items[menucode]["items"][order]["iconpath"] = GUI.HeroesIconPath
+			GUI.Items[menucode]["items"][order]["iconpath"] = GUIDB.HeroPath
 		else
 			GUI.Items[menucode]["items"][order]["iconpath"] = select(2, ...)
 		end
@@ -1380,15 +1377,7 @@ function DrawImageBox(click, x, y, value)
 	
 	for _, k in ipairs(sortedKeys) do
 		local tempName = k:gsub(value["replace"], "")
-		local imageHandle = GUI.ImageCashe[tempName]
-		if imageHandle == nil then
-			if value["iconpath"] ~= "" then
-				imageHandle = Renderer.LoadImage(value["iconpath"] .. tempName .. ".png")
-			else
-				imageHandle = Renderer.LoadImage(value["heroes"][k] .. tempName .. ".png")
-			end
-			GUI.ImageCashe[tempName] = imageHandle
-		end
+		local imageHandle = GUIDB.Image(tempName)
 
 		if value["search"] ~= nil and strpos(tempName, string.lower(value["search"])) ~= false then
 			Renderer.SetDrawColor(0, 255, 0, 255)
@@ -1483,15 +1472,7 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 	
 	for _, k in ipairs(sortedKeys) do
 		local tempName = k:gsub(value["replace"], "")
-		local imageHandle = GUI.ImageCashe[tempName]
-		if imageHandle == nil then
-			if value["iconpath"] ~= "" then
-				imageHandle = Renderer.LoadImage(value["iconpath"] .. tempName .. ".png")
-			else
-				imageHandle = Renderer.LoadImage(value["heroes"][k] .. tempName .. ".png")
-			end
-			GUI.ImageCashe[tempName] = imageHandle
-		end
+		local imageHandle = GUIDB.Image(tempName)
 		
 		if value["search"] ~= nil and strpos(tempName, string.lower(value["search"])) ~= false then
 			Renderer.SetDrawColor(0, 255, 0, 255)
@@ -1843,123 +1824,6 @@ function GUI.GetThemeName()
 
 	return "Default"
 end
-
-GUI.HeroesList = {}
-GUI.HeroesList["npc_dota_hero_abaddon"] = "Abaddon"
-GUI.HeroesList["npc_dota_hero_alchemist"] = "Alchemist"
-GUI.HeroesList["npc_dota_hero_antimage"] = "Anti-Mage"
-GUI.HeroesList["npc_dota_hero_ancient_apparition"] = "Ancient Apparition"
-GUI.HeroesList["npc_dota_hero_arc_warden"] = "Arc Warden"
-GUI.HeroesList["npc_dota_hero_axe"] = "Axe"
-GUI.HeroesList["npc_dota_hero_bane"] = "Bane"
-GUI.HeroesList["npc_dota_hero_batrider"] = "Batrider"
-GUI.HeroesList["npc_dota_hero_beastmaster"] = "Beastmaster"
-GUI.HeroesList["npc_dota_hero_bloodseeker"] = "Bloodseeker"
-GUI.HeroesList["npc_dota_hero_bounty_hunter"] = "Bounty Hunter"
-GUI.HeroesList["npc_dota_hero_brewmaster"] = "Brewmaster"
-GUI.HeroesList["npc_dota_hero_bristleback"] = "Bristleback"
-GUI.HeroesList["npc_dota_hero_broodmother"] = "Broodmother"
-GUI.HeroesList["npc_dota_hero_centaur"] = "Centaur Warrunner"
-GUI.HeroesList["npc_dota_hero_chaos_knight"] = "Chaos Knight"
-GUI.HeroesList["npc_dota_hero_chen"] = "Chen"
-GUI.HeroesList["npc_dota_hero_clinkz"] = "Clinkz"
-GUI.HeroesList["npc_dota_hero_rattletrap"] = "Clockwerk"
-GUI.HeroesList["npc_dota_hero_crystal_maiden"] = "Crystal Maiden"
-GUI.HeroesList["npc_dota_hero_dark_seer"] = "Dark Seer"
-GUI.HeroesList["npc_dota_hero_dark_willow"] = "Dark Willow"
-GUI.HeroesList["npc_dota_hero_dazzle"] = "Dazzle"
-GUI.HeroesList["npc_dota_hero_death_prophet"] = "Death Prophet"
-GUI.HeroesList["npc_dota_hero_disruptor"] = "Disruptor"
-GUI.HeroesList["npc_dota_hero_doom_bringer"] = "Doom"
-GUI.HeroesList["npc_dota_hero_dragon_knight"] = "Dragon Knight"
-GUI.HeroesList["npc_dota_hero_drow_ranger"] = "Drow Ranger"
-GUI.HeroesList["npc_dota_hero_earth_spirit"] = "Earth Spirit"
-GUI.HeroesList["npc_dota_hero_earthshaker"] = "Earthshaker"
-GUI.HeroesList["npc_dota_hero_elder_titan"] = "Elder Titan"
-GUI.HeroesList["npc_dota_hero_ember_spirit"] = "Ember Spirit"
-GUI.HeroesList["npc_dota_hero_enchantress"] = "Enchantress"
-GUI.HeroesList["npc_dota_hero_enigma"] = "Enigma"
-GUI.HeroesList["npc_dota_hero_faceless_void"] = "Faceless Void"
-GUI.HeroesList["npc_dota_hero_gyrocopter"] = "Gyrocopter"
-GUI.HeroesList["npc_dota_hero_huskar"] = "Huskar"
-GUI.HeroesList["npc_dota_hero_invoker"] = "Invoker"
-GUI.HeroesList["npc_dota_hero_wisp"] = "Io"
-GUI.HeroesList["npc_dota_hero_jakiro"] = "Jakiro"
-GUI.HeroesList["npc_dota_hero_juggernaut"] = "Juggernaut"
-GUI.HeroesList["npc_dota_hero_keeper_of_the_light"] = "Keeper of the Light"
-GUI.HeroesList["npc_dota_hero_kunkka"] = "Kunkka"
-GUI.HeroesList["npc_dota_hero_legion_commander"] = "Legion Commander"
-GUI.HeroesList["npc_dota_hero_leshrac"] = "Leshrac"
-GUI.HeroesList["npc_dota_hero_lich"] = "Lich"
-GUI.HeroesList["npc_dota_hero_life_stealer"] = "Lifestealer"
-GUI.HeroesList["npc_dota_hero_lina"] = "Lina"
-GUI.HeroesList["npc_dota_hero_lion"] = "Lion"
-GUI.HeroesList["npc_dota_hero_lone_druid"] = "Lone Druid"
-GUI.HeroesList["npc_dota_hero_luna"] = "Luna"
-GUI.HeroesList["npc_dota_hero_lycan"] = "Lycan"
-GUI.HeroesList["npc_dota_hero_magnataur"] = "Magnus"
-GUI.HeroesList["npc_dota_hero_medusa"] = "Medusa"
-GUI.HeroesList["npc_dota_hero_meepo"] = "Meepo"
-GUI.HeroesList["npc_dota_hero_mirana"] = "Mirana"
-GUI.HeroesList["npc_dota_hero_morphling"] = "Morphling"
-GUI.HeroesList["npc_dota_hero_monkey_king"] = "Monkey King"
-GUI.HeroesList["npc_dota_hero_naga_siren"] = "Naga Siren"
-GUI.HeroesList["npc_dota_hero_furion"] = "Nature's Prophet"
-GUI.HeroesList["npc_dota_hero_necrolyte"] = "Necrophos"
-GUI.HeroesList["npc_dota_hero_night_stalker"] = "Night Stalker"
-GUI.HeroesList["npc_dota_hero_nyx_assassin"] = "Nyx Assassin"
-GUI.HeroesList["npc_dota_hero_ogre_magi"] = "Ogre Magi"
-GUI.HeroesList["npc_dota_hero_omniknight"] = "Omniknight"
-GUI.HeroesList["npc_dota_hero_oracle"] = "Oracle"
-GUI.HeroesList["npc_dota_hero_obsidian_destroyer"] = "Outworld Devourer"
-GUI.HeroesList["npc_dota_hero_pangolier"] = "Pangolier"
-GUI.HeroesList["npc_dota_hero_phantom_assassin"] = "Phantom Assassin"
-GUI.HeroesList["npc_dota_hero_phantom_lancer"] = "Phantom Lancer"
-GUI.HeroesList["npc_dota_hero_phoenix"] = "Phoenix"
-GUI.HeroesList["npc_dota_hero_puck"] = "Puck"
-GUI.HeroesList["npc_dota_hero_pudge"] = "Pudge"
-GUI.HeroesList["npc_dota_hero_pugna"] = "Pugna"
-GUI.HeroesList["npc_dota_hero_queenofpain"] = "Queen of Pain"
-GUI.HeroesList["npc_dota_hero_razor"] = "Razor"
-GUI.HeroesList["npc_dota_hero_riki"] = "Riki"
-GUI.HeroesList["npc_dota_hero_rubick"] = "Rubick"
-GUI.HeroesList["npc_dota_hero_sand_king"] = "Sand King"
-GUI.HeroesList["npc_dota_hero_shadow_demon"] = "Shadow Demon"
-GUI.HeroesList["npc_dota_hero_nevermore"] = "Shadow Fiend"
-GUI.HeroesList["npc_dota_hero_shadow_shaman"] = "Shadow Shaman"
-GUI.HeroesList["npc_dota_hero_silencer"] = "Silencer"
-GUI.HeroesList["npc_dota_hero_skywrath_mage"] = "Skywrath Mage"
-GUI.HeroesList["npc_dota_hero_slardar"] = "Slardar"
-GUI.HeroesList["npc_dota_hero_slark"] = "Slark"
-GUI.HeroesList["npc_dota_hero_sniper"] = "Sniper"
-GUI.HeroesList["npc_dota_hero_spectre"] = "Spectre"
-GUI.HeroesList["npc_dota_hero_spirit_breaker"] = "Spirit Breaker"
-GUI.HeroesList["npc_dota_hero_storm_spirit"] = "Storm Spirit"
-GUI.HeroesList["npc_dota_hero_sven"] = "Sven"
-GUI.HeroesList["npc_dota_hero_techies"] = "Techies"
-GUI.HeroesList["npc_dota_hero_templar_assassin"] = "Templar Assassin"
-GUI.HeroesList["npc_dota_hero_terrorblade"] = "Terrorblade"
-GUI.HeroesList["npc_dota_hero_tidehunter"] = "Tidehunter"
-GUI.HeroesList["npc_dota_hero_shredder"] = "Timbersaw"
-GUI.HeroesList["npc_dota_hero_tinker"] = "Tinker"
-GUI.HeroesList["npc_dota_hero_tiny"] = "Tiny"
-GUI.HeroesList["npc_dota_hero_treant"] = "Treant Protector"
-GUI.HeroesList["npc_dota_hero_troll_warlord"] = "Troll Warlord"
-GUI.HeroesList["npc_dota_hero_tusk"] = "Tusk"
-GUI.HeroesList["npc_dota_hero_abyssal_underlord"] = "Underlord"
-GUI.HeroesList["npc_dota_hero_undying"] = "Undying"
-GUI.HeroesList["npc_dota_hero_ursa"] = "Ursa"
-GUI.HeroesList["npc_dota_hero_vengefulspirit"] = "Vengeful Spirit"
-GUI.HeroesList["npc_dota_hero_venomancer"] = "Venomancer"
-GUI.HeroesList["npc_dota_hero_viper"] = "Viper"
-GUI.HeroesList["npc_dota_hero_visage"] = "Visage"
-GUI.HeroesList["npc_dota_hero_warlock"] = "Warlock"
-GUI.HeroesList["npc_dota_hero_weaver"] = "Weaver"
-GUI.HeroesList["npc_dota_hero_windrunner"] = "Windranger"
-GUI.HeroesList["npc_dota_hero_winter_wyvern"] = "Winter Wyvern"
-GUI.HeroesList["npc_dota_hero_witch_doctor"] = "Witch Doctor"
-GUI.HeroesList["npc_dota_hero_skeleton_king"] = "Wraith King"
-GUI.HeroesList["npc_dota_hero_zuus"] = "Zeus"
 
 function GUI.Set(key, value)
 	if type(value) ~= "table" then
