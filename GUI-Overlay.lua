@@ -3,8 +3,8 @@ Overlay.Identity = "overlay"
 Overlay.Locale = {
 	["name"] = {
 		["english"] = "Overlay",
-		["russian"] = "Контроль предметов",
-		["chinese"] = "物品观察者"
+		["russian"] = "Overlay",
+		["chinese"] = "Overlay"
 	},
 	["desc"] = {
 		["english"] = "Extra information",
@@ -96,6 +96,11 @@ Overlay.Locale = {
 		["russian"] = "Показать networh / hero damage / золото потраченное на support",
 		["chinese"] = "顯示 networth / hero damage / gold spent on support "
 	},
+	["showonlyselected"] = {
+		["english"] = "Show only selected items to notify ",
+		["russian"] = "Показать только предметы выбранные для уведомления",
+		["chinese"] = "只显示选定的项目进行通知"
+	},
 	["width"] = {
 		["english"] = 240,
 		["russian"] = 300,
@@ -146,6 +151,7 @@ function Overlay.OnDraw()
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showally", Overlay.Locale["showally"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showwards", Overlay.Locale["showwards"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showstat", Overlay.Locale["showstat"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showonlyselected", Overlay.Locale["showonlyselected"], GUI.MenuType.CheckBox, 0)
 		Overlay.Font = Renderer.LoadFont("Tahoma", math.floor(GUI.Get(Overlay.Identity .. "size") / 2) - 1, Enum.FontWeight.BOLD)
 		if (locx == "" or locx == nil) then GUI.Set(Overlay.Identity .. "locx", 10) locx = 10 end
 		if (locy == "" or locy == nil) then GUI.Set(Overlay.Identity .. "locy", 150) locy = 150 end
@@ -177,6 +183,7 @@ function Overlay.OnDraw()
 	local showally = GUI.IsEnabled(Overlay.Identity .. "showally")
 	local showwards = GUI.IsEnabled(Overlay.Identity .. "showwards")
 	local showstat = GUI.IsEnabled(Overlay.Identity .. "showstat")
+	local showonlyselected = GUI.IsEnabled(Overlay.Identity .. "showonlyselected")
 	local size = GUI.Get(Overlay.Identity .. "size")
 	local defx, xpos = math.floor(size * 128 / 72)
 	local ypos = locy
@@ -230,14 +237,14 @@ function Overlay.OnDraw()
 			for i = 0, (showextrainv and 8 or 5) do
 				local item = NPC.GetItemByIndex(hero, i)
 				if (i == 6) then xpos = xpos + 5 end
-				if item ~= nil and Entity.IsAbility(item) then
+				if item ~= nil and Entity.IsAbility(item) and (not showonlyselected or hasValue(notify_items, Ability.GetName(item))) then
 					if (xpos + size + 8) > maxx then maxx = (xpos + size + 8) end
 					local imageHandle = GUIDB.Image(Ability.GetName(item))
 
 					if isnotify then
 						Overlay.Notify(item, notify_items, Ability.GetName(item), title, width, tts, imageHandle, heroImageHandle)
 					end
-					
+
 					if show then
 						Renderer.SetDrawColor(255, 255, 255, top)
 						Renderer.DrawImage(imageHandle, xpos, ypos, size + 8, size)
@@ -280,15 +287,13 @@ function Overlay.OnDraw()
 							Renderer.DrawTextCentered(GUI.Font.ContentBold, heroX + math.ceil((size + 8) / 2), drawHeroY + math.ceil(size / 2), d, true)
 						end
 					end
-					
+					xpos = xpos + size + 8
+					heroX = heroX + size + 8
 				end
-				
-				xpos = xpos + size + 8
-				heroX = heroX + size + 8
 			end
 			
 			if show then
-				if Entity.IsSameTeam(myHero, hero) and showwards then	
+				if Entity.IsSameTeam(myHero, hero) and showwards and Entity.IsPlayer(player) then	
 					local txpos = maxx
 					local hsize = math.floor(size / 2)
 					Renderer.SetDrawColor(255, 255, 255, opcolor)
@@ -308,7 +313,7 @@ function Overlay.OnDraw()
 				end
 				Renderer.SetDrawColor(255, 255, 255, top)
 				Renderer.DrawImage(heroImageHandle, locx, ypos, defx, size)
-				if Entity.IsSameTeam(myHero, hero) and showstat then
+				if Entity.IsSameTeam(myHero, hero) and showstat and Entity.IsPlayer(player) then
 					Renderer.DrawText(Overlay.Font, locx, ypos - math.floor(size / 2) + 1, "net: " .. Player.GetNetWorth(player) .. ' / dmg: ' .. Player.GetHeroDamage(player) .. ' / sup: ' .. Player.GetGoldSpentOnSupport(player), true)
 					ypos = ypos + math.floor(size / 2) + 2
 				end
