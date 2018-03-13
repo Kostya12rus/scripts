@@ -36,8 +36,8 @@ GUI.Font.Search						= Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
 GUI.Font.Footer						= Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.GameState						= -2
 GUI.Config							= "GUI"
-GUI.Version							= 180303
-GUI.TextVersion						= 'v 18.03.03'
+GUI.Version							= 180310
+GUI.TextVersion						= 'v 18.03.10'
 
 GUI.GameStates						= {}
 GUI.GameStates.OnGameMenu			= -1
@@ -1378,7 +1378,15 @@ function DrawImageBox(click, x, y, value)
 	for _, k in ipairs(sortedKeys) do
 		local tempName = k:gsub(value["replace"], "")
 		local imageHandle = GUIDB.Image(tempName)
-
+		if imageHandle == nil then
+			if value["iconpath"] ~= "" then
+				imageHandle = Renderer.LoadImage(value["iconpath"] .. tempName .. ".png")
+			else
+				imageHandle = Renderer.LoadImage(value["heroes"][k] .. tempName .. ".png")
+			end
+			GUIDB.Images[tempName] = imageHandle
+		end
+		
 		if value["search"] ~= nil and strpos(tempName, string.lower(value["search"])) ~= false then
 			Renderer.SetDrawColor(0, 255, 0, 255)
 			Renderer.DrawOutlineRect(tempx, y + 25, value["size_x"], value["size_y"])
@@ -1473,6 +1481,14 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 	for _, k in ipairs(sortedKeys) do
 		local tempName = k:gsub(value["replace"], "")
 		local imageHandle = GUIDB.Image(tempName)
+		if imageHandle == nil then
+			if value["iconpath"] ~= "" then
+				imageHandle = Renderer.LoadImage(value["iconpath"] .. tempName .. ".png")
+			else
+				imageHandle = Renderer.LoadImage(value["heroes"][k] .. tempName .. ".png")
+			end
+			GUIDB.Images[tempName] = imageHandle
+		end
 		
 		if value["search"] ~= nil and strpos(tempName, string.lower(value["search"])) ~= false then
 			Renderer.SetDrawColor(0, 255, 0, 255)

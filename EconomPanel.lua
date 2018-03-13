@@ -195,7 +195,7 @@ function EconomPanel.OnDraw()
 					Renderer.SetDrawColor(0,0,0,visibility)
 					Renderer.DrawOutlineRect(math.ceil(xpos),math.ceil(ypos),math.ceil(sizeamountx*prochent)+2,math.ceil(sizeBary))
 					Renderer.SetDrawColor(0,255,255,visibility)
-					Renderer.DrawTextCenteredY(EconomPanel.Font, math.ceil(xpos + 1), math.ceil(ypos+sizeBary/2), hero[2], 1)
+					Renderer.DrawTextCenteredY(EconomPanel.Font, math.ceil(xpos + 1), math.ceil(ypos+sizeBary/2), hero[2] .. "|" ..Player.GetNetWorth(Entity.GetOwner(hero[1])), 1) --
 					ypos = ypos + sizeBary
 					xpos = Config.ReadInt("EconomPanel", "xpos", 200)
 					if not hero[1] then
