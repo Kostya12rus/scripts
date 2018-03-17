@@ -3,16 +3,12 @@ Testkekeas.optionEnable = Menu.AddOption({"Kostya12rus"}, "AllNpcs", "")
 Testkekeas.font = Renderer.LoadFont("Tahoma", 20, Enum.FontWeight.EXTRABOLD)
 Testkekeas.fontNps = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
 function Testkekeas.OnDraw()
-    local myHero = Heroes.GetLocal()
-	if not myHero or not Menu.IsEnabled(Testkekeas.optionEnable) then return end
-	local myPos = Entity.GetAbsOrigin(myHero)
+	if not Menu.IsEnabled(Testkekeas.optionEnable) then return end
 	Renderer.DrawText(Testkekeas.font, 500, 100,"NPCs найдены " ..NPCs.Count(), 1)
 	for i = 1, NPCs.Count() do
 		local unitNA = NPCs.Get(i)
 		if Entity.IsAlive(unitNA) then
 			local UnitPos = Entity.GetAbsOrigin(unitNA)
-			local vector = myPos - UnitPos
-			local distance = vector:Length2D()
 			local x1, y1 , worldVis= Renderer.WorldToScreen(UnitPos)
 			if worldVis then	
 				Testkekeas.DrawCircle(UnitPos, 100)
