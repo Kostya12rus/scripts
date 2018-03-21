@@ -136,7 +136,7 @@ function AutoDust.FindTarget(me, item)
 	local entities = Heroes.GetAll()
 	for index, ent in pairs(entities) do
 		local enemyhero = Heroes.Get(index)
-		if not Entity.IsSameTeam(me, enemyhero)  and not NPC.IsIllusion(enemyhero) and NPC.IsEntityInRange(me, enemyhero, 1050) then
+		if not Entity.IsSameTeam(me, enemyhero) and not NPC.IsIllusion(enemyhero) and NPC.IsEntityInRange(me, enemyhero, 1050) and Entity.IsAlive(enemyhero) then
 			local isNotValid = AutoDust.CheckForModifiers(enemyhero)
 			local isPosValid = AutoDust.CheckForPositiveModifiers(enemyhero)
 			if not isNotValid and isPosValid then return enemyhero end
