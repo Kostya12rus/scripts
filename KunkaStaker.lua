@@ -1,20 +1,19 @@
 local KunkaStaker = {}
 KunkaStaker.optionEnable = Menu.AddOption({"Utility", "Kunka Staker"}, "Activation", "")
+KunkaStaker.Key = Menu.AddKeyOption({"Utility", "Kunka Staker"}, "Key on/off stack in spot", Enum.ButtonCode.BUTTON_CODE_NONE)
 
 function KunkaStaker.OnUpdate()
   if not Menu.IsEnabled(KunkaStaker.optionEnable) then return end
-  local myHero = Heroes.GetLocal()
-  if not myHero then return end
-  local torrent = NPC.GetAbility(myHero, "kunkka_torrent")
-  if torrent and GameRules.GetGameState() == 5 then
-    needStaker = true
+  if not Heroes.GetLocal() then return end
+  local torrent = NPC.GetAbility(Heroes.GetLocal(), "kunkka_torrent")
+  if not torrent then return end
+  needStaker = true
+  if GameRules.GetGameState() == 5 and (GameRules.GetGameTime()-GameRules.GetGameStartTime()) > 60 then
     if Ability.IsReady(torrent) then
-      local rangetorrent = Ability.GetCastRange(torrent)
       local second = (GameRules.GetGameTime()-GameRules.GetGameStartTime())%60
-	  local ping = NetChannel.GetAvgLatency(Enum.Flow.MAX_FLOWS)
-      if second >= 60-2.6-ping then
+      if second >= 60-2.6-NetChannel.GetAvgLatency(Enum.Flow.MAX_FLOWS) then
         for _,camp in pairs(anchentpoint) do
-          if camp[2] and NPC.IsPositionInRange(myHero,camp[1],rangetorrent) then
+          if camp[2] and NPC.IsPositionInRange(Heroes.GetLocal(),camp[1],Ability.GetCastRange(torrent)) then
             Ability.CastPosition(torrent,camp[1])
           end
         end
@@ -24,7 +23,6 @@ function KunkaStaker.OnUpdate()
 end
 
 function KunkaStaker.OnDraw()
-  if not Menu.IsEnabled(KunkaStaker.optionEnable) then return end
   if not needStaker then return end
   for _,camp in pairs(anchentpoint) do
     if camp then
@@ -38,7 +36,7 @@ function KunkaStaker.OnDraw()
         Renderer.DrawFilledRect(X-sizeBar/2,Y-sizeBar/2,sizeBar,sizeBar)
       end
       if Input.IsCursorInRect(X-sizeBar/2,Y-sizeBar/2,sizeBar,sizeBar) then
-        if Input.IsKeyDownOnce(Enum.ButtonCode.KEY_LCONTROL) then
+        if Menu.IsKeyDownOnce(KunkaStaker.Key) then
           camp[2] = not camp[2]
         end
       end
