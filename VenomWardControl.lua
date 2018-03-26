@@ -92,7 +92,7 @@ function VenomWardControl.FindCreepFarm(ward)
 	local target = nil
 	for _,npc in pairs(NPCs.GetAll()) do
 		if npc then
-			if NPC.IsEntityInRange(ward,npc,NPC.GetAttackRange(ward)-25) and not Entity.IsSameTeam(ward,npc) and Entity.IsAlive(npc) then
+			if NPC.IsEntityInRange(ward,npc,NPC.GetAttackRange(ward)-25) and NPC.IsCreep(npc) and Entity.IsAlive(npc) then
 				local damage_to_creep = ((NPC.GetTrueDamage(ward)+NPC.GetTrueMaximumDamage(ward))/2)-NPC.GetPhysicalDamageReduction(npc)*((NPC.GetTrueDamage(ward)+NPC.GetTrueMaximumDamage(ward))/2)
 				if Entity.GetHealth(npc) < damage_to_creep then
 					return npc
