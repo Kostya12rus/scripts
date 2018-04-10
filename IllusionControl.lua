@@ -8,38 +8,43 @@ function FakeIllusion.OnUpdate()
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 	if not Menu.IsKeyDown(FakeIllusion.Key1) and not Menu.IsKeyDown(FakeIllusion.Key2) then return end
-	local naga = NPC.GetAbility(myHero, "naga_siren_mirror_image")
-	if naga and Ability.IsReady(naga) then
-		if triger <= GameRules.GetGameTime() then
-			Ability.CastNoTarget(naga)
-			triger = GameRules.GetGameTime() + 1
+	local illustable = FakeIllusion.FindIllus()
+	if #illustable == 0 then
+		local naga = NPC.GetAbility(myHero, "naga_siren_mirror_image")
+		if naga and Ability.IsReady(naga) then
+			if triger <= GameRules.GetGameTime() then
+				Ability.CastNoTarget(naga)
+				triger = GameRules.GetGameTime() + 1
+			end
+		end
+		local doppelwalk = NPC.GetAbility(myHero, "phantom_lancer_doppelwalk")
+		if doppelwalk and Ability.IsReady(doppelwalk) then
+			if triger <= GameRules.GetGameTime() then
+				if Entity.GetAbsOrigin(myHero):Distance(Input.GetWorldCursorPos()):Length2D() < Ability.GetCastRange(doppelwalk) then
+					Ability.CastPosition(doppelwalk,FakeIllusion.GetVec(Entity.GetAbsOrigin(myHero),Input.GetWorldCursorPos(),Entity.GetAbsOrigin(myHero):Distance(Input.GetWorldCursorPos()):Length2D()))
+				else
+					Ability.CastPosition(doppelwalk,FakeIllusion.GetVec(Entity.GetAbsOrigin(myHero),Input.GetWorldCursorPos(),Ability.GetCastRange(doppelwalk)))
+				end
+				triger = GameRules.GetGameTime() + 0.5
+			end
+		end
+		local manta = NPC.GetItem(myHero, "item_manta")
+		if manta and Ability.IsReady(manta) then
+			if triger <= GameRules.GetGameTime() then
+				Ability.CastNoTarget(manta)
+				triger = GameRules.GetGameTime() + 0.2
+			end
+		end
+		local bottle = NPC.GetItem(myHero, "item_bottle")
+		if bottle and Bottle.GetRuneType(bottle) == Enum.RuneType.DOTA_RUNE_ILLUSION then
+			if triger <= GameRules.GetGameTime() then
+				Ability.CastNoTarget(bottle)
+				triger = GameRules.GetGameTime() + 0.5
+			end
 		end
 	end
-	local doppelwalk = NPC.GetAbility(myHero, "phantom_lancer_doppelwalk")
-	if doppelwalk and Ability.IsReady(doppelwalk) then
-		if triger <= GameRules.GetGameTime() then
-			Ability.CastPosition(doppelwalk,Entity.GetAbsOrigin(myHero))
-			triger = GameRules.GetGameTime() + 0.5
-		end
-	end
-	local manta = NPC.GetItem(myHero, "item_manta")
-	if manta and Ability.IsReady(manta) then
-		if triger <= GameRules.GetGameTime() then
-			Ability.CastNoTarget(manta)
-			triger = GameRules.GetGameTime() + 0.2
-		end
-	end
-	local bottle = NPC.GetItem(myHero, "item_bottle")
-	if bottle and Bottle.GetRuneType(bottle) == Enum.RuneType.DOTA_RUNE_ILLUSION then
-		if triger <= GameRules.GetGameTime() then
-			Ability.CastNoTarget(bottle)
-			triger = GameRules.GetGameTime() + 0.5
-		end
-	end
-	
 	if Menu.IsKeyDown(FakeIllusion.Key1) then
 		if movetriger <= GameRules.GetGameTime() then
-			illustable = FakeIllusion.FindIllus()
 			if #illustable > 0 then
 				for _,illusion in pairs(illustable) do
 					if illusion then
@@ -57,7 +62,6 @@ function FakeIllusion.OnUpdate()
 	end
 	if Menu.IsKeyDown(FakeIllusion.Key2) then
 		if movetriger <= GameRules.GetGameTime() then
-			illustable = FakeIllusion.FindIllus()
 			if #illustable > 0 then
 				NPC.MoveTo(illustable[1],FakeIllusion.FindBase())
 				for i,illusion in pairs(illustable) do
@@ -69,6 +73,19 @@ function FakeIllusion.OnUpdate()
 				movetriger = GameRules.GetGameTime() + 0.2
 			end
 		end
+	end
+end
+
+function FakeIllusion.GetVec(poss1,poss2,range)
+	if poss1 and poss2 and range then
+		local pos1 = poss1
+		local pos2 = poss1
+		local pos3 = poss2
+		pos1:SetZ(0)
+		pos3:SetZ(0)
+		return pos2 + ((pos3 - pos1):Normalized()):Scaled(range)
+	else
+		return nil
 	end
 end
 
