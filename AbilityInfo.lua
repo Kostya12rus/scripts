@@ -393,7 +393,7 @@ function AbilityInfom.OnDraw()
 			end
 			
 			local img1
-			if abil.sourse then
+			if abil.sourse and NPCs.Contains(abil.sourse) and NPC.IsHero(abil.sourse) then
 				img1 = HeroImg[NPC.GetUnitName(abil.sourse)]
 			else
 				img1 = img2
@@ -401,7 +401,7 @@ function AbilityInfom.OnDraw()
 			
 			local img3
 			local imgformat = nil
-			if abil.target then
+			if abil.target and NPCs.Contains(abil.target) and NPC.IsHero(abil.target) then
 				img3 = HeroImg[NPC.GetUnitName(abil.target)]
 				imgformat = false
 			else
@@ -450,22 +450,27 @@ function AbilityInfom.DrawInfo(img1,img2,img3,index,formats)
 	local posy = math.ceil(size_y-200-backgroundsize*1.1*index)
 	Renderer.DrawImage(blankcard,posx,posy,backgroundsize*3,backgroundsize)
 	
-	
 	local imgposx1 = math.ceil(posx+backgroundsize*0.39)
 	local imgposy1 = math.ceil(posy + (backgroundsize-imgsize)/2)
-	Renderer.DrawImage(img1,imgposx1,imgposy1,math.ceil(imgsize*0.80),imgsize)
+	if img1 then
+		Renderer.DrawImage(img1,imgposx1,imgposy1,math.ceil(imgsize*0.80),imgsize)
+	end
 	
 	local imgsize2 = math.ceil(imgsize*0.9)
 	local imgposx2 = math.ceil(posx+(backgroundsize*3)/2-imgsize2/2)
 	local imgposy2 = math.ceil(posy + (backgroundsize-imgsize2)/2)
-	Renderer.DrawImage(img2,imgposx2,imgposy2,imgsize2,imgsize2)
+	if img2 then
+		Renderer.DrawImage(img2,imgposx2,imgposy2,imgsize2,imgsize2)
+	end
 	
 	local imgposx3 = math.ceil(posx+backgroundsize*2)
 	local imgposy3 = math.ceil(posy + (backgroundsize-imgsize)/2)
-	if formats then
-		Renderer.DrawImage(img3,imgposx3,imgposy3,imgsize,imgsize)
-	else
-		Renderer.DrawImage(img3,imgposx3,imgposy3,math.ceil(imgsize*0.80),imgsize)
+	if img3 then
+		if formats then
+			Renderer.DrawImage(img3,imgposx3,imgposy3,imgsize,imgsize)
+		else
+			Renderer.DrawImage(img3,imgposx3,imgposy3,math.ceil(imgsize*0.80),imgsize)
+		end
 	end
 end
 
