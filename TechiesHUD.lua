@@ -6,12 +6,28 @@ TechiesHUD.Locale = {
 		["english"] = "TechiesHUD"
 	},
 	["desc"] = {
-		["english"] = "TechiesHUD v1.3.2",
-		["russian"] = "TechiesHUD v1.3.2"
+		["english"] = "TechiesHUD v1.4",
+		["russian"] = "TechiesHUD v1.4"
 	},
 	["optionDetonate"] = {
 		["english"] = "Auto detonate remote mines",
 		["russian"] = "Авто взрыв бочек"
+	},
+	["optionUseShareHeroInfo"] = {
+		["english"] = "Script can use allied mines or hero",
+		["russian"] = "Скрипт может использовать союзные мины или героя"
+	},
+	["optionUseShareHeroInfo1"] = {
+		["english"] = "For this, allied techies need to share control",
+		["russian"] = "Для этого союзному techies нужно поделится контролем"
+	},
+	["optionUseShareHeroInfo2"] = {
+		["english"] = "Scoreboard->Show Shared Unit Control Options->Unit and(or) Hero",
+		["russian"] = "Таблица счета->Настройки общего управления->Сущ-ва и(или) Герой"
+	},
+	["optionUseShareHero"] = {
+		["english"] = "Use Allied hero and mines",
+		["russian"] = "Использовать союзного героя и мины"
 	},
 	["optionActiveAeon"] = {
 		["english"] = "If hero has aeon, activate it",
@@ -74,8 +90,8 @@ TechiesHUD.Locale = {
 		["russian"] = "Информационная панель"
 	},
 	["drawCircleMethod"] = {
-		["english"] = "The method of drawing a circle",
-		["russian"] = "Метод рисования круга"
+		["english"] = "The method of drawing a circle, after change need reload scripts",
+		["russian"] = "Метод рисования круга, после изменения нужно перезагрузить скрипты"
 	},
 	["autoPlantNumMines"] = {
 		["english"] = "Number of mines for planting",
@@ -177,6 +193,10 @@ TechiesHUD.Locale = {
 		["english"] = "Everything related to drawing",
 		["russian"] = "Все что связано с рисованием"
 	},
+	["optionShowEnemyRemotes"] = {
+		["english"] = "Drawing circle on predicted place enemy remote mines",
+		["russian"] = "Рисование круга на прогнозируемом месте вражеских remote mines"
+	},
 	["panelOptionsSection"] = {
 		["english"] = "Panel calibration",
 		["russian"] = "Калибровка панели"
@@ -269,6 +289,8 @@ local optionUpdate
 
 local optionActiveAeon
 
+local optionUseShareHero
+
 local optionDetonate
 local optionDrawCircleMethod
 local optionLR
@@ -330,6 +352,8 @@ local kunkka_ghostship = 1
 local flame_guard = 0
 local state_mines = {}
 local need_enemy = {}
+local radius_off = {}
+local enemy_mines_pos = {}
 
 function TechiesHUD.OnGameStart()
 	hero_time = {}
@@ -346,7 +370,7 @@ function TechiesHUD.OnGameStart()
 
 	state_mines = {}
 	need_enemy = {}
-
+	radius_off = {}
 	wisp_overcharge = 1
 	kunkka_ghostship = 1
 	flame_guard = 0
@@ -358,6 +382,39 @@ function TechiesHUD.OnGameStart()
 	TechiesHUD.LandMinesTimings = {}
 	TechiesHUD.RemoteMinesDamage = {}
 	TechiesHUD.RemoteMinesCreateTimings = {}
+	enemy_mines_pos = {}
+end
+
+
+function TechiesHUD.OnParticleCreate(particle)
+	if  not optionShowEnemyRemotes then
+		return
+	end
+	if particle.name == "techies_remote_mine_plant" then
+		table.insert(enemy_mines_pos, {index = particle.index, time = GameRules.GetGameTime(), pos = Vector(0, 0, 0)})
+	end
+end
+
+function TechiesHUD.OnParticleUpdateEntity(particle)
+	if not optionShowEnemyRemotes then
+		return
+	end
+	for _, mines in ipairs(enemy_mines_pos) do
+		if particle.index == mines.index then
+			mines.pos = particle.position
+		end
+	end
+end
+
+function TechiesHUD.OnParticleDestroy(particle)
+	if not optionShowEnemyRemotes then
+		return
+	end
+	for i, mines in ipairs(enemy_mines_pos) do
+		if particle.index == mines.index then
+			table.remove(enemy_mines_pos, i)
+		end
+	end
 end
 
 function TechiesHUD.OnEntityCreate(ent)
@@ -383,10 +440,11 @@ function TechiesHUD.OnEntityDestroy(ent)
 end
 
 local Monitor = {
-	["10"] = { ["first"] = 25.903, ["next"] = 55.903, ["step"] = 3.7  },
-	["9"] = { ["first"] = 28.326, ["next"] = 55.32, ["step"] = 3.314  },
-	["3"] = { ["first"] = 21.09, ["next"] = 57.34, ["step"] = 4.4  },
-	["1"] = { ["first"] = 31.875, ["next"] = 54.375, ["step"] = 2.8  }}
+	["21"] = { ["first"] = 33.8,	["next"] = 54, 		["step"] = 2.51 },
+	["10"] = { ["first"] = 25.903,	["next"] = 55.903, 	["step"] = 3.7  },
+	["9"] =  { ["first"] = 28.326,	["next"] = 55.32,	["step"] = 3.314},
+	["3"] =  { ["first"] = 21.09,	["next"] = 57.34, 	["step"] = 4.4  },
+	["1"] =  { ["first"] = 31.875,	["next"] = 54.375, 	["step"] = 2.8  }}
 
 function TechiesHUD.GetSize()
 	local w, h = Renderer.GetScreenSize()
@@ -398,6 +456,8 @@ function TechiesHUD.GetSize()
 		m = "9"
 	elseif math.floor(r * 10) / 10 == 2.1 then
 		m = "1"
+	elseif math.floor(r * 10) / 10 == 2.3 then
+		m = "21"
 	end
 	local p = ( w / 100 )
 	return math.floor((Monitor[m]["step"] + optionPanelInfoDist / 10) * p)
@@ -413,6 +473,8 @@ function TechiesHUD.GetHeroPos(indexHero)
 		m = "9"
 	elseif math.floor(r * 10) / 10 == 2.1 then
 		m = "1"
+	elseif math.floor(r * 10) / 10 == 2.3 then
+		m = "21"
 	end
 	local p = ( w / 100 )
 	local dw = Monitor[m]["first"] + indexHero * (Monitor[m]["step"] + optionPanelInfoDist / 10) + optionPanelInfoXL
@@ -532,7 +594,7 @@ function TechiesHUD.GetDamageAndShieldAfterDetonate(Unit, remote_damage, Hp, Mp,
 	if calc_remote_damage < 0 then
 		calc_remote_damage = 0
 	end
-	if NPC.HasItem(Unit, "item_aeon_disk", 1) and Ability.GetCooldownTimeLeft(NPC.GetItem(Unit, "item_aeon_disk", 1)) == 0 and (Hp - calc_remote_damage) / Entity.GetMaxHealth(Unit) < 0.8 then -- spell_shield_resistance
+	if NPC.HasItem(Unit, "item_aeon_disk", 1) and Ability.GetCooldownTimeLeft(NPC.GetItem(Unit, "item_aeon_disk", 1)) == 0 and (Hp - calc_remote_damage) / Entity.GetMaxHealth(Unit) < 0.7 then -- spell_shield_resistance
 		if optionActiveAeon then
 			Hp = 0
 			calc_remote_damage = 999999
@@ -743,14 +805,18 @@ end
 
 function TechiesHUD.DrawCircle(UnitPos, radius, degree)
 	local x, y, visible = Renderer.WorldToScreen(UnitPos + Vector(0, radius, 0))
+	local x4, y4, x3, y3, visible3
 	if visible == 1 then
 		for angle = 0, 360 / degree do
-			local x1, y1 = Renderer.WorldToScreen(UnitPos + Vector(0, radius, 0):Rotated(Angle(0, angle * degree, 0)))
+			local tmp_x = 0 * math.cos(angle * degree / 57.3) - radius * math.sin(angle * degree / 57.3)
+			local tmp_y = radius * math.cos(angle * degree / 57.3) + 0 * math.sin(angle * degree / 57.3)
+			local x1, y1  = Renderer.WorldToScreen(UnitPos + Vector(tmp_x, tmp_y, 0))
 			Renderer.DrawLine(x, y, x1, y1)
 			x, y = x1, y1
 		end
 	end
 end
+
 
 function TechiesHUD.CheckMove(Unit, Unit2, pred_time)
 	local UnitPos = Entity.GetAbsOrigin(Unit)
@@ -784,6 +850,8 @@ end
 function TechiesHUD.UpdateGUISettings()
 	optionTotal = GUI.IsEnabled(TechiesHUD.Identity)
 	if not optionTotal then return end
+	optionUseShareHero = GUI.IsEnabled(TechiesHUD.Identity .. "optionUseShareHero")
+	optionShowEnemyRemotes = GUI.IsEnabled(TechiesHUD.Identity .. "optionShowEnemyRemotes")
 	optionDetonate = GUI.IsEnabled(TechiesHUD.Identity .. "optionDetonate")
 	optionActiveAeon = GUI.IsEnabled(TechiesHUD.Identity .. "optionActiveAeon")
 	optionUpdate = GUI.IsEnabled(TechiesHUD.Identity .. "optionUpdate")
@@ -876,6 +944,11 @@ function TechiesHUD.OnDraw()
 	if not GUI.Exist(TechiesHUD.Identity) then
 		GUI.Initialize(TechiesHUD.Identity, GUI.Category.Heroes, TechiesHUD.Locale["name"], TechiesHUD.Locale["desc"], "Zerling14", "npc_dota_hero_techies")
 
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionUseShareHeroInfo", TechiesHUD.Locale["optionUseShareHeroInfo"], GUI.MenuType.Label)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionUseShareHeroInfo1", TechiesHUD.Locale["optionUseShareHeroInfo1"], GUI.MenuType.Label)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionUseShareHeroInfo2", TechiesHUD.Locale["optionUseShareHeroInfo2"], GUI.MenuType.Label)
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionUseShareHero", TechiesHUD.Locale["optionUseShareHero"], GUI.MenuType.CheckBox, 0)
+
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "detonateSection", TechiesHUD.Locale["detonateSection"], GUI.MenuType.Label) -- Detonate
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionDetonate", TechiesHUD.Locale["optionDetonate"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionActiveAeon", TechiesHUD.Locale["optionActiveAeon"], GUI.MenuType.CheckBox, 1)
@@ -919,6 +992,7 @@ function TechiesHUD.OnDraw()
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionEmpty", TechiesHUD.Locale["empty"], GUI.MenuType.Label) -- Alt info
 
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "drawingOptionSection", TechiesHUD.Locale["drawingOptionSection"], GUI.MenuType.Label) -- Drawing
+		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionShowEnemyRemotes", TechiesHUD.Locale["optionShowEnemyRemotes"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionPanelInfo", TechiesHUD.Locale["panelInfo"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionDrawCircleMethod", TechiesHUD.Locale["drawCircleMethod"], GUI.MenuType.SelectBox, TechiesHUD.Locale["drawCircleMode"], { 0 }, 1, nil)
 		GUI.AddMenuItem(TechiesHUD.Identity, TechiesHUD.Identity .. "optionLR", TechiesHUD.Locale["drawRadiusLR"], GUI.MenuType.CheckBox, 1)
@@ -955,7 +1029,9 @@ function TechiesHUD.OnDraw()
 		GUI.Sleep("updateSettings", 0.1)
 	end
 
-	if not optionTotal then return end
+	if not optionTotal then
+		return
+	end
 
 	local myHero = Heroes.GetLocal()
 
@@ -963,8 +1039,40 @@ function TechiesHUD.OnDraw()
 		return
 	end
 
+	if optionShowEnemyRemotes then
+		for i, pos in pairs(enemy_mines_pos) do
+			if GameRules.GetGameTime() - pos.time > 600 then
+				table.remove(enemy_mines_pos, i)
+			end
+			Renderer.SetDrawColor(0, 255, 0, 255)
+			if GameRules.GetGameTime() - pos.time > 2 then
+				TechiesHUD.DrawCircle(pos.pos, 425, optionResCircle)
+			end
+			if not pos.ent then
+				for j, Unit in pairs(TechiesHUD.RemoteMinesList) do
+					if NPC.GetModifier(Unit, "modifier_techies_remote_mine") and math.abs(Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_remote_mine")) - pos.time) < 2 then
+						pos.ent = Unit
+						if Entity.IsSameTeam(Heroes.GetLocal(), Unit) then
+							table.remove(enemy_mines_pos, i)
+						end
+					end
+				end
+			end
+			if pos.ent and not Entity.IsAlive(pos.ent) then
+				table.remove(enemy_mines_pos, i)
+			end
+		end
+	end
+
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_techies" then
-		return
+		for i, Unit in pairs(Heroes.GetAll()) do
+			if NPC.GetUnitName(Unit) and NPC.GetUnitName(Unit) == "npc_dota_hero_techies" and Entity.IsSameTeam(myHero, Unit) then
+				myHero = Unit
+			end
+		end
+		if NPC.GetUnitName(myHero) ~= "npc_dota_hero_techies" then
+			return
+		end
 	end
 
 	local land_m = NPC.GetAbilityByIndex(myHero, 0)
@@ -981,7 +1089,7 @@ function TechiesHUD.OnDraw()
 
 	local remote_damage = Ability.GetLevelSpecialValueFor(remote, "damage")
 
-	if Ability.IsInAbilityPhase(blast) then
+	if Ability.IsInAbilityPhase(blast) and TechiesHUD.BlastPosition then
 		if optionDrawCircleMethod then
 			if not TechiesHUD.BlastPositionCircle then
 				TechiesHUD.BlastPositionCircle = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf")
@@ -1102,7 +1210,7 @@ function TechiesHUD.OnDraw()
 			local x, y, visible = Renderer.WorldToScreen(UnitPos)
 			if visible == 1 then
 				Renderer.SetDrawColor(255, 255, 255, 255)
-				Renderer.DrawText(TechiesHUD.font, x, y, math.floor((2 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_stasis_trap")))) * 100)/100, 0)
+				Renderer.DrawText(TechiesHUD.font, x, y, math.floor((2 - (GameRules.GetGameTime() - Modifier.GetCreationTime(NPC.GetModifier(Unit, "modifier_techies_stasis_trap")))) * 100) / 100, 0)
 			end
 		end
 		if not Entity.IsAlive(Unit) and TechiesHUD.ParticleList[Unit] then
@@ -1128,13 +1236,20 @@ function TechiesHUD.OnDraw()
 					end
 					if remote_pos_draw[scaled_x][scaled_y] ~= 1 then
 						remote_pos_draw[scaled_x][scaled_y] = 1
-						Renderer.SetDrawColor(0, 255, 0, 255)
-						TechiesHUD.DrawCircle(UnitPos, 425, optionResCircle)
+						if (radius_off[Unit] and radius_off[Unit] < 455) or not radius_off[Unit] then
+							Renderer.SetDrawColor(150, 255, 150, 150)
+							TechiesHUD.DrawCircle(UnitPos, 425, optionResCircle)
+						end
+						if radius_off[Unit] then
+							Renderer.SetDrawColor(0, 255, 0, 255)
+							TechiesHUD.DrawCircle(UnitPos, radius_off[Unit] - 30, optionResCircle)
+						end
 					end
 				end
 			else
 				if TechiesHUD.ParticleList[Unit] then
 					Particle.SetControlPoint(TechiesHUD.ParticleList[Unit].particle, 0, Entity.GetAbsOrigin(Unit))
+					Particle.SetControlPoint(TechiesHUD.ParticleList[Unit].particle2, 0, Entity.GetAbsOrigin(Unit))
 				end
 			end
 			if mines_num[Unit] == nil and RemoteMinesModif then
@@ -1152,7 +1267,7 @@ function TechiesHUD.OnDraw()
 						local stack_mines = {}
 						for j, Unit2 in pairs(TechiesHUD.RemoteMinesList) do
 							local remote_modif = NPC.GetModifier(Unit2, "modifier_techies_remote_mine")
-							if NPC.IsPositionInRange(Unit2, UnitPos, 425, Enum.TeamType.TEAM_FRIEND)
+							if NPC.IsPositionInRange(Unit2, UnitPos, 425 - (radius_off[Unit2] and 455 - radius_off[Unit2] or 0), Enum.TeamType.TEAM_FRIEND)
 							and remote_modif
 							then
 								if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and optionAltInfoDrawing then
@@ -1183,11 +1298,31 @@ function TechiesHUD.OnDraw()
 								if state_mines[Unit] == nil then
 									state_mines[Unit] = true
 								end
+								if radius_off[Unit] == nil then
+									local radius_off_tmp
+									for k, Unit3 in pairs(TechiesHUD.RemoteMinesList) do
+										local remote_modif = NPC.GetModifier(Unit3, "modifier_techies_remote_mine")
+										if NPC.IsPositionInRange(Unit3, UnitPos, 425, Enum.TeamType.TEAM_FRIEND)
+										and remote_modif
+										and Unit ~= Unit3
+										then
+											if radius_off[Unit3] then
+												radius_off_tmp = radius_off[Unit3]
+											end
+										end
+									end
+									if radius_off_tmp then
+										radius_off[Unit] = radius_off_tmp
+									else
+										radius_off[Unit] = 455
+									end
+								end
+
 								if need_enemy[Unit] == nil then
 									local need_enemy_tmp
 									for k, Unit3 in pairs(TechiesHUD.RemoteMinesList) do
 										local remote_modif = NPC.GetModifier(Unit3, "modifier_techies_remote_mine")
-										if NPC.IsPositionInRange(Unit3, UnitPos, 425, Enum.TeamType.TEAM_FRIEND)
+										if NPC.IsPositionInRange(Unit3, UnitPos, 425 - (radius_off[Unit3] and 455 - radius_off[Unit3] or 0), Enum.TeamType.TEAM_FRIEND)
 										and remote_modif
 										and Unit ~= Unit3
 										then
@@ -1204,11 +1339,21 @@ function TechiesHUD.OnDraw()
 								end
 								need_enemy[Unit2] = need_enemy[Unit]
 								state_mines[Unit2] = state_mines[Unit]
+								if radius_off[Unit2] ~= radius_off[Unit] and TechiesHUD.ParticleList[Unit2] then
+									radius_off[Unit2] = radius_off[Unit]
+									Particle.Destroy(TechiesHUD.ParticleList[Unit2].particle2)
+									TechiesHUD.ParticleList[Unit2].particle2 = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf")
+									Particle.SetControlPoint(TechiesHUD.ParticleList[Unit2].particle2, 1, Vector(80, 255, 50))
+									Particle.SetControlPoint(TechiesHUD.ParticleList[Unit2].particle2, 3, Vector(20, 0, 0))
+									Particle.SetControlPoint(TechiesHUD.ParticleList[Unit2].particle2, 2, Vector(radius_off[Unit], 255, 0))
+									Particle.SetControlPoint(TechiesHUD.ParticleList[Unit2].particle2, 0, Entity.GetAbsOrigin(Unit))
+								end
+								radius_off[Unit2] = radius_off[Unit]
 								if TechiesHUD.ParticleList[Unit2] then
 									if not state_mines[Unit] then
-										Particle.SetControlPoint(TechiesHUD.ParticleList[Unit2].particle, 1, Vector(20, 120, 25))
+										Particle.SetControlPoint(TechiesHUD.ParticleList[Unit2].particle2, 1, Vector(20, 120, 25))
 									else
-										Particle.SetControlPoint(TechiesHUD.ParticleList[Unit2].particle, 1, Vector(80, 255, 50))
+										Particle.SetControlPoint(TechiesHUD.ParticleList[Unit2].particle2, 1, Vector(80, 255, 50))
 									end
 								end
 							end
@@ -1311,6 +1456,79 @@ function TechiesHUD.OnDraw()
 								Renderer.SetDrawColor(255, 255, 255, 255)
 								Renderer.DrawTextCentered(TechiesHUD.Panelfont1, x - math.floor(10 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 3 + math.floor(8 * optionAltInfoTimeMinesPanelSize), "+", 0)
 
+								------------------------------------
+								-- radius off -
+								if Input.IsCursorInRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 4 + 1, math.floor(20 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize) + 1) then
+									CursorOnButton = true
+									Renderer.SetDrawColor(100, 100, 100, 250)
+									if Input.IsKeyDown(Enum.ButtonCode.MOUSE_RIGHT) then
+										if ClickSave then
+											if radius_off[Unit] > 0 then
+												radius_off[Unit] = radius_off[Unit] - 10
+											end
+											if optionDrawCircleMethod then
+											Particle.Destroy(TechiesHUD.ParticleList[Unit].particle2)
+											TechiesHUD.ParticleList[Unit].particle2 = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf")
+											Particle.SetControlPoint(TechiesHUD.ParticleList[Unit].particle2, 1, Vector(80, 255, 50))
+											Particle.SetControlPoint(TechiesHUD.ParticleList[Unit].particle2, 3, Vector(20, 0, 0))
+											Particle.SetControlPoint(TechiesHUD.ParticleList[Unit].particle2, 2, Vector(radius_off[Unit], 255, 0))
+											Particle.SetControlPoint(TechiesHUD.ParticleList[Unit].particle2, 0, Entity.GetAbsOrigin(Unit))
+											end
+											ClickSave = false
+										end
+									else
+										ClickSave = true
+									end
+								else
+									Renderer.SetDrawColor(30, 30, 30, 150)
+								end
+								Renderer.DrawFilledRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 4, math.floor(20 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize))
+								Renderer.SetDrawColor(200, 200, 200, 150)
+								Renderer.DrawOutlineRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 4, math.floor(20 * optionAltInfoTimeMinesPanelSize) + 1, math.floor(16 * optionAltInfoTimeMinesPanelSize) * 3)
+								Renderer.SetDrawColor(255, 255, 255, 255)
+								Renderer.DrawTextCentered(TechiesHUD.Panelfont1, x - math.floor(10 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 4 + math.floor(8 * optionAltInfoTimeMinesPanelSize), "-", 0)
+
+								-- num radius off text
+								Renderer.SetDrawColor(30, 30, 30, 150)
+								Renderer.DrawFilledRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 5, math.floor(20 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize))
+								Renderer.SetDrawColor(200, 200, 200, 150)
+								Renderer.DrawOutlineRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 5, math.floor(20 * optionAltInfoTimeMinesPanelSize) + 1, math.floor(16 * optionAltInfoTimeMinesPanelSize) * 2)
+								Renderer.SetDrawColor(255, 255, 255, 255)
+								Renderer.DrawTextCentered(TechiesHUD.Panelfont1, x - math.floor(10 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 5 + math.floor(8 * optionAltInfoTimeMinesPanelSize), radius_off[Unit], 0)
+
+								-- radius off +
+								if Input.IsCursorInRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 6, math.floor(20 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize) + 1) then
+									CursorOnButton = true
+									Renderer.SetDrawColor(100, 100, 100, 250)
+									if Input.IsKeyDown(Enum.ButtonCode.MOUSE_RIGHT) then
+										if ClickSave then
+											if radius_off[Unit] < 455 then
+												radius_off[Unit] = radius_off[Unit] + 10
+												if optionDrawCircleMethod then
+													Particle.Destroy(TechiesHUD.ParticleList[Unit].particle2)
+													TechiesHUD.ParticleList[Unit].particle2 = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf")
+													Particle.SetControlPoint(TechiesHUD.ParticleList[Unit].particle2, 1, Vector(80, 255, 50))
+													Particle.SetControlPoint(TechiesHUD.ParticleList[Unit].particle2, 3, Vector(20, 0, 0))
+													Particle.SetControlPoint(TechiesHUD.ParticleList[Unit].particle2, 2, Vector(radius_off[Unit], 255, 0))
+													Particle.SetControlPoint(TechiesHUD.ParticleList[Unit].particle2, 0, Entity.GetAbsOrigin(Unit))
+												end
+											end
+
+											ClickSave = false
+										end
+									else
+										ClickSave = true
+									end
+								else
+									Renderer.SetDrawColor(30, 30, 30, 150)
+								end
+								Renderer.DrawFilledRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 6, math.floor(20 * optionAltInfoTimeMinesPanelSize), math.floor(16 * optionAltInfoTimeMinesPanelSize))
+								Renderer.SetDrawColor(200, 200, 200, 150)
+								Renderer.DrawOutlineRect(x - math.floor(20 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 6, math.floor(20 * optionAltInfoTimeMinesPanelSize) + 1, math.floor(16 * optionAltInfoTimeMinesPanelSize))
+								Renderer.SetDrawColor(255, 255, 255, 255)
+								Renderer.DrawTextCentered(TechiesHUD.Panelfont1, x - math.floor(10 * optionAltInfoTimeMinesPanelSize), y + math.floor(16 * optionAltInfoTimeMinesPanelSize) * 6 + math.floor(8 * optionAltInfoTimeMinesPanelSize), "+", 0)
+								------------------------------------
+
 								for i, oldest_mine in pairs(stack_mines) do
 									local h = 0
 									if #stack_mines <= 3 then
@@ -1359,6 +1577,7 @@ function TechiesHUD.OnDraw()
 		end
 		if not Entity.IsAlive(Unit) and TechiesHUD.ParticleList[Unit] then
 			Particle.Destroy(TechiesHUD.ParticleList[Unit].particle)
+			Particle.Destroy(TechiesHUD.ParticleList[Unit].particle2)
 			TechiesHUD.ParticleList[Unit] = nil
 		end
 	end
@@ -1386,8 +1605,8 @@ function TechiesHUD.OnDraw()
 				Renderer.DrawOutlineRect(x - 1, y - 1, TechiesHUD.GetSize() - 2, bary)
 				Renderer.SetDrawColor(255, 255, 255, 255)
 				local x, y = TechiesHUD.GetHeroPos(Hero.GetPlayerID(Unit))
-				Renderer.DrawTextCenteredY(TechiesHUD.HUDfont, x + 2, y + math.floor(6 * TechiesHUD.ScreenScale), math.floor(Hp * 10) / 10, 0)
-				Renderer.DrawTextCenteredY(TechiesHUD.HUDfont, x + 2, y + math.floor((6 + 14) * TechiesHUD.ScreenScale), math.floor(Hp_all * 10) / 10, 0)
+				Renderer.DrawTextCenteredY(TechiesHUD.HUDfont, x + 2, y + math.floor(6 * TechiesHUD.ScreenScale), math.ceil(Hp * 10) / 10, 0)
+				Renderer.DrawTextCenteredY(TechiesHUD.HUDfont, x + 2, y + math.floor((6 + 14) * TechiesHUD.ScreenScale), math.ceil(Hp_all * 10) / 10, 0)
 				if NPC.HasItem(Unit, "item_gem", 1) then
 					Renderer.DrawTextCenteredY(TechiesHUD.HUDfont, x + TechiesHUD.GetSize() - math.floor(15 * TechiesHUD.ScreenScale), y + math.floor(6 * TechiesHUD.ScreenScale), "G", 0)
 				end
@@ -1424,10 +1643,9 @@ function TechiesHUD.OnDraw()
 					local x, y, visible = Renderer.WorldToScreen(UnitPos)
 					if visible == 1 then
 						Renderer.SetDrawColor(255, 255, 255, 255)
-						local rotate = Entity.GetAbsRotation(Unit):GetYaw()
-						local x4 = 600 * math.cos(rotate / 57.3) - 0 * math.sin(rotate / 57.3)
-						local y4 = 0 * math.cos(rotate / 57.3) + 600 * math.sin(rotate / 57.3)
-						local x3,y3,visible3 = Renderer.WorldToScreen(UnitPos + Vector(x4,y4,0))
+						local tmp_x = 0 - 600 * math.sin((Entity.GetAbsRotation(Unit):GetYaw() - 90) / 57.3)
+						local tmp_y = 600 * math.cos((Entity.GetAbsRotation(Unit):GetYaw() - 90) / 57.3)
+						local x3,y3,visible3 = Renderer.WorldToScreen(UnitPos + Vector(tmp_x, tmp_y, 0))
 						Renderer.DrawLine(x, y, x3, y3)
 					end
 				end
@@ -1475,8 +1693,16 @@ function TechiesHUD.OnUpdate()
 	if not myHero then
 		return
 	end
+
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_techies" then
-		return
+		for i, Unit in pairs(Heroes.GetAll()) do
+			if NPC.GetUnitName(Unit) and NPC.GetUnitName(Unit) == "npc_dota_hero_techies" and Entity.IsSameTeam(myHero, Unit) then
+				myHero = Unit
+			end
+		end
+		if NPC.GetUnitName(myHero) ~= "npc_dota_hero_techies" then
+			return
+		end
 	end
 	local remote = NPC.GetAbilityByIndex(myHero, 5)
 	local remote_damage = Ability.GetLevelSpecialValueFor(remote, "damage")
@@ -1490,7 +1716,7 @@ function TechiesHUD.OnUpdate()
 					Particle.SetControlPoint(particle.particle, 1, Vector(255, 80, 80))
 					Particle.SetControlPoint(particle.particle, 3, Vector(9, 0, 0))
 					Particle.SetControlPoint(particle.particle, 2, Vector(425, 255, 0))
-					Particle.SetControlPoint(particle.particle	, 0, Entity.GetAbsOrigin(Unit))
+					Particle.SetControlPoint(particle.particle, 0, Entity.GetAbsOrigin(Unit))
 					TechiesHUD.ParticleList[Unit] = particle
 				end
 				TechiesHUD.LandMinesList[Unit] = Unit
@@ -1500,21 +1726,25 @@ function TechiesHUD.OnUpdate()
 					Particle.SetControlPoint(particle.particle, 1, Vector(80, 100, 255))
 					Particle.SetControlPoint(particle.particle, 3, Vector(20, 0, 0))
 					Particle.SetControlPoint(particle.particle, 2, Vector(430, 255, 0))
-					Particle.SetControlPoint(particle.particle	, 0, Entity.GetAbsOrigin(Unit))
+					Particle.SetControlPoint(particle.particle, 0, Entity.GetAbsOrigin(Unit))
 					Particle.SetControlPoint(particle.particle2, 1, Vector(0, 255, 255))
 					Particle.SetControlPoint(particle.particle2, 3, Vector(20, 0, 0))
 					Particle.SetControlPoint(particle.particle2, 2, Vector(630, 255, 0))
-					Particle.SetControlPoint(particle.particle2	, 0, Entity.GetAbsOrigin(Unit))
+					Particle.SetControlPoint(particle.particle2, 0, Entity.GetAbsOrigin(Unit))
 					TechiesHUD.ParticleList[Unit] = particle
 				end
 				TechiesHUD.StasisMinesList[Unit] = Unit
 			elseif NPC.GetUnitName(Unit) == "npc_dota_techies_remote_mine" then
 				if optionDrawCircleMethod then
-					local particle = {particle = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf"), Unit = Unit}
-					Particle.SetControlPoint(particle.particle, 1, Vector(80, 255, 50))
+					local particle = {particle = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf"), Unit = Unit, particle2 = Particle.Create("particles\\ui_mouseactions\\drag_selected_ring.vpcf")}
+					Particle.SetControlPoint(particle.particle, 1, Vector(20, 120, 25))
 					Particle.SetControlPoint(particle.particle, 3, Vector(20, 0, 0))
 					Particle.SetControlPoint(particle.particle, 2, Vector(455, 255, 0))
-					Particle.SetControlPoint(particle.particle	, 0, Entity.GetAbsOrigin(Unit))
+					Particle.SetControlPoint(particle.particle, 0, Entity.GetAbsOrigin(Unit))
+					Particle.SetControlPoint(particle.particle2, 1, Vector(80, 255, 50))
+					Particle.SetControlPoint(particle.particle2, 3, Vector(20, 0, 0))
+					Particle.SetControlPoint(particle.particle2, 2, Vector(455, 255, 0))
+					Particle.SetControlPoint(particle.particle2, 0, Entity.GetAbsOrigin(Unit))
 					TechiesHUD.ParticleList[Unit] = particle
 				end
 				TechiesHUD.RemoteMinesList[Unit] = Unit
@@ -1523,6 +1753,10 @@ function TechiesHUD.OnUpdate()
 			end
 		end
 		table.remove(TechiesHUD.UndefEntity, i)
+	end
+
+	if not optionUseShareHero and NPC.GetUnitName(myHero) ~= "npc_dota_hero_techies" then
+		return
 	end
 
 	if optionAutoPlant then
@@ -1576,8 +1810,9 @@ function TechiesHUD.OnUpdate()
 		local magic_shield_f = {}
 		for i, Unit in pairs(TechiesHUD.RemoteMinesList) do
 			local UnitPos = Entity.GetAbsOrigin(Unit)
-			local heroes_in_radius = NPC.GetHeroesInRadius(Unit, 425 - 24, Enum.TeamType.TEAM_ENEMY)
+			local heroes_in_radius = NPC.GetHeroesInRadius(Unit, 401 - (radius_off[Unit] and 455 - radius_off[Unit] or 0), Enum.TeamType.TEAM_ENEMY)
 			if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
+			and not NPC.HasModifier(Unit, "modifier_faceless_void_chronosphere_freeze")
 			and need_enemy[Unit]
 			and state_mines[Unit]
 			and #heroes_in_radius >= need_enemy[Unit]
@@ -1631,7 +1866,7 @@ function TechiesHUD.OnUpdate()
 			local hero_pos = nil
 			for i, Unit in pairs(TechiesHUD.RemoteMinesList) do
 				local UnitPos = Entity.GetAbsOrigin(Unit)
-				local heroes_in_radius = NPC.GetHeroesInRadius(Unit, 425 - 24, Enum.TeamType.TEAM_ENEMY)
+				local heroes_in_radius = NPC.GetHeroesInRadius(Unit, 401 - (radius_off[Unit] and 455 - radius_off[Unit] or 0), Enum.TeamType.TEAM_ENEMY)
 				if NPC.GetModifier(Unit, "modifier_techies_remote_mine") ~= nil
 				and state_mines[Unit]
 				--and #heroes_in_radius >= Menu.GetValue(TechiesHUD.optionDetonateNumEnemy)
@@ -1735,14 +1970,13 @@ function TechiesHUD.OnUpdate()
 				for j = 1, NPCs.Count() do -- calc sum damage
 					local Unit2 = NPCs.Get(j)
 					if NPC.GetModifier(Unit2, "modifier_techies_remote_mine") ~= nil and state_mines[Unit2] then
-						if NPC.IsPositionInRange(Unit2, UnitPos, 425, 0) then -- - NPC.GetMoveSpeed(Unit) * 0.1
+						if NPC.IsPositionInRange(Unit2, UnitPos, 425 - (radius_off[Unit2] and 455 - radius_off[Unit2] or 0), 0) then -- - NPC.GetMoveSpeed(Unit) * 0.1
 							remote_sum_damage = remote_sum_damage + TechiesHUD.RemoteMinesDamage[Unit2] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)
 						end
 
-						local rotate = Entity.GetAbsRotation(Unit):GetYaw()
-						local x4 = 600 * math.cos(rotate / 57.3) - 0 * math.sin(rotate / 57.3)
-						local y4 = 0 * math.cos(rotate / 57.3) + 600 * math.sin(rotate / 57.3)
-						if NPC.IsPositionInRange(Unit2, UnitPos + Vector(x4,y4,0), 425, 0) then
+						local tmp_x = 0 - 600 * math.sin((Entity.GetAbsRotation(Unit):GetYaw() - 90) / 57.3)
+						local tmp_y = 600 * math.cos((Entity.GetAbsRotation(Unit):GetYaw() - 90) / 57.3)
+						if NPC.IsPositionInRange(Unit2, UnitPos + Vector(tmp_x, tmp_y, 0), 425 - (radius_off[Unit2] and 455 - radius_off[Unit2] or 0), 0) then
 							force_remote_sum_damage = force_remote_sum_damage + TechiesHUD.RemoteMinesDamage[Unit2] + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0)
 						end
 					end
@@ -1787,11 +2021,21 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 	if not myHero then
 		return true
 	end
-	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_techies" then
-		return true
-	end
 	if CursorOnButton then
 		return false
+	end
+	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_techies" then
+		if not optionUseShareHero then
+			return true
+		end
+		for i, Unit in pairs(Heroes.GetAll()) do
+			if NPC.GetUnitName(Unit) and NPC.GetUnitName(Unit) == "npc_dota_hero_techies" and Entity.IsSameTeam(myHero, Unit) then
+				myHero = Unit
+			end
+		end
+		if NPC.GetUnitName(myHero) ~= "npc_dota_hero_techies" then
+			return true
+		end
 	end
 
 	if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET and orders.target and Entity.IsSameTeam(myHero, orders.target)
@@ -1837,7 +2081,7 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 					and not NPC.HasModifier(v, "modifier_item_aeon_disk_buff")
 					and NPC.GetMagicalArmorDamageMultiplier(v) ~= 0
 					then
-						Log.Write("check")
+						--Log.Write("check")
 						if hp[Entity.GetIndex(v)] == nil then
 							hp[Entity.GetIndex(v)] = Entity.GetHealth(v) + NPC.GetHealthRegen(v) * 0.3
 							mp[Entity.GetIndex(v)] = NPC.GetMana(v) + NPC.GetManaRegen(v) * 0.3
@@ -1908,7 +2152,7 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 			local a = (mine_pos - mine_pos1):Length2DSqr() / (2 * (mine_pos - mine_pos1):Length2D())
 			local d = (mine_pos - mine_pos1):Length2D()
 			local h = (range^2 - a^2)^0.5
-			local P2 = mine_pos + Vector(a, a, a) * (mine_pos1 - mine_pos) * Vector(1/d, 1/d, 1/d)
+			local P2 = mine_pos + (mine_pos1 - mine_pos):Scaled(a):Scaled(1/d)
 			local P31 = Vector(P2:GetX() + h * (mine_pos1:GetY() - mine_pos:GetY()) / d, P2:GetY() - h * (mine_pos1:GetX() - mine_pos:GetX()) / d, P2:GetZ())
 			local P32 = Vector(P2:GetX() - h * (mine_pos1:GetY() - mine_pos:GetY()) / d, P2:GetY() + h * (mine_pos1:GetX() - mine_pos:GetX()) / d, P2:GetZ())
 			local h_pos = ((range + add_h)^2 - (d / 2)^2)^0.5
