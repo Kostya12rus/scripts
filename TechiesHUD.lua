@@ -6,8 +6,8 @@ TechiesHUD.Locale = {
 		["english"] = "TechiesHUD"
 	},
 	["desc"] = {
-		["english"] = "TechiesHUD v1.4",
-		["russian"] = "TechiesHUD v1.4"
+		["english"] = "TechiesHUD v1.4.1",
+		["russian"] = "TechiesHUD v1.4.1"
 	},
 	["optionDetonate"] = {
 		["english"] = "Auto detonate remote mines",
@@ -1595,7 +1595,7 @@ function TechiesHUD.OnDraw()
 					flame_guard = Ability.GetLevelSpecialValueFor(NPC.GetAbility(Unit, "ember_spirit_flame_guard"), "absorb_amount")
 				end
 
-				local Hp, Hp_all = TechiesHUD.GetNumRemoteForKill(Unit, remote_damage, Entity.GetHealth(Unit), NPC.GetMana(Unit)), TechiesHUD.GetNumRemoteForKill(Unit, remote_damage, Entity.GetMaxHealth(Unit), NPC.GetMaxMana(Unit))
+				local Hp, Hp_all = TechiesHUD.GetNumRemoteForKill(Unit, remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0), Entity.GetHealth(Unit), NPC.GetMana(Unit)), TechiesHUD.GetNumRemoteForKill(Unit, remote_damage + 150 * (NPC.HasItem(myHero, "item_ultimate_scepter", 1) and 1 or 0), Entity.GetMaxHealth(Unit), NPC.GetMaxMana(Unit))
 
 				local x, y = TechiesHUD.GetHeroPos(Hero.GetPlayerID(Unit))
 				local bary = math.ceil(28 * TechiesHUD.ScreenScale)
@@ -1873,7 +1873,9 @@ function TechiesHUD.OnUpdate()
 				then
 					local num_enemy = 0
 					for j, v in pairs(heroes_in_radius) do
-						if (NPC.IsKillable(v) or (NPC.HasItem(v, "item_aegis", 1) and optionDetonateAegis) or (NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" and optionDetonateWk) or NPC.HasModifier(v, "modifier_templar_assassin_refraction_absorb")) and not NPC.HasModifier(v, "modifier_item_aeon_disk_buff") and not NPC.HasModifier(v, "modifier_dazzle_shallow_grave") and not NPC.HasModifier(v, "modifier_oracle_false_promise") then
+						if (NPC.IsKillable(v) or (NPC.HasItem(v, "item_aegis", 1) and optionDetonateAegis) or (NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" and optionDetonateWk) or NPC.HasModifier(v, "modifier_templar_assassin_refraction_absorb"))
+						and not NPC.HasModifier(v, "modifier_item_aeon_disk_buff") and not NPC.HasModifier(v, "modifier_dazzle_shallow_grave")
+						and not NPC.HasModifier(v, "modifier_oracle_false_promise") and not NPC.HasModifier(v, "modifier_skeleton_king_reincarnation_scepter_active") then
 							-- for k, b in pairs(NPC.GetModifiers(v)) do
 								-- Log.Write(Modifier.GetName(b))
 							-- end
@@ -1958,7 +1960,7 @@ function TechiesHUD.OnUpdate()
 			and (NPC.IsKillable(Unit) or (NPC.HasItem(Unit, "item_aegis", 1) and optionDetonateAegis) or (NPC.GetUnitName(Unit) == "npc_dota_hero_skeleton_king" and optionDetonateWk)
 			or NPC.HasModifier(Unit, "modifier_templar_assassin_refraction_absorb"))
 			and not NPC.HasModifier(Unit, "modifier_dazzle_shallow_grave") and not NPC.HasModifier(Unit, "modifier_oracle_false_promise")
-			and not NPC.HasModifier(Unit, "modifier_item_aeon_disk_buff")
+			and not NPC.HasModifier(Unit, "modifier_item_aeon_disk_buff") and not NPC.HasModifier(Unit, "modifier_skeleton_king_reincarnation_scepter_active")
 			and Entity.IsAlive(Unit)
 			then
 				--Log.Write(NPC.GetMagicalArmorDamageMultiplier(Unit) .. " " .. (Entity.GetHealth(Unit) - Entity.GetMaxHealth(Unit) * 0.1) / (Entity.GetMaxHealth(Unit) * 0.9))
@@ -2078,7 +2080,7 @@ function TechiesHUD.OnPrepareUnitOrders(orders)
 					and (NPC.IsKillable(v) or (NPC.HasItem(v, "item_aegis", 1) and optionDetonateAegis)
 					or NPC.GetUnitName(v) == "npc_dota_hero_skeleton_king" or NPC.HasModifier(v, "modifier_templar_assassin_refraction_absorb"))
 					and not NPC.HasModifier(v, "modifier_dazzle_shallow_grave") and not NPC.HasModifier(v, "modifier_oracle_false_promise")
-					and not NPC.HasModifier(v, "modifier_item_aeon_disk_buff")
+					and not NPC.HasModifier(v, "modifier_item_aeon_disk_buff") and not NPC.HasModifier(v, "modifier_skeleton_king_reincarnation_scepter_active")
 					and NPC.GetMagicalArmorDamageMultiplier(v) ~= 0
 					then
 						--Log.Write("check")

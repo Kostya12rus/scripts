@@ -97,9 +97,54 @@ Overlay.Locale = {
 		["chinese"] = "顯示 networth / hero damage / gold spent on support "
 	},
 	["showonlyselected"] = {
-		["english"] = "Show only selected items to notify ",
+		["english"] = "Show only selected items to notify",
 		["russian"] = "Показать только предметы выбранные для уведомления",
 		["chinese"] = "只显示选定的项目进行通知"
+	},
+	["showherolevel"] = {
+		["english"] = "Show hero level",
+		["russian"] = "Показывать уровень героя",
+		["chinese"] = "顯示英雄等級"
+	},
+	["showlastposition"] = {
+		["english"] = "Show last hero position",
+		["russian"] = "Показывать последнюю позицию героя",
+		["chinese"] = "顯示最後的英雄位置"
+	},
+	["mapsize"] = {
+		["english"] = "Hero icon map size",
+		["russian"] = "Размер героя на карте",
+		["chinese"] = "英雄圖標地圖大小"
+	},
+	["fixposition"] = {
+		["english"] = "Fix panel position",
+		["russian"] = "Зафиксировать положение панели",
+		["chinese"] = "修復面板位置"
+	},
+	["timepass"] = {
+		["english"] = "Show how much time has passed since last seen",
+		["russian"] = "Показывать сколько прошло времени с момента последнего появления",
+		["chinese"] = "顯示自上次出現以來經過了多少時間"
+	},
+	["showhp"] = {
+		["english"] = "Show enemy hero latest HP",
+		["russian"] = "Показывать последнее известное значение ХП врага",
+		["chinese"] = "顯示敵方英雄最新的HP"
+	},
+	["showmp"] = {
+		["english"] = "Show enemy hero latest MP",
+		["russian"] = "Показывать последнее известное значение МП врага",
+		["chinese"] = "顯示敵方英雄最新的MP"
+	},
+	["showms"] = {
+		["english"] = "Show enemy hero latest MS",
+		["russian"] = "Показывать последнее известное значение скорости передвижения врага",
+		["chinese"] = "顯示敵方英雄最新的MS"
+	},
+	["drawpath"] = {
+		["english"] = "Show approximate hero location",
+		["russian"] = "Показывать примерное местоположение героя",
+		["chinese"] = "顯示近似的英雄位置"
 	},
 	["width"] = {
 		["english"] = 240,
@@ -115,7 +160,10 @@ Overlay.Locale = {
 
 Overlay.OnAir = false
 Overlay.UsedItems = {}
-Overlay.Font = Renderer.LoadFont("Tahoma", 10, Enum.FontWeight.BOLD)
+Overlay.Font		= Renderer.LoadFont("Tahoma", 10, Enum.FontWeight.BOLD)
+Overlay.IconFont	= Renderer.LoadFont("Tahoma", 10, Enum.FontWeight.BOLD)
+Overlay.IconBigFont	= Renderer.LoadFont("Tahoma", 10, Enum.FontWeight.BOLD)
+Overlay.Times		= {}
 
 local offsetPosX = 0
 local offsetPosY = 0
@@ -139,6 +187,7 @@ function Overlay.OnDraw()
 			GUI.MenuType.ImageBox, Length(GUIDB.Items), GUIDB.Items, GUIDB.ItemPath, "item_", 32, 24, nil, 21)
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "time", Overlay.Locale["time"], GUI.MenuType.Slider, 3, 60, 10)
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "show", Overlay.Locale["show"], GUI.MenuType.CheckBox, 0)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "fixposition", Overlay.Locale["fixposition"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "size", Overlay.Locale["size"], GUI.MenuType.Slider, 16, 64, 24, Overlay.UpdateSize)
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "cd", Overlay.Locale["cd"], GUI.MenuType.CheckBox, 0)
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "charges", Overlay.Locale["charges"], GUI.MenuType.CheckBox, 0)
@@ -151,8 +200,19 @@ function Overlay.OnDraw()
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showally", Overlay.Locale["showally"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showwards", Overlay.Locale["showwards"], GUI.MenuType.CheckBox, 1)
 		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showstat", Overlay.Locale["showstat"], GUI.MenuType.CheckBox, 1)
-		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showonlyselected", Overlay.Locale["showonlyselected"], GUI.MenuType.CheckBox, 0)
-		Overlay.Font = Renderer.LoadFont("Tahoma", math.floor(GUI.Get(Overlay.Identity .. "size") / 2) - 1, Enum.FontWeight.BOLD)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showonlyselected", Overlay.Locale["showonlyselected"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showherolevel", Overlay.Locale["showherolevel"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showlastposition", Overlay.Locale["showlastposition"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "drawpath", Overlay.Locale["drawpath"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "timepass", Overlay.Locale["timepass"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showhp", Overlay.Locale["showhp"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showmp", Overlay.Locale["showmp"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "showms", Overlay.Locale["showms"], GUI.MenuType.CheckBox, 1)
+		GUI.AddMenuItem(Overlay.Identity, Overlay.Identity .. "mapsize", Overlay.Locale["mapsize"], GUI.MenuType.Slider, 16, 256, 36, Overlay.UpdateIconSize)
+
+		Overlay.Font		= Renderer.LoadFont("Tahoma", math.floor(GUI.Get(Overlay.Identity .. "size") / 2) - 1, Enum.FontWeight.BOLD)
+		Overlay.IconFont	= Renderer.LoadFont("Tahoma", GUI.Get(Overlay.Identity .. "mapsize") - math.floor(GUI.Get(Overlay.Identity .. "mapsize") / 1.4), Enum.FontWeight.BOLD)
+		Overlay.IconBigFont	= Renderer.LoadFont("Tahoma", GUI.Get(Overlay.Identity .. "mapsize") - math.floor(GUI.Get(Overlay.Identity .. "mapsize") / 2), Enum.FontWeight.Normal)
 		if (locx == "" or locx == nil) then GUI.Set(Overlay.Identity .. "locx", 10) locx = 10 end
 		if (locy == "" or locy == nil) then GUI.Set(Overlay.Identity .. "locy", 150) locy = 150 end
 	end
@@ -177,14 +237,23 @@ function Overlay.OnDraw()
 
 	if GUI.SelectedLanguage == nil then return end
 	
-	local show = GUI.IsEnabled(Overlay.Identity .. "show")
-	local isremop = GUI.IsEnabled(Overlay.Identity .. "removeopacity")
-	local showextrainv = GUI.IsEnabled(Overlay.Identity .. "showextrainvent")
-	local showally = GUI.IsEnabled(Overlay.Identity .. "showally")
-	local showwards = GUI.IsEnabled(Overlay.Identity .. "showwards")
-	local showstat = GUI.IsEnabled(Overlay.Identity .. "showstat")
+	local show	= GUI.IsEnabled(Overlay.Identity .. "show")
+	local fixposition	= GUI.IsEnabled(Overlay.Identity .. "fixposition")
+	local isremop	= GUI.IsEnabled(Overlay.Identity .. "removeopacity")
+	local showextrainv	= GUI.IsEnabled(Overlay.Identity .. "showextrainvent")
+	local showally	= GUI.IsEnabled(Overlay.Identity .. "showally")
+	local showwards	= GUI.IsEnabled(Overlay.Identity .. "showwards")
+	local showstat	= GUI.IsEnabled(Overlay.Identity .. "showstat")
 	local showonlyselected = GUI.IsEnabled(Overlay.Identity .. "showonlyselected")
+	local showherolevel = GUI.IsEnabled(Overlay.Identity .. "showherolevel")
+	local showlastposition = GUI.IsEnabled(Overlay.Identity .. "showlastposition")
+	local drawpath = GUI.IsEnabled(Overlay.Identity .. "drawpath")
+	local timepass = GUI.IsEnabled(Overlay.Identity .. "timepass")
+	local showhp = GUI.IsEnabled(Overlay.Identity .. "showhp")
+	local showmp = GUI.IsEnabled(Overlay.Identity .. "showmp")
+	local showms = GUI.IsEnabled(Overlay.Identity .. "showms")
 	local size = GUI.Get(Overlay.Identity .. "size")
+	local mapsize = GUI.Get(Overlay.Identity .. "mapsize")
 	local defx, xpos = math.floor(size * 128 / 72)
 	local ypos = locy
 	local aboveoffset = GUI.Get(Overlay.Identity .. "aboveoffset")
@@ -201,7 +270,77 @@ function Overlay.OnDraw()
 		if hero ~= nil and not NPC.IsIllusion(hero) and Entity.IsHero(hero) and (showally or not Entity.IsSameTeam(myHero, hero)) then 
 			ypos = ypos + size
 			xpos = defx + locx + 5
-			 
+			
+			if showlastposition then 
+				Renderer.SetDrawColor(255, 255, 255, 255)
+				if	not Entity.IsSameTeam(myHero, hero)
+					and Entity.IsAlive(hero)
+					and Entity.IsDormant(hero)
+				then
+					local pos = Entity.GetAbsOrigin(hero)
+					local x, y, visible = Renderer.WorldToScreen(pos)
+					if visible then
+						local star_size = math.ceil(mapsize * 1.6)
+						Renderer.DrawImage(GUIDB.Image('star_circle'), x - math.ceil(star_size / 2), y - math.ceil(star_size / 2) - 3, star_size, star_size)
+						Renderer.DrawImage(GUIDB.Image('mini_' .. NPC.GetUnitName(hero)), x - math.ceil(mapsize / 2), y - math.ceil(mapsize / 2), mapsize, mapsize)
+						
+						if showhp then
+							local hptext = Entity.GetHealth(hero) .. "/" .. Entity.GetMaxHealth(hero) .. " (".. math.ceil((Entity.GetHealth(hero) / Entity.GetMaxHealth(hero)) * 100) .."%)"
+							Renderer.SetDrawColor(hex2rgb('#a2e15e'))
+							Renderer.DrawTextCenteredY(Overlay.IconFont, x + math.ceil(star_size / 2) + 10, y - math.floor(mapsize / 5), hptext, true)
+						end
+
+						if showmp then
+							local mptext = math.ceil(NPC.GetMana(hero)) .. "/" .. math.ceil(NPC.GetMaxMana(hero)) .. " (".. math.ceil((math.ceil(NPC.GetMana(hero)) / math.ceil(NPC.GetMaxMana(hero))) * 100) .."%)"
+							Renderer.SetDrawColor(hex2rgb('#5672d3'))
+							Renderer.DrawTextCenteredY(Overlay.IconFont, x + math.ceil(star_size / 2) + 10, y + math.floor(mapsize / 5), mptext, true)
+						end
+						
+						if showms then
+							Renderer.SetDrawColor(hex2rgb('#ffff01'))
+							Renderer.DrawTextCentered(Overlay.IconFont, x, y + mapsize, "MS: " .. math.floor(NPC.GetMoveSpeed(hero)), true)
+						end
+						
+						if Overlay.Times[NPC.GetUnitName(hero)] == nil then
+							Overlay.Times[NPC.GetUnitName(hero)] = os.clock()
+						end
+
+						if timepass then
+							if Overlay.Times[NPC.GetUnitName(hero)] == nil then
+								Overlay.Times[NPC.GetUnitName(hero)] = os.clock()
+							end
+							local seconds = math.floor((os.clock() - Overlay.Times[NPC.GetUnitName(hero)])*10)/10
+							local secsize = utf8.len(seconds)
+							Renderer.SetDrawColor(hex2rgb('#9da1a0'))
+							Renderer.DrawTextCentered(Overlay.IconBigFont, x - math.ceil(star_size / 2) - math.floor(secsize * (GUI.Get(Overlay.Identity .. "mapsize") / 5)), y, seconds, true)
+						end
+						
+						if drawpath then
+							local speed = NPC.GetMoveSpeed(hero)
+							local angle = Entity.GetRotation(hero)
+							local angleOffset = Angle(0, 45, 0)
+							angle:SetYaw(angle:GetYaw() + angleOffset:GetYaw())
+							local x,y,z = angle:GetVectors()
+							local direction = x + y + z
+							direction:SetZ(0)
+							direction:Normalize()
+							direction:Scale(math.floor(speed * (os.clock() - Overlay.Times[NPC.GetUnitName(hero)])))
+							local pos = Entity.GetAbsOrigin(hero)
+							local xp, yp, vis = Renderer.WorldToScreen(pos + direction)
+							local xz, yz = Renderer.WorldToScreen(pos)
+							if vis then
+								Renderer.SetDrawColor(255, 255, 255, 100)
+								local specsize = mapsize - math.floor(mapsize / 4)
+								Renderer.DrawImage(GUIDB.Image('mini_' .. NPC.GetUnitName(hero)), xp - math.ceil(specsize / 2), yp - math.ceil(specsize / 2), specsize, specsize)
+							end
+						end
+					end
+				else
+					if Overlay.Times[NPC.GetUnitName(hero)] ~= nil then
+						Overlay.Times[NPC.GetUnitName(hero)] = nil
+					end
+				end
+			end
 			local player = Entity.GetOwner(hero)
 			local top = opcolor
 			local top_less = opcolor_less
@@ -215,6 +354,10 @@ function Overlay.OnDraw()
 
 			local heroX, heroY, heroV = Renderer.WorldToScreen(heroPos)
 			heroX = heroX - math.floor((size + 8) * 3)
+			if showherolevel then
+				xpos = xpos + size + 8
+			end
+			
 			local drawHeroY = heroY - size - aboveoffset
 			local isAbove = false
 			
@@ -303,7 +446,7 @@ function Overlay.OnDraw()
 					Renderer.DrawText(Overlay.Font, txpos + hsize + 5, ypos + hsize, Player.GetSentryWardsPlaced(player), true)
 				end
 			
-				if Input.IsCursorInRect(locx, ypos, defx, size) then
+				if Input.IsCursorInRect(locx, ypos, defx, size) and not fixposition then
 					if Input.IsKeyDownOnce(Enum.ButtonCode.MOUSE_LEFT) then 
 						local mx, my = Input.GetCursorPos()
 						offsetPosX = mx - locx
@@ -311,6 +454,14 @@ function Overlay.OnDraw()
 						if Overlay.OnAir then Overlay.OnAir = false else Overlay.OnAir = true end
 					end
 				end
+				
+				if showherolevel then
+					Renderer.SetDrawColor(0, 0, 0, top)
+					Renderer.DrawFilledRect(locx + defx, ypos, size + 8, size)
+					Renderer.SetDrawColor(255, 255, 255, top)
+					Renderer.DrawTextCentered(GUI.Font.ContentBold, locx + defx + math.ceil((size + 8) / 2), ypos + math.ceil(size / 2), NPC.GetCurrentLevel(hero), true)
+				end
+				
 				Renderer.SetDrawColor(255, 255, 255, top)
 				Renderer.DrawImage(heroImageHandle, locx, ypos, defx, size)
 				if Entity.IsSameTeam(myHero, hero) and showstat and Entity.IsPlayer(player) then
@@ -328,6 +479,11 @@ end
 
 function Overlay.UpdateSize(key, val)
 	Overlay.Font = Renderer.LoadFont("Tahoma", math.floor(val / 2) - 1, Enum.FontWeight.BOLD)
+end
+
+function Overlay.UpdateIconSize(key, val)
+	Overlay.IconFont = Renderer.LoadFont("Tahoma", val - math.floor(val / 1.4), Enum.FontWeight.BOLD)
+	Overlay.IconBigFont = Renderer.LoadFont("Tahoma", val - math.floor(val / 2), Enum.FontWeight.Normal)
 end
 
 function Overlay.Notify(item, notify_items, name, ttl, wdt, tts, imageHandle, heroImageHandle)

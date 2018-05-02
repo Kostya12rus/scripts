@@ -1,8 +1,9 @@
 GUIDB	= {}
 GUIDB.Images	= {}
-GUIDB.Version	= "v 18.03.03"
+GUIDB.Version	= "v 18.05.02"
 GUIDB.IconPath	= "resource/flash3/images/items/"
 GUIDB.HeroPath	= "resource/flash3/images/heroes/"
+GUIDB.MiniHeroPath	= "~/Extra/miniheroes/"
 
 GUIDB.Items = {}
 GUIDB.Items["item_aegis"] = "Aegis of the Immortal"
@@ -310,7 +311,15 @@ function GUIDB.Cache()
 			end
 			GUIDB.Images[tempName] = imageHandle
 		end
+		
+		imageHandle = GUIDB.Images['mini_' .. tempName]
+		if imageHandle == nil then
+			GUIDB.Images['mini_' .. tempName] = Renderer.LoadImage(GUIDB.MiniHeroPath .. tempName .. ".png")
+		end		
 	end
+	
+	GUIDB.Images["star_circle"] = Renderer.LoadImage("~/Extra/star_circle.png")
+
 	GUI.Write("GUIDB cached")
 end
 
