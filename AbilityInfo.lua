@@ -416,7 +416,7 @@ end
 function AbilityInfom.FindTargetVector(startpos,endpos)
 	local rangehook = math.floor(startpos:Distance(endpos):Length2D())
 	for i = 100,rangehook,100 do
-		Log.Write(i)
+		--Log.Write(i)
 		local VectorToEnd = AbilityInfom.GetVec(startpos,endpos,i)
 		if VectorToEnd then
 			local heroes = Heroes.InRadius(VectorToEnd,200,Entity.GetTeamNum(Heroes.GetLocal()),Enum.TeamType.TEAM_FRIEND)
