@@ -1,6 +1,6 @@
 GUIDB	= {}
 GUIDB.Images	= {}
-GUIDB.Version	= "v 18.05.02"
+GUIDB.Version	= "v 18.05.20"
 GUIDB.IconPath	= "resource/flash3/images/items/"
 GUIDB.HeroPath	= "resource/flash3/images/heroes/"
 GUIDB.MiniHeroPath	= "~/Extra/miniheroes/"
@@ -16,6 +16,16 @@ GUIDB.Items["item_blight_stone"] = "Blight Stone"
 GUIDB.Items["item_blink"] = "Blink Dagger"
 GUIDB.Items["item_boots"] = "Boots of Speed"
 GUIDB.Items["item_bottle"] = "Bottle"
+GUIDB.Items["bottle_empty"] = "Bottle"
+GUIDB.Items["bottle_small"] = "Bottle"
+GUIDB.Items["bottle_medium"] = "Bottle"
+GUIDB.Items["bottle_haste"] = "Bottle"
+GUIDB.Items["bottle_bounty"] = "Bottle"
+GUIDB.Items["bottle_doubledamage"] = "Bottle"
+GUIDB.Items["bottle_illusion"] = "Bottle"
+GUIDB.Items["bottle_invisibility"] = "Bottle"
+GUIDB.Items["bottle_regeneration"] = "Bottle"
+GUIDB.Items["bottle_arcane"] = "Bottle"
 GUIDB.Items["item_broadsword"] = "Broadsword"
 GUIDB.Items["item_chainmail"] = "Chainmail"
 GUIDB.Items["item_cheese"] = "Cheese"
@@ -78,6 +88,7 @@ GUIDB.Items["item_aether_lens"] = "Aether Lens"
 GUIDB.Items["item_ultimate_scepter"] = "Aghanim's Scepter"
 GUIDB.Items["item_arcane_boots"] = "Arcane Boots"
 GUIDB.Items["item_armlet"] = "Armlet of Mordiggian"
+GUIDB.Items["armlet_active"] = "Armlet of Mordiggian"
 GUIDB.Items["item_assault"] = "Assault Cuirass"
 GUIDB.Items["item_bfury"] = "Battle Fury"
 GUIDB.Items["item_black_king_bar"] = "Black King Bar"
@@ -138,9 +149,13 @@ GUIDB.Items["item_pers"] = "Perseverance"
 GUIDB.Items["item_phase_boots"] = "Phase Boots"
 GUIDB.Items["item_pipe"] = "Pipe of Insight"
 GUIDB.Items["item_power_treads"] = "Power Treads"
+GUIDB.Items["power_treads_str"] = "Power Treads"
+GUIDB.Items["power_treads_agi"] = "Power Treads"
+GUIDB.Items["power_treads_int"] = "Power Treads"
 GUIDB.Items["item_radiance"] = "Radiance"
 GUIDB.Items["item_rapier"] = "Divine Rapier"
 GUIDB.Items["item_refresher"] = "Refresher Orb"
+GUIDB.Items["refresher_shard"] = "Refresher Shard"
 GUIDB.Items["item_ring_of_aquila"] = "Ring of Aquila"
 GUIDB.Items["item_ring_of_basilius"] = "Ring of Basilius"
 GUIDB.Items["item_rod_of_atos"] = "Rod of Atos"
@@ -167,6 +182,7 @@ GUIDB.Items["item_spirit_vessel"] = "Spirit Vessel"
 GUIDB.Items["item_nullifier"] = "Nullifier"
 GUIDB.Items["item_aeon_disk"] = "Aeon Disk"
 GUIDB.Items["item_kaya"] = "Kaya"
+GUIDB.Items["neutral"] = "Neutral"
 
 GUIDB.Heroes = {}
 GUIDB.Heroes["npc_dota_hero_abaddon"] = "Abaddon"
@@ -297,6 +313,8 @@ function GUIDB.Cache()
 		end
 	end
 	GUIDB.Images["recipe"] = Renderer.LoadImage(GUIDB.IconPath .. "recipe.png")
+	GUIDB.Images["neutral"] = Renderer.LoadImage(GUIDB.IconPath .. "neutral.png")
+	GUIDB.Images["npc_dota_courier"] = Renderer.LoadImage(GUIDB.IconPath .. "courier.png")
 
 	for k, v in pairs(GUIDB.Heroes) do
 		local tempName = k
@@ -327,7 +345,7 @@ function GUIDB.Image(name)
 	if string.match(name, "recipe_") then name = "recipe" end
 	name = name:gsub("item_", "")
 	name = name:gsub("npc_dota_hero_", "")
-	
+	if (GUIDB.Images[name] == nil) then name = "neutral" end
 	return GUIDB.Images[name]
 end
 
