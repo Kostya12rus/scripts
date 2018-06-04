@@ -5,6 +5,13 @@ GUI.Locale			= Menu.AddOption({ "GUI"},	"Localization", "Select your primary lan
 GUI.SelectedTheme	= Menu.AddOption({ "GUI"},	"Theme", "Select GUI theme", 1, 3)
 GUI.LockPanel		= Menu.AddOption({ "GUI" },	"Lock panel position", "")
 GUI.Key				= Menu.AddKeyOption({ "GUI" }, "Key", Enum.ButtonCode.KEY_BACKQUOTE)
+
+GUIDB.DNFG	= "Do not forget reload scripts after changes"
+GUI.PreCacheItems	= Menu.AddOption({ "GUI", "GUIDB" },	"PreCache items", GUIDB.DNFG)
+GUI.PreCacheHeroes	= Menu.AddOption({ "GUI", "GUIDB" },	"PreCache heroes", GUIDB.DNFG)
+GUI.PreCacheAb		= Menu.AddOption({ "GUI", "GUIDB" },	"PreCache abilities", GUIDB.DNFG)
+
+
 Menu.SetValueName(GUI.Locale,			1,	"English")
 Menu.SetValueName(GUI.Locale,			2,	"Russian")
 Menu.SetValueName(GUI.Locale,			3,	"Chinese")
@@ -36,8 +43,8 @@ GUI.Font.Search						= Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
 GUI.Font.Footer						= Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.GameState						= -2
 GUI.Config							= "GUI"
-GUI.Version							= 180310
-GUI.TextVersion						= 'v 18.03.10'
+GUI.Version							= 180602
+GUI.TextVersion						= 'v 18.06.02'
 
 GUI.GameStates						= {}
 GUI.GameStates.OnGameMenu			= -1
@@ -1461,7 +1468,10 @@ function DrawImageBox(click, x, y, value)
 		value["search"] = nil
 	end
 	
-	GUI.Set(key, datawork)
+	if (GUI.Data[key] ~= datawork) then
+		GUI.Set(key, datawork)
+	end
+	
 	return ((y + value["size_y"]) - safe_y) + 25
 end
 
@@ -1587,7 +1597,10 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 		value["search"] = nil
 	end
 	
-	GUI.Set(key, datawork)
+	if (GUI.Data[key] ~= datawork) then
+		GUI.Set(key, datawork)
+	end
+	
 	return ((y + value["size_y"]) - safe_y) + 25
 end
 
@@ -1630,7 +1643,9 @@ function DrawSelectBox(leftclick, x, y, value)
 		y = y + 25
 	end
 	
-	GUI.Set(key, datawork)
+	if (GUI.Data[key] ~= datawork) then
+		GUI.Set(key, datawork)
+	end
 end
 
 function DrawTextBox(click, x, y, size_x, size_y, value)
@@ -1674,6 +1689,7 @@ function DrawTextBox(click, x, y, size_x, size_y, value)
 			GUI.Set(key, '')
 		end
 	end
+	
 	Renderer.DrawImage(GUI.Theme.Close, x + size_x - (size_y - 10), y + 23 + math.floor(size_y / 2) - 5, 10, 10)
 end
 

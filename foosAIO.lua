@@ -8534,7 +8534,7 @@ function fooAllInOne.wardProcessing(myHero)
 					fooAllInOne.wardCaptureTiming = os.clock()
 				else
 					if fooAllInOne.wardDispenserCount[ownerID]["sentry"] > sentryStack then
-						fooAllInOne.wardProcessingTable[ownerID + math.floor(GameRules.GetGameTime())] = {type = "sentry", pos = Entity.GetAbsOrigin(heroes), dieTime = math.floor(GameRules.GetGameTime() + 240)}
+						fooAllInOne.wardProcessingTable[ownerID + math.floor(GameRules.GetGameTime())] = {type = "sentry", pos = Entity.GetAbsOrigin(heroes), dieTime = math.floor(GameRules.GetGameTime() + 360)}
 						fooAllInOne.wardDispenserCount[ownerID] = nil
 						fooAllInOne.wardCaptureTiming = os.clock()
 					elseif fooAllInOne.wardDispenserCount[ownerID]["observer"] > sentryStack then
