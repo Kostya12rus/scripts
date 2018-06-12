@@ -1,5 +1,5 @@
 local sadafaf = {}
-sadafaf.optionEnable = Menu.AddOption({"Kostya12rus","ItemManeger"}, "Activate", "")
+sadafaf.optionEnable = Menu.AddOption({"Kostya12rus","ItemManeger"}, "Activate1", "")
 sadafaf.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 trigerTime = 0
 tick = 0
