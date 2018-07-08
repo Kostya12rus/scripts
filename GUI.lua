@@ -43,8 +43,8 @@ GUI.Font.Search						= Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
 GUI.Font.Footer						= Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.GameState						= -2
 GUI.Config							= "GUI"
-GUI.Version							= 180602
-GUI.TextVersion						= 'v 18.06.02'
+GUI.Version							= 180707
+GUI.TextVersion						= 'v 18.07.07'
 
 GUI.GameStates						= {}
 GUI.GameStates.OnGameMenu			= -1
@@ -1429,8 +1429,10 @@ function DrawImageBox(click, x, y, value)
 						table.remove(datawork, 1)
 					end
 					datawork[Length(datawork) + 1] = k
+					GUI.Set(key, datawork)
 				else
 					datawork = removeValue(datawork, k)
+					GUI.Set(key, datawork)
 				end
 				
 				if value["callback"] ~= nil then
@@ -1466,10 +1468,6 @@ function DrawImageBox(click, x, y, value)
 	
 	if value["search"] ~= nil and value["last_time"] ~= nil and value["last_time"] + 5 < os.clock() then
 		value["search"] = nil
-	end
-	
-	if (GUI.Data[key] ~= datawork) then
-		GUI.Set(key, datawork)
 	end
 	
 	return ((y + value["size_y"]) - safe_y) + 25
@@ -1526,11 +1524,13 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 			if leftclick then
 				if not hasValue(datawork, k) then
 					datawork[Length(datawork) + 1] = k
+					GUI.Set(key, datawork)
 				else
 					for i, v in pairs(datawork) do
 						if v == k then
 							if i < Length(datawork) then 
 								datawork = swapElements(datawork, i, i + 1)
+								GUI.Set(key, datawork)
 							break end
 						end
 					end
@@ -1543,6 +1543,7 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 						if value == k then
 							if (index - 1) > 0 then
 								datawork = swapElements(datawork, index - 1, index)
+								GUI.Set(key, datawork)
 							else
 								table.remove(datawork, 1)
 							end
@@ -1597,10 +1598,6 @@ function DrawOrderBox(inpos, leftclick, rightclick, x, y, value)
 		value["search"] = nil
 	end
 	
-	if (GUI.Data[key] ~= datawork) then
-		GUI.Set(key, datawork)
-	end
-	
 	return ((y + value["size_y"]) - safe_y) + 25
 end
 
@@ -1625,6 +1622,7 @@ function DrawSelectBox(leftclick, x, y, value)
 						table.remove(datawork, 1)
 					end
 					datawork[Length(datawork) + 1] = k
+					GUI.Set(key, datawork)
 				end
 				
 				if value["callback"] ~= nil then
@@ -1641,10 +1639,6 @@ function DrawSelectBox(leftclick, x, y, value)
 		end
 		Renderer.DrawText(GUI.Font.ContentSmallBold, tempx + 26, y + 20, v, false)
 		y = y + 25
-	end
-	
-	if (GUI.Data[key] ~= datawork) then
-		GUI.Set(key, datawork)
 	end
 end
 
