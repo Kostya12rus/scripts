@@ -155,7 +155,6 @@ function EconomPanel.OnDraw()
 				moveicon = moveicon1
 			end
 			Renderer.SetDrawColor(255,255,255,visibility)
-			
 			Renderer.DrawImage(moveicon, math.ceil(xpos-sizeBary),math.ceil(ypos-sizeBary),math.ceil(sizeBary),math.ceil(sizeBary))
 			if Input.IsCursorInRect(math.ceil(xpos-sizeBary),math.ceil(ypos-sizeBary),math.ceil(sizeBary),math.ceil(sizeBary)) then
 				if Menu.IsKeyDownOnce(EconomPanel.KeySetting) then 
@@ -174,14 +173,7 @@ function EconomPanel.OnDraw()
 					if heroicon[NPC.GetUnitName(hero[1])] then
 						imageHandle = heroicon[NPC.GetUnitName(hero[1])]
 					else
-						if NPC.GetUnitName(hero[1]) == "npc_dota_hero_dark_willow" then
-							imageHandle = Renderer.LoadImage("resource/flash3/images/heroes/fairy.png")
-						elseif NPC.GetUnitName(hero[1]) == "npc_dota_hero_pangolier" then
-							imageHandle = Renderer.LoadImage("resource/flash3/images/heroes/selection/npc_dota_hero_pangolier.png")
-						else
-							imageHandle = Renderer.LoadImage(heroIconpath .. string.gsub(NPC.GetUnitName(hero[1]), "npc_dota_hero_", "") .. ".png")
-						end
-						heroicon[NPC.GetUnitName(hero[1])] = imageHandle
+						heroicon[NPC.GetUnitName(hero[1])] = Renderer.LoadImage(string.gsub(heroIconpath, "*", NPC.GetUnitName(hero[1])))
 					end
 					local prochent = hero[2]/(playert[1][2]/100)/100
 					Renderer.DrawImage(imageHandle, math.ceil(xpos), math.ceil(ypos), math.ceil(sizeBarx), math.ceil(sizeBary))
@@ -222,20 +214,20 @@ end
 function EconomPanel.init()
 	canDraw = false
 	playert = {}
-	heroIconpath = "resource/flash3/images/heroes/"
+	heroIconpath = "panorama/images/heroes/*_png.vtex_c"
 	moveicon1 = Renderer.LoadImage('resource/cursor/source/cursor_spell_default.png')
 	moveicon2 = Renderer.LoadImage('resource/cursor/source/cursor_spell_illegal.png')
 	moveicon = moveicon1
 	movepanel = false
-	settingicon = Renderer.LoadImage('resource/flash3/images/heroes/selection/pip_baby.png')
+	settingicon = Renderer.LoadImage('panorama/images/control_icons/settings_png.vtex_c')
 	settingactov = false
-	closeicon = Renderer.LoadImage('resource/flash3/images/heroes/selection/pip_disa.png')
+	closeicon = Renderer.LoadImage('panorama/images/control_icons/quit_png.vtex_c')
 	closes = false
-	visicon = Renderer.LoadImage('resource/flash3/images/heroes/selection/pip_jung.png')
+	visicon = Renderer.LoadImage('panorama/images/control_icons/eye_png.vtex_c')
 	vision = false
-	ringicon = Renderer.LoadImage('resource/flash3/images/heroes/selection/hero_quest.png')
+	ringicon = Renderer.LoadImage('panorama/images/profile_badges/bg_02_psd.vtex_c')
 	ringmove = false
-	setsizeicon = Renderer.LoadImage('resource/flash3/images/spellicons/modifier_invulnerable.png')
+	setsizeicon = Renderer.LoadImage('panorama/images/spellicons/modifier_invulnerable_png.vtex_c')
 	setsize = false
 	
 	heroicon = {}
