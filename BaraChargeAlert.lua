@@ -1,8 +1,6 @@
 local AbilityInfo = {}
 AbilityInfo.optionEnable = Menu.AddOption({"Awareness", "Bara Alert"}, "Activation", "")
 AbilityInfo.ChatReport = Menu.AddOption({"Awareness", "Bara Alert"}, "Chat report", "")
--- AbilityInfo.Key1= Menu.AddKeyOption({"Awareness", "Ability Info"}, "Key black hole №1", Enum.ButtonCode.BUTTON_CODE_NONE)
--- AbilityInfo.targetkey1 = Menu.AddOption({"Awareness", "Ability Info"}, ">= целей для кнопки 1", "", 1, 5, 1)
 AbilityInfo.Font = Renderer.LoadFont("Tahoma", 15, Enum.FontWeight.EXTRABOLD)
 
 function AbilityInfo.OnParticleCreate(particle)
@@ -50,7 +48,7 @@ function AbilityInfo.OnUpdate()
 	for i,hero in pairs(Heroes.GetAll()) do
 		if hero then
 			if not HeroImg[NPC.GetUnitName(hero)] then
-				HeroImg[NPC.GetUnitName(hero)] = Renderer.LoadImage(heroIcon .. NPC.GetUnitName(hero) .. ".png")
+				HeroImg[NPC.GetUnitName(hero)] = Renderer.LoadImage(string.gsub(heroIcon, "*", NPC.GetUnitName(hero)))
 			end
 		end
 	end
@@ -65,7 +63,7 @@ function AbilityInfo.OnDraw()
 			if HeroImg[abil.name] then
 				skillIMG = HeroImg[abil.name]
 			else
-				HeroImg[abil.name] = Renderer.LoadImage(spellIconpath .. abil.name .. ".png")
+				HeroImg[abil.name] = Renderer.LoadImage(string.gsub(ItemIconpath, "*", abil.name))
 			end
 			AbilityInfo.DrawInfo(HeroImg[NPC.GetUnitName(abil.sourse)],HeroImg[abil.name],HeroImg[NPC.GetUnitName(abil.target)],i,abil.format)
 			if Menu.IsEnabled(AbilityInfo.ChatReport) and abil.name == "spirit_breaker_charge_of_darkness" then
@@ -107,9 +105,9 @@ function AbilityInfo.DrawInfo(img1,img2,img3,index,formats)
 end
 
 function AbilityInfo.init()
-	blankcard = Renderer.LoadImage('resource/flash3/images/heroes/selection/blankcard_loadout.png')
-	heroIcon = "resource/flash3/images/heroes/selection/"
-	spellIconpath = "resource/flash3/images/spellicons/"
+	blankcard = Renderer.LoadImage('panorama/images/weekend_tourney/battle_cup_tooltip_backer_champions_fall_psd.vtex_c')
+	heroIcon = "panorama/images/heroes/selection/*_png.vtex_c"
+	spellIconpath = "panorama/images/spellicons/*_png.vtex_c"
 	HeroImg = {}
 	bara = false
 	timing = 0

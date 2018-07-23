@@ -8,7 +8,10 @@ HpMpBar.Font = Renderer.LoadFont("Arial", Config.ReadInt("HpMpBar", "Font", 10),
 HpMpBar.FontSmall = Renderer.LoadFont("Arial", Config.ReadInt("HpMpBar", "Font", 12), Enum.FontWeight.BOLD)
 HpMpBar.Font1 = Renderer.LoadFont("Arial", Config.ReadInt("HpMpBar", "Font1", 14), Enum.FontWeight.BOLD)
 
-local ult_icon_h = Renderer.LoadImage("resource/flash3/images/event_1stkill.png")
+
+local load_path = "resource/flash3/images/spellicons/"
+local format_type = ".png"
+local ult_icons_h = {}
 local obs_icon_h = Renderer.LoadImage("resource/flash3/images/items/ward_observer.png")
 local sen_icon_h = Renderer.LoadImage("resource/flash3/images/items/ward_sentry.png")
 local gem_icon_h = Renderer.LoadImage("resource/flash3/images/items/gem.png")
@@ -21,8 +24,8 @@ HpMpBar.Locale = {
 		["english"] = "HpMpBar"
 	},
 	["desc"] = {
-		["english"] = "HpMpBar v0.2.3",
-		["russian"] = "HpMpBar v0.2.3"
+		["english"] = "HpMpBar v0.3",
+		["russian"] = "HpMpBar v0.3"
 	},
 	["bary"] = {
 		["english"] = "Height in percent",
@@ -156,9 +159,12 @@ function HpMpBar.GetHeroPos(Unit)
 	local myHero = Heroes.GetLocal()
 	if Players.GetByPlayerID(indexHero) and Player.GetTeamData(Players.GetByPlayerID(indexHero)) and Player.GetTeamData(Players.GetByPlayerID(indexHero)).respawnTime ~= -1 then
 		addit_h = addit_h + 2.45
+		if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and Entity.IsSameTeam(myHero, Unit) then
+			addit_h = addit_h + 4.15
+		end
 	else
 		if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and myHero and Entity.IsSameTeam(myHero, Unit) then
-			addit_h = addit_h + 1.6
+			addit_h = addit_h + 6.6
 		end
 		if not myHero then
 			addit_h = addit_h + 1.6
@@ -190,6 +196,7 @@ end
 
 local old_scale
 local old_font_off
+
 function HpMpBar.OnDraw()
 	if GUI == nil then
 		return
@@ -308,6 +315,7 @@ function HpMpBar.OnDraw()
 					end
 					if Ability.GetCooldownLength(tmp_ability) == 0 then
 						ultimate_cd = 0
+						HpMpBar.UltimateTime[Hero.GetPlayerID(Unit)] = 0
 					else
 						ultimate_cd = ultimate_cd_time / Ability.GetCooldownLength(tmp_ability)
 					end
@@ -347,7 +355,6 @@ function HpMpBar.OnDraw()
 				Renderer.SetDrawColor(255, 255, 255, alpha)
 			end
 			if GUI.IsEnabled(HpMpBar.Identity .. "altinfohpmp") and Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) then
-				--Log.Write((#("720") * (math.floor(((math.floor((12 + fontoff) * scale)) / 2.5) + 0.5) + 1)) - 1)
 				if GUI.IsEnabled(HpMpBar.Identity .. "showhp") then
 					Renderer.DrawTextCentered(HpMpBar.FontSmall, x_center, y_center + math.floor(5 * scale) - 1, Hp .. "/" .. HpMax, 0)
 				end
@@ -380,7 +387,7 @@ function HpMpBar.OnDraw()
 					end
 				end
 
-				if tp_cooldown then
+				if tp_cooldown and not Entity.IsSameTeam(myHero, Unit) then
 					local str = ""
 					if tp_cooldown == 0 and HpMpBar.ItemState(Unit, "item_tpscroll") == 1 then
 						str = str .. "bkpk"
@@ -394,14 +401,21 @@ function HpMpBar.OnDraw()
 					Renderer.DrawTextCentered(HpMpBar.Font, center_x_r, center_y_r + 20, str, 1)
 				end
 			else
-				if ultimate_cd and ultimate_cd <= 0 then
+				if ultimate_cd then
 					if not have_mana_ultimate then
 						Renderer.SetDrawColor(100, 100, 255, alpha)
 					else
 						Renderer.SetDrawColor(255, 255, 255, alpha)
 					end
-					if GUI.IsEnabled(HpMpBar.Identity .. "ultpanel") then
-						Renderer.DrawImage(ult_icon_h, x_center - 10, y + math.floor(bary * 2.2), 16, 16)
+					if GUI.IsEnabled(HpMpBar.Identity .. "ultpanel") and tmp_ability then
+						if not ult_icons_h[Ability.GetName(tmp_ability)] then
+							ult_icons_h[Ability.GetName(tmp_ability)] = Renderer.LoadImage(load_path .. Ability.GetName(tmp_ability) .. format_type)
+						end
+						Renderer.DrawImage(ult_icons_h[Ability.GetName(tmp_ability)], x_center - 12, y + math.floor(bary * 2.2), 20, 20)
+						Renderer.SetDrawColor(255, 255, 255, alpha)
+						if ultimate_cd_time > 0 then
+							Renderer.DrawTextCentered(HpMpBar.Font, x_center - 12 + 10, y + math.floor(bary * 2.2) + 10, ultimate_cd_time, 1)
+						end
 					end
 				end
 				if GUI.IsEnabled(HpMpBar.Identity .. "showdangitems") then
