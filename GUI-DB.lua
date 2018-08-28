@@ -1,6 +1,6 @@
 GUIDB	= {}
 GUIDB.Images	= {}
-GUIDB.Version	= "v 18.06.02"
+GUIDB.Version	= "v 18.08.27"
 GUIDB.IconPath	= "resource/flash3/images/items/"
 GUIDB.HeroPath	= "resource/flash3/images/heroes/"
 GUIDB.SpellPath	= "resource/flash3/images/spellicons/"
@@ -222,6 +222,7 @@ GUIDB.Heroes["npc_dota_hero_ember_spirit"] = "Ember Spirit"
 GUIDB.Heroes["npc_dota_hero_enchantress"] = "Enchantress"
 GUIDB.Heroes["npc_dota_hero_enigma"] = "Enigma"
 GUIDB.Heroes["npc_dota_hero_faceless_void"] = "Faceless Void"
+GUIDB.Heroes["npc_dota_hero_grimstroke"] = "Grimstroke"
 GUIDB.Heroes["npc_dota_hero_gyrocopter"] = "Gyrocopter"
 GUIDB.Heroes["npc_dota_hero_huskar"] = "Huskar"
 GUIDB.Heroes["npc_dota_hero_invoker"] = "Invoker"
@@ -586,6 +587,10 @@ GUIDB.Abilities["greevil_purification"]	=	"greevil_purification"
 GUIDB.Abilities["greevil_rot"]	=	"greevil_rot"
 GUIDB.Abilities["greevil_shadow_wave"]	=	"greevil_shadow_wave"
 GUIDB.Abilities["greevil_time_lock"]	=	"greevil_time_lock"
+GUIDB.Abilities["grimstroke_dark_artistry"]	=	"grimstroke_dark_artistry"
+GUIDB.Abilities["grimstroke_ink_creature"]	=	"grimstroke_ink_creature"
+GUIDB.Abilities["grimstroke_soul_chain"]	=	"grimstroke_soul_chain"
+GUIDB.Abilities["grimstroke_spirit_walk"]	=	"grimstroke_spirit_walk"
 GUIDB.Abilities["gyrocopter_call_down"]	=	"gyrocopter_call_down"
 GUIDB.Abilities["gyrocopter_flak_cannon"]	=	"gyrocopter_flak_cannon"
 GUIDB.Abilities["gyrocopter_homing_missile"]	=	"gyrocopter_homing_missile"
@@ -1657,8 +1662,13 @@ function GUIDB.Cache()
 end
 
 function GUIDB.LoadImage(k, path, name)
+
 	if (GUIDB.Images[k] == nil) then
-		GUIDB.Images[k]	= Renderer.LoadImage((name or path .. k) .. ".png")
+		if string.match((name or path .. k), "grimstroke") and string.match((name or path .. k), "mini") then
+			GUIDB.Images[k]	= Renderer.LoadImage('panorama/images/heroes/icons/npc_dota_hero_grimstroke_png.vtex_c')
+		else
+			GUIDB.Images[k]	= Renderer.LoadImage((name or path .. k) .. ".png")
+		end
 		GUIDB.TotalLoad	= GUIDB.TotalLoad + 1
 	end
 end
