@@ -1058,7 +1058,7 @@ function TechiesHUD.OnDraw()
 		end
 	end
 
-	if Input.IsKeyDownOnce(key_for_set_spot) then
+	if key_for_set_spot and Input.IsKeyDownOnce(key_for_set_spot) then
 		TechiesHUD.SetSpot()
 	end
 

@@ -10,7 +10,6 @@ Menu.SetValueName(BirgaMemof.AutoPick, 3, 'Абдуль')
 
 function BirgaMemof.init()
 	attacparticle = {}
-	imageHandlepar = Renderer.LoadImage("resource/flash3/images/broadcast/statpop_exclaim.png")
 	Distanse = 900
 	Distanse2 = Distanse/1.4085
 	tablepos = {Vector(Distanse,0,0),Vector(Distanse2,Distanse2,0),Vector(0,Distanse,0),Vector(-Distanse2,Distanse2,0),Vector(-Distanse,0,0),Vector(-Distanse2,-Distanse2,0),Vector(0,-Distanse,0),Vector(Distanse2,-Distanse2,0)}

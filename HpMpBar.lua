@@ -24,8 +24,8 @@ HpMpBar.Locale = {
 		["english"] = "HpMpBar"
 	},
 	["desc"] = {
-		["english"] = "HpMpBar v0.3",
-		["russian"] = "HpMpBar v0.3"
+		["english"] = "HpMpBar v0.3.1",
+		["russian"] = "HpMpBar v0.3.1"
 	},
 	["bary"] = {
 		["english"] = "Height in percent",
@@ -159,7 +159,7 @@ function HpMpBar.GetHeroPos(Unit)
 	local myHero = Heroes.GetLocal()
 	if Players.GetByPlayerID(indexHero) and Player.GetTeamData(Players.GetByPlayerID(indexHero)) and Player.GetTeamData(Players.GetByPlayerID(indexHero)).respawnTime ~= -1 then
 		addit_h = addit_h + 2.45
-		if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and Entity.IsSameTeam(myHero, Unit) then
+		if Input.IsKeyDown(Enum.ButtonCode.KEY_LALT) and myHero and Entity.IsSameTeam(myHero, Unit) then
 			addit_h = addit_h + 4.15
 		end
 	else
@@ -387,7 +387,7 @@ function HpMpBar.OnDraw()
 					end
 				end
 
-				if tp_cooldown and not Entity.IsSameTeam(myHero, Unit) then
+				if myHero and tp_cooldown and not Entity.IsSameTeam(myHero, Unit) then
 					local str = ""
 					if tp_cooldown == 0 and HpMpBar.ItemState(Unit, "item_tpscroll") == 1 then
 						str = str .. "bkpk"
