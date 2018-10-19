@@ -32,8 +32,8 @@ function AP.OnDraw()
 	if GUI == nil then return end
 
 	if not GUI.Exist(AP.Identity) then
-		local templist		= GUIDB.Heroes
-		templist["roshan"]	= "zRandom"
+		local templist		=  deepcopy(GUIDB.Heroes)
+		templist["random"]	= "zRandom"
 	
 		GUI.Initialize(AP.Identity,		GUI.Category.General,			AP.Locale["name"],			AP.Locale["desc"],		"paroxysm")
 		GUI.AddMenuItem(AP.Identity,	AP.Identity .. "pickedHero",	AP.Locale["select"],		GUI.MenuType.ImageBox,	1,	templist,	GUIDB.HeroPath,	"npc_dota_hero_")
@@ -49,7 +49,7 @@ function AP.OnDraw()
 		if GUI.Get(AP.Identity .. "pickedHero") == nil then return end
 	
 		for k,v in pairs(GUI.Get(AP.Identity .. "pickedHero", 1)) do
-			if v == "roshan" then
+			if v == "random" then
 				Engine.ExecuteCommand("dota_select_hero random")
 			else
 				Engine.ExecuteCommand("dota_select_hero " .. v)

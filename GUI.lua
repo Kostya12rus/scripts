@@ -43,8 +43,8 @@ GUI.Font.Search						= Renderer.LoadFont("Arial", 30, Enum.FontWeight.MEDIUM)
 GUI.Font.Footer						= Renderer.LoadFont("Arial", 17, Enum.FontWeight.MEDIUM)
 GUI.GameState						= -2
 GUI.Config							= "GUI"
-GUI.Version							= 180707
-GUI.TextVersion						= 'v 18.07.07'
+GUI.Version							= 181019
+GUI.TextVersion						= 'v 18.10.19'
 
 GUI.GameStates						= {}
 GUI.GameStates.OnGameMenu			= -1
@@ -2067,6 +2067,21 @@ function strpos (haystack, needle, offset)
 	local i       = string.find (haystack, pattern, (offset or 0))
   
 	return (i ~= nil and i or false)
+end
+
+function deepcopy (orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else
+        copy = orig
+    end
+    return copy
 end
 
 function explode (str, div)
