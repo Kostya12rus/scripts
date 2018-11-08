@@ -16,6 +16,7 @@ MultiCheat.FurAndShamBlock =         Menu.AddOption({"Kostya12rus","MultiCheat",
 MultiCheat.BlockKey =             Menu.AddKeyOption({"Kostya12rus","MultiCheat",  "5 FurAndShamBlock"},"BlockKey",Enum.ButtonCode.KEY_D)
 MultiCheat.BD =                      Menu.AddOption({"Kostya12rus","MultiCheat",  "6 Break Dance"}, "Break Dance on/off", "")
 MultiCheat.BDKey =                Menu.AddKeyOption({"Kostya12rus","MultiCheat",  "6 Break Dance"},"BlockKey",Enum.ButtonCode.KEY_T)
+MultiCheat.typemove =                Menu.AddOption({"Kostya12rus","MultiCheat",  "6 Break Dance"},"Type", "", 0, 2, 1)
 MultiCheat.CsGoESPbole =             Menu.AddOption({"Kostya12rus","MultiCheat",  "7 CsGO 3D ESP"}, "CsGo ESP on/off", "")
 MultiCheat.CsGoESPName =             Menu.AddOption({"Kostya12rus","MultiCheat",  "7 CsGO 3D ESP"}, "CsGo ESP Name Hero on/off", "")
 MultiCheat.CsGoESPBox  =             Menu.AddOption({"Kostya12rus","MultiCheat",  "7 CsGO 3D ESP"}, "CsGo ESP Draw Box on/off", "")
@@ -404,14 +405,34 @@ function MultiCheat.RoflTime()
   end
 end
 
+local trigerpiper = true
 function MultiCheat.BreakDance(hero)
   if Menu.IsKeyDown(MultiCheat.BDKey) then
-    if tick <= GameRules.GetGameTime() then
-      local NeedPosinot = MultiCheat.PositionAngle(hero,180,1)
-      MultiCheat.MoveTo(NeedPosinot)
-      tick = GameRules.GetGameTime() + 0.001
-    end
-  end
+		if Menu.GetValue(MultiCheat.typemove) == 0 then
+			if tick <= GameRules.GetGameTime() then
+				NPC.MoveTo(myHero,MultiCheat.PositionAngle(myHero,160,1),false,false)
+				tick = GameRules.GetGameTime() + 0.05
+			end
+		end
+		if Menu.GetValue(MultiCheat.typemove) == 1 then
+			if tick <= GameRules.GetGameTime() then
+				NPC.MoveTo(myHero,MultiCheat.PositionAngle(myHero,100,40),false,false)
+				tick = GameRules.GetGameTime() + 0.15
+			end
+		end
+		if Menu.GetValue(MultiCheat.typemove) == 2 then
+			if tick <= GameRules.GetGameTime() then
+				if trigerpiper then
+					minitable = 75
+				else
+					minitable = -120
+				end
+				NPC.MoveTo(myHero,MultiCheat.PositionAngle(myHero,minitable,1),false,false)
+				tick = GameRules.GetGameTime() + 0.1
+				trigerpiper = not trigerpiper
+			end
+		end
+	end
 end
 
 --Untility function
