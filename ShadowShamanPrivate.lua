@@ -1,1 +1,1 @@
-D:/122/DotaCheat1Tester/scripts/ShadowShamanPrivate.lua
+D:/GitHub/PrivateScripts/Combo_ShadowShaman.lua

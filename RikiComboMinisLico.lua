@@ -1,1 +1,1 @@
-D:/122/DotaCheat1Tester/scripts/RikiComboMinisLico.lua
+D:/GitHub/PrivateScripts/Combo_Riki.lua

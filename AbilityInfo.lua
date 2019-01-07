@@ -1,1 +1,0 @@
-D:/GitHub/AbilityInfo/AbilityInfo.lua
