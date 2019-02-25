@@ -28,5 +28,11 @@ function Logger.OnModifierGained(npc, modifier)
         Config.WriteInt("OnModifierGained", Modifier.GetName(modifier), isHasKey+1)
     end
 end
+function Logger.OnSoundStart(sound)
+    if Menu.IsEnabled(Logger.TrigerActiv) and Modifier.GetName(sound.name) then
+        local isHasKey = Config.ReadInt("OnSoundStart", sound.name, 0)
+        Config.WriteInt("OnSoundStart", sound.name, isHasKey+1)
+    end
+end
 
 return Logger
