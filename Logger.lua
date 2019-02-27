@@ -1,6 +1,13 @@
 local Logger = {}
 Logger.TrigerActiv = Menu.AddOption({"Kostya12rus"}, "Logger", "")
 
+function Logger.OnSoundStart(sound)
+    if Menu.IsEnabled(Logger.TrigerActiv) then
+        local isHasKey = Config.ReadInt("OnSoundStart", sound.name, 0)
+        Config.WriteInt("OnSoundStart", sound.name, isHasKey+1)
+    end
+end
+
 function Logger.OnParticleCreate(particle)
     if Menu.IsEnabled(Logger.TrigerActiv) then
         local isHasKey = Config.ReadInt("OnParticleCreate", particle.name, 0)
@@ -26,12 +33,6 @@ function Logger.OnModifierGained(npc, modifier)
     if Menu.IsEnabled(Logger.TrigerActiv) and Modifier.GetName(modifier) then
         local isHasKey = Config.ReadInt("OnModifierGained", Modifier.GetName(modifier), 0)
         Config.WriteInt("OnModifierGained", Modifier.GetName(modifier), isHasKey+1)
-    end
-end
-function Logger.OnSoundStart(sound)
-    if Menu.IsEnabled(Logger.TrigerActiv) then
-        local isHasKey = Config.ReadInt("OnSoundStart", sound.name, 0)
-        Config.WriteInt("OnSoundStart", sound.name, isHasKey+1)
     end
 end
 
