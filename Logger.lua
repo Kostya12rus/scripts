@@ -1,7 +1,7 @@
 local Logger = {}
 Logger.TrigerActiv = Menu.AddOption({"Kostya12rus"}, "Logger", "")
 
-function Logger.OnSoundStart(sound)
+function Logger.OnStartSound(sound)
     if Menu.IsEnabled(Logger.TrigerActiv) then
         local isHasKey = Config.ReadInt("OnSoundStart", sound.name, 0)
         Config.WriteInt("OnSoundStart", sound.name, isHasKey+1)
