@@ -73,9 +73,6 @@ end
 function MyTeamateInGame.OnGameStart()
   MyTeamateInGame.init()
 end
-function MyTeamateInGame.OnGameEnd()
-  MyTeamateInGame.init()
-end
 MyTeamateInGame.init()
 
 return MyTeamateInGame
