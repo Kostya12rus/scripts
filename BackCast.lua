@@ -2,6 +2,10 @@ local BackCast = {}
 
 local working_spells = {
 	"pudge_meat_hook",
+	"windrunner_powershot",
+	"death_prophet_carrion_swarm",
+	"mars_spear",
+	"vengefulspirit_wave_of_terror",
 	"rattletrap_hookshot",
 	"mirana_arrow",
 	"queenofpain_sonic_wave",
@@ -11,14 +15,53 @@ local working_spells = {
 	"nyx_assassin_impale",
 	"earthshaker_fissure",
 	"shredder_timber_chain",
-	"jakiro_ice_path"
+	"jakiro_ice_path",
+	"venomancer_venomous_gale",
+	"weaver_the_swarm",
+	"invoker_deafening_blast",
+	"invoker_tornado",
+	"jakiro_dual_breath",
+	"jakiro_ice_path",
+	"jakiro_macropyre",
+	"lina_dragon_slave",
+	"lion_impale",
+	"magnataur_shockwave",
+	"phoenix_icarus_dive",
+	"puck_illusory_orb",
+	"shadow_demon_shadow_poison",
+	"spectre_spectral_dagger",
+	"tidehunter_gush",
+	"tinker_march_of_the_machines",
+	"troll_warlord_whirling_axes_ranged",
 }
+
+local used = 0;
+local time = 0;
+local myHero = Heroes.GetLocal()
+local play
+local ord
+local pos
+local targ
+local result_vec
+local abil
+local iss
+local np
+local myHeroPos
+function BackCast.OnUpdate(orders)
+	if used == 1 and Entity.GetVelocity(myHero):Length2DSqr() == 0 then
+		Log.Write(Ability.GetName(abil))
+		myHeroPos = Entity.GetAbsOrigin(myHero)
+		result_vec = myHeroPos + ((pos - myHeroPos):Normalized():Scaled(1.3))
+		Player.PrepareUnitOrders(play, ord, targ, result_vec, abil, iss, np, false, true)
+		used = 0;
+	end
+end
 
 function BackCast.OnPrepareUnitOrders(orders)
 
 	if orders.order ~= 5 then return true end
 	local abil_name = Ability.GetName(orders.ability)
-	--Console.Print(abil_name)
+	Console.Print(abil_name)
 	--Log.Write(abil_name)
 	local enable = false
 	for i, name in pairs(working_spells) do
@@ -28,17 +71,16 @@ function BackCast.OnPrepareUnitOrders(orders)
 		end
 	end
 	if not enable then return true end
-	
-	local myHero = Heroes.GetLocal()
-	if Entity.GetVelocity(myHero):Length2DSqr() == 0 then -- not working if hero is moving
-		local myHeroPos = Entity.GetAbsOrigin(myHero)
-		local result_vec = myHeroPos + ((orders.position - myHeroPos):Normalized():Scaled(1.3))
-		
-		Player.PrepareUnitOrders(orders.player, orders.order, orders.target, result_vec, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
-		return false
-	end
-
-	return true
+	Player.PrepareUnitOrders(orders.player, Enum.UnitOrder.DOTA_UNIT_ORDER_STOP, orders.target, Vector(0, 0, 0), orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
+	play = orders.player
+	ord = orders.order
+	targ = orders.target
+	abil = orders.ability
+	iss = orders.orderIssuer
+	np = orders.npc
+	pos = orders.position
+	used = 1;
+	return false
 end
 
 return BackCast
