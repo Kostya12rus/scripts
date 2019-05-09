@@ -63,7 +63,7 @@ function AbilityInfo.OnDraw()
 			if HeroImg[abil.name] then
 				skillIMG = HeroImg[abil.name]
 			else
-				HeroImg[abil.name] = Renderer.LoadImage(string.gsub(ItemIconpath, "*", abil.name))
+				HeroImg[abil.name] = Renderer.LoadImage(string.gsub(spellIconpath, "*", abil.name))
 			end
 			AbilityInfo.DrawInfo(HeroImg[NPC.GetUnitName(abil.sourse)],HeroImg[abil.name],HeroImg[NPC.GetUnitName(abil.target)],i,abil.format)
 			if Menu.IsEnabled(AbilityInfo.ChatReport) and abil.name == "spirit_breaker_charge_of_darkness" then

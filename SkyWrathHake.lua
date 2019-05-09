@@ -7,8 +7,8 @@ SkyWrathHake.combokey = Menu.AddKeyOption({"Hero Specific", "SkyWrathHake"}, "Co
 SkyWrathHake.harraskey = Menu.AddKeyOption({"Hero Specific", "SkyWrathHake"}, "Harras Key", Enum.ButtonCode.KEY_D)
 SkyWrathHake.enemyInRange = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Closest to mouse range", "Range that makes assembly checking for enemy in selected range.", 100, 600, 100)
 
-SkyWrathHake.menuItems = {atos = "Rod of Atos", hex = "Scythe of Vyse", eblade = "Ethereal Blade", veil = "Veil of Discrod", dagon = "Dagon", orchid = "Orchid", blood = "Bloodthorn", shiva = "Shiva's guard", nullifier = "Nullifier"}
-SkyWrathHake.ItemsOptionID = {atos, hex, eblade, veil, dagon, orchid, blood, shiva, nullifier}
+SkyWrathHake.menuItems = {atos = "Rod of Atos", hex = "Scythe of Vyse", eblade = "Ethereal Blade", veil = "Veil of Discrod", dagon = "Dagon", orchid = "Orchid", blood = "Bloodthorn", shiva = "Shiva's guard"}
+SkyWrathHake.ItemsOptionID = {atos, hex, eblade, veil, dagon, orchid, blood, shiva}
 for k, v in pairs(SkyWrathHake.menuItems) do
 	SkyWrathHake.ItemsOptionID[k] = Menu.AddOption({"Hero Specific", "SkyWrathHake", "Magic Damage Items"}, SkyWrathHake.menuItems[k], "")
 end
@@ -34,8 +34,6 @@ for k, v in pairs(SkyWrathHake.menuPopupAMReflect) do
 end
 
 SkyWrathHake.IsBMToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Check for BladeMail", "")
-SkyWrathHake.IsAMCounterSpellToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Check for AM Counterspell", "")
-SkyWrathHake.IsPWToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Check for Pugna Ward", "")
 SkyWrathHake.IsSRToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Use Soul Ring", "")
 SkyWrathHake.IsBlinkToggled = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Use Blink Dagger", "Auto-blink to target when Combo key is pressed.")
 SkyWrathHake.IsEZKChecked = Menu.AddOption({"Hero Specific", "SkyWrathHake"}, "Check for EZ Kill", "Check if an enemy is ez-killable (low-mana costs and the fastest way to slay an enemy).")
@@ -73,16 +71,16 @@ function SkyWrathHake.OnGameEnd()
 end
 
 function SkyWrathHake.OnUpdate()
-	if not Engine.IsInGame() or not Heroes.GetLocal() or not Menu.IsEnabled(SkyWrathHake.IsToggled) or GameRules.IsPaused() then return end
+	if not Engine.IsInGame() or not GameRules.GetGameState() == 5 or not Menu.IsEnabled(SkyWrathHake.IsToggled) or GameRules.IsPaused() then return
+	end
 	myHero = Heroes.GetLocal()
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_skywrath_mage" or not Entity.IsAlive(myHero) then
 		return
 	end
 	if Menu.IsKeyDownOnce(SkyWrathHake.EZTogglerKey) then
-		if Menu.IsEnabled(SkyWrathHake.IsEZKChecked) then
+		if Menu.GetValue(SkyWrathHake.IsEZKChecked) == 1 then
 			Menu.SetValue(SkyWrathHake.IsEZKChecked, 0, false)
-		else 
-			Menu.SetValue(SkyWrathHake.IsEZKChecked, 1, true)
+		else Menu.SetValue(SkyWrathHake.IsEZKChecked, 1, false)
 		end		
 	end
 	myPlayer = Players.GetLocal()	
@@ -96,7 +94,7 @@ end
 
 function SkyWrathHake.GetCshotEnemy()
 	cshotenemy = nil
-	local cshot = NPC.GetAbility(myHero, "skywrath_mage_concussive_shot")
+	local cshot = NPC.GetAbilityByIndex(myHero, 1)
 	if not cshot then return end
 	local heroes = Heroes.InRadius(Entity.GetAbsOrigin(myHero), Ability.GetCastRange(cshot), Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
 	if not heroes then return end
@@ -115,7 +113,6 @@ end
 
 
 function SkyWrathHake.OnDraw()
-	if not Heroes.GetLocal() then return end
 	if myHero == nil or NPC.GetUnitName(myHero) ~= "npc_dota_hero_skywrath_mage" or not Entity.IsAlive(myHero) then
 		if targetParticle ~= 0 then
 			Particle.Destroy(targetParticle)			
@@ -152,7 +149,7 @@ function SkyWrathHake.OnDraw()
 		Renderer.SetDrawColor(255, 90, 100)
 		ezKillMode = "OFF"
 	end
-	Renderer.DrawText(Font, x, y, "[EZ KILL: "..ezKillMode.."]")
+	Renderer.DrawText(Font, x, y, "[EZ KILL: "..ezKillMode.."]", 0)
 	local particleEnemy = enemy
 	if Menu.IsEnabled(SkyWrathHake.IsTargetParticleEnabled) then	
 		if not particleEnemy or(not NPC.IsPositionInRange(enemy, Input.GetWorldCursorPos(), Menu.GetValue(SkyWrathHake.enemyInRange), 0) and targetParticle ~= 0) or enemy ~= particleEnemy then
@@ -176,7 +173,7 @@ function SkyWrathHake.OnDraw()
 		end
 	end
 
-	local cshot = NPC.GetAbility(myHero, "skywrath_mage_concussive_shot")
+	local cshot = NPC.GetAbilityByIndex(myHero, 1)
 	if Menu.IsEnabled(SkyWrathHake.IsConcShotParticleEnabled) then	
 		if not Ability.IsReady(cshot) or(not cshotenemy and cshotParticle ~= 0) or cshotenemy ~= cshotParticleEnemy then
 			Particle.Destroy(cshotParticle)			
@@ -205,6 +202,7 @@ end
 
 function SkyWrathHake.PrayToDog()	
 	if not Menu.IsKeyDown(SkyWrathHake.combokey) then return end
+	
 	if not enemy or not NPC.IsPositionInRange(enemy, Input.GetWorldCursorPos(), Menu.GetValue(SkyWrathHake.enemyInRange), 0) then
 		return
 	end
@@ -212,8 +210,8 @@ function SkyWrathHake.PrayToDog()
 	enemyPos = Entity.GetAbsOrigin(enemy)
 	if not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_ATTACK_IMMUNE) then	
 		Player.AttackTarget(myPlayer, myHero, enemy, false)
-	end
-	if not SkyWrathHake.CheckForModifiers() or NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) or NPC.HasModifier(enemy, "modifier_oracle_fates_edict") then
+	end	
+	if not SkyWrathHake.CheckForModifiers() or NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 		return
 	end
 
@@ -221,7 +219,7 @@ function SkyWrathHake.PrayToDog()
 	SkyWrathHake.GetItems()
 	SkyWrathHake.isFullDebuffed = SkyWrathHake.IsFullDebuffed()
 
-	if Menu.IsEnabled(SkyWrathHake.IsPopAMReflectToggled) and NPC.GetUnitName(enemy) == "npc_dota_hero_antimage" and not NPC.HasModifier(enemy, "modifier_silver_edge_debuff") and not NPC.HasModifier(enemy, "modifier_viper_nethertoxin") and(NPC.GetItem(enemy, "item_ultimate_scepter", true) or NPC.HasModifier(enemy, "modifier_item_ultimate_scepter_consumed")) and Ability.IsReady(NPC.GetAbility(enemy, "antimage_spell_shield")) then
+	if Menu.IsEnabled(SkyWrathHake.IsPopAMReflectToggled) and NPC.GetUnitName(enemy) == "npc_dota_hero_antimage" and(NPC.GetItem(enemy, "item_ultimate_scepter", true) or NPC.HasModifier(enemy, "modifier_item_ultimate_scepter_consumed")) and Ability.IsReady(NPC.GetAbility(enemy, "antimage_spell_shield")) then
 		if SkyWrathHake.PopLinkens(forcestaff, SkyWrathHake.PopupAMReflectOptionID["forcestaff"]) then return end
 		if SkyWrathHake.PopLinkens(cyclone, SkyWrathHake.PopupAMReflectOptionID["cyclone"]) then return end
 		if SkyWrathHake.PopLinkens(dagon, SkyWrathHake.PopupAMReflectOptionID["dagon"]) then return end
@@ -257,6 +255,7 @@ function SkyWrathHake.PrayToDog()
 		Ability.CastNoTarget(soulring)
 		return
 	end
+
 	if SkyWrathHake.UseBlink() then return end
 	if SkyWrathHake.AeonDispelling() then return end
 	if SkyWrathHake.CastAbility(slow, SkyWrathHake.AbilitiesOptionID["slow"]) then return end
@@ -270,14 +269,6 @@ function SkyWrathHake.PrayToDog()
 	if SkyWrathHake.UseItem(dagon, SkyWrathHake.ItemsOptionID["dagon"]) then return end
 	if SkyWrathHake.UseItem(blood, SkyWrathHake.ItemsOptionID["blood"]) then return end
 	if SkyWrathHake.UseItem(shiva, SkyWrathHake.ItemsOptionID["shiva"]) then return end
-	if not NPC.HasModifier(enemy, "modifier_item_nullifier_mute") and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_HEXED) then
-		if NPC.GetItem(enemy, "item_aeon_disk", true) and not Ability.IsReady(NPC.GetItem(enemy, "item_aeon_disk", true)) then
-			if SkyWrathHake.UseItem(nullifier, SkyWrathHake.ItemsOptionID["nullifier"]) then return end
-		elseif not NPC.GetItem(enemy, "item_aeon_disk", true) then
-			if SkyWrathHake.UseItem(nullifier, SkyWrathHake.ItemsOptionID["nullifier"]) then return end
-		end	
-		return
-	end
 end
 
 function SkyWrathHake.AeonDispelling()
@@ -354,7 +345,6 @@ function SkyWrathHake.GetItems()
 	hex = NPC.GetItem(myHero, "item_sheepstick", true)
 	veil = NPC.GetItem(myHero, "item_veil_of_discord", true)
 	eblade = NPC.GetItem(myHero, "item_ethereal_blade", true)
-	nullifier = NPC.GetItem(myHero, "item_nullifier", true)
 	dagon = NPC.GetItem(myHero, "item_dagon", true)
 	if not dagon then
 		for i = 2, 5 do
@@ -423,7 +413,7 @@ end
 
 
 function SkyWrathHake.CheckForModifiers()
-	if (Menu.IsEnabled(SkyWrathHake.IsBMToggled) and NPC.HasModifier(enemy, "modifier_item_blade_mail_reflect")) or (Menu.IsEnabled(SkyWrathHake.IsPWToggled) and NPC.HasModifier(myHero, "modifier_pugna_nether_ward_aura")) or (Menu.IsEnabled(SkyWrathHake.IsAMCounterSpellToggled) and NPC.HasModifier(enemy, "modifier_antimage_counterspell")) then
+	if Menu.IsEnabled(SkyWrathHake.IsBMToggled) and NPC.HasModifier(enemy, "modifier_item_blade_mail_reflect") then
 		return false
 	end	
 	for i = 0, 2 do
@@ -561,7 +551,7 @@ function SkyWrathHake.InFront(delay)
 	if vec then		
 		local x = enemyPos:GetX() + vec:GetX() *(delay / 1000) * adjusment
 		local y = enemyPos:GetY() + vec:GetY() *(delay / 1000) * adjusment
-		return Vector(x, y, enemyPos:GetZ())
+		return Vector(x, y, 0)
 	end
 end
 
